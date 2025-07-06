@@ -1,6 +1,6 @@
 'use client'
 
-import React from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   Home,
@@ -14,6 +14,7 @@ import {
   Map,
   MessageSquare,
 } from "lucide-react";
+import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 
 const navItems = [
   { label: "Todo", icon: ListTodo, href: "/todo" },
@@ -25,6 +26,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-30 flex flex-col p-6 border-r border-gray-200">
@@ -58,7 +60,10 @@ export function Sidebar() {
             <span className="text-sm font-medium">Roadmap</span>
           </button>
           <div className="w-px bg-gray-200"></div>
-          <button className="flex items-center justify-center text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg px-2 py-2 transition-colors w-1/2">
+          <button 
+            onClick={() => setIsFeedbackOpen(true)}
+            className="flex items-center justify-center text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg px-2 py-2 transition-colors w-1/2"
+          >
             <span className="text-sm font-medium">Feedback</span>
           </button>
         </div>
@@ -83,6 +88,11 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+      
+      <FeedbackDialog 
+        isOpen={isFeedbackOpen} 
+        onClose={() => setIsFeedbackOpen(false)} 
+      />
     </aside>
   );
 } 
