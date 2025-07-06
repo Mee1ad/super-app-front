@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { TaskItem, TaskItemProps } from "../atoms/TaskItem";
 import { NewTask } from "../molecules/NewTask";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DndContext,
   closestCenter,
@@ -91,7 +94,7 @@ export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle,
       handleSaveTitle();
     } else if (e.key === 'Escape') {
       setIsEditing(false);
-      setEditTitle(title); // Reset to original title
+      setEditTitle(title);
     }
   };
 
@@ -114,69 +117,93 @@ export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle,
     }
   };
 
-  const base = "p-4 border rounded mb-6 transition-colors";
-  const variants = {
-    default: "bg-white border-gray-200",
-    outlined: "bg-transparent",
-    filled: "",
-  };
-
   return (
-    <section className={`${base} ${variants[variant]}`}> 
-      <div className="flex justify-between items-center mb-4">
-        {isEditing ? (
-          <>
-            <input 
-              className="font-bold text-xl mr-2" 
-              value={editTitle} 
-              onChange={e => setEditTitle(e.target.value)}
-              onKeyDown={handleKeyPress}
-              autoFocus
-            />
-            <button className="text-blue-600 mr-2" onClick={handleSaveTitle}>Save</button>
-            <button className="text-gray-500" onClick={() => { setIsEditing(false); setEditTitle(title); }}>Cancel</button>
-          </>
-        ) : (
-          <>
-            <span className="font-bold text-xl">{title}</span>
-            <div className="flex gap-2">
-              <Edit className="w-4 h-4 text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => setIsEditing(true)} />
-              <Trash2 className="w-4 h-4 text-red-500 cursor-pointer hover:text-red-700" onClick={() => onDelete?.(id)} />
-            </div>
-          </>
-        )}
-      </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-2">
-            {tasks.map(task => (
-              <SortableTaskItem
-                key={task.id}
-                task={task}
-                onUpdate={(tid, t, d) => onTaskUpdate?.({ ...task, id: tid, title: t, description: d })}
-                onDelete={(taskId) => onTaskDelete?.(taskId)}
-                onToggle={(taskId, checked) => onTaskToggle?.(taskId, checked)}
+    <Card className="mb-6">
+      <CardHeader className="pb-4">
+        <div className="flex justify-between items-center">
+          {isEditing ? (
+            <div className="flex items-center gap-2 flex-1">
+              <Input 
+                className="text-xl font-bold border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+                value={editTitle} 
+                onChange={e => setEditTitle(e.target.value)}
+                onKeyDown={handleKeyPress}
+                autoFocus
               />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-      <div className="mt-4 text-center">
-        {!showAdd ? (
-          <button className="text-blue-600" onClick={() => setShowAdd(true)}>+ Add Task</button>
-        ) : (
-          <NewTask
-            onCreate={(title, description) => {
-              onTaskUpdate?.({ id: Date.now().toString(), title, description, checked: false, variant });
-              setShowAdd(false);
-            }}
-          />
-        )}
-      </div>
-    </section>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
+                onClick={handleSaveTitle}
+              >
+                Save
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-500 hover:text-gray-700" 
+                onClick={() => { setIsEditing(false); setEditTitle(title); }}
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <>
+              <CardTitle className="text-xl font-bold">{title}</CardTitle>
+              <div className="flex gap-2">
+                <Edit 
+                  className="w-4 h-4 text-blue-600 cursor-pointer hover:text-blue-800 transition-colors" 
+                  onClick={() => setIsEditing(true)} 
+                />
+                <Trash2 
+                  className="w-4 h-4 text-red-500 cursor-pointer hover:text-red-700 transition-colors" 
+                  onClick={() => onDelete?.(id)} 
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-2">
+              {tasks.map(task => (
+                <SortableTaskItem
+                  key={task.id}
+                  task={task}
+                  onUpdate={(tid, t, d) => onTaskUpdate?.({ ...task, id: tid, title: t, description: d })}
+                  onDelete={(taskId) => onTaskDelete?.(taskId)}
+                  onToggle={(taskId, checked) => onTaskToggle?.(taskId, checked)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+        <div className="mt-6 text-center">
+          {!showAdd ? (
+            <Button 
+              variant="ghost" 
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
+              onClick={() => setShowAdd(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Task
+            </Button>
+          ) : (
+            <NewTask
+              onCreate={(title, description) => {
+                onTaskUpdate?.({ id: Date.now().toString(), title, description, checked: false, variant });
+                setShowAdd(false);
+              }}
+            />
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 } 
