@@ -7,7 +7,12 @@ import { ShoppingList } from "./organisms/ShoppingList";
 
 export default function TodoPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [lists, setLists] = useState<any[]>([
+  const [lists, setLists] = useState<any[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+    setLists([
     { 
       id: "1", 
       type: "task", 
@@ -54,6 +59,7 @@ export default function TodoPage() {
       variant: "filled" 
     }
   ]);
+  }, []);
 
   const handleCreateList = (type: "task" | "shopping") => {
     const id = Date.now().toString();
@@ -162,6 +168,10 @@ export default function TodoPage() {
       }
     });
   }, [lists, searchQuery]);
+
+  if (!isClient) {
+    return <div className="p-8">Loading...</div>;
+  }
 
   return (
     <div className="p-8">

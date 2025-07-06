@@ -13,12 +13,12 @@ import {
 
 const navItems = [
   { label: "Todo", icon: ListTodo, href: "/todo" },
+  { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Movies", icon: Film, href: "/movies" },
   { label: "Accounting", icon: PiggyBank, href: "/accounting" },
   { label: "Diary", icon: Notebook, href: "/diary" },
   { label: "Books", icon: Book, href: "/books" },
   { label: "Habit", icon: CheckSquare, href: "/habit" },
-  { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Mind Inbox", icon: Inbox, href: "/mind-inbox" },
 ];
 
