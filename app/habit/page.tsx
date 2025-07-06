@@ -12,9 +12,11 @@ export default function HabitPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
-  // Load habits from localStorage on component mount
+  // Set client flag and load habits from localStorage on component mount
   useEffect(() => {
+    setIsClient(true);
     const savedHabits = localStorage.getItem('habits');
     if (savedHabits) {
       setHabits(JSON.parse(savedHabits));
@@ -162,12 +164,12 @@ export default function HabitPage() {
   };
 
   const totalHabits = habits.length;
-  const completedToday = habits.filter(habit => 
+  const completedToday = isClient ? habits.filter(habit => 
     habit.completedDates.some(
       date => new Date(date).toDateString() === new Date().toDateString()
     )
-  ).length;
-  const averageCompletionRate = habits.length > 0 
+  ).length : 0;
+  const averageCompletionRate = isClient && habits.length > 0 
     ? Math.round(habits.reduce((sum, habit) => sum + habit.completionRate, 0) / habits.length)
     : 0;
 
@@ -224,7 +226,16 @@ export default function HabitPage() {
         </div>
 
         {/* Habits List */}
-        {habits.length === 0 ? (
+        {!isClient ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 dark:text-gray-600 mb-4">
+              <Target className="h-16 w-16 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              Loading...
+            </h3>
+          </div>
+        ) : habits.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 dark:text-gray-600 mb-4">
               <Target className="h-16 w-16 mx-auto" />
