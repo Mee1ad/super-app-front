@@ -5,13 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   ListTodo,
-  Film,
-  Book,
-  PiggyBank,
   Notebook,
   CheckSquare,
   Lightbulb,
-  Inbox,
   Utensils,
 } from "lucide-react";
 
@@ -21,10 +17,6 @@ const navItems = [
   { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Diary", icon: Notebook, href: "/diary" },
   { label: "Habit", icon: CheckSquare, href: "/habit" },
-  { label: "Movies", icon: Film, href: "/movies" },
-  { label: "Accounting", icon: PiggyBank, href: "/accounting" },
-  { label: "Books", icon: Book, href: "/books" },
-  { label: "Mind Inbox", icon: Inbox, href: "/mind-inbox" },
 ];
 
 export function Sidebar() {
