@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit, Trash2, Calendar } from 'lucide-react'
+import { Trash2, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,9 +26,16 @@ export function IdeaCard({ idea, category, onDelete, onUpdate }: IdeaCardProps) 
     }).format(date)
   }
 
+  const handleCardClick = () => {
+    setIsEditDialogOpen(true)
+  }
+
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow">
+      <Card 
+        className="hover:shadow-md transition-shadow cursor-pointer" 
+        onClick={handleCardClick}
+      >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -45,15 +52,10 @@ export function IdeaCard({ idea, category, onDelete, onUpdate }: IdeaCardProps) 
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsEditDialogOpen(true)}
-                className="h-8 w-8 p-0"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(idea.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(idea.id)
+                }}
                 className="h-8 w-8 p-0 text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
