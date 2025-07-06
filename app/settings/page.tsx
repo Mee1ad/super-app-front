@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { ChangelogDialog } from '@/components/ui/changelog-dialog';
 import { 
   Settings, 
   CheckSquare, 
@@ -27,6 +28,7 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -392,7 +394,11 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">
                   A comprehensive productivity toolkit
                 </p>
-                <Button variant="link" className="p-0 h-auto text-sm">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-sm"
+                  onClick={() => setIsChangelogOpen(true)}
+                >
                   View Changelog
                 </Button>
               </CardContent>
@@ -400,6 +406,11 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+      
+      <ChangelogDialog 
+        isOpen={isChangelogOpen} 
+        onClose={() => setIsChangelogOpen(false)} 
+      />
     </div>
   );
 } 
