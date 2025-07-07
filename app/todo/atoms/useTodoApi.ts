@@ -16,21 +16,20 @@ import {
   searchApi, 
   getListsWithItems 
 } from './api';
+import { showSuccessToast, showErrorToast } from '@/lib/error-handler';
 
 export const useTodoApi = () => {
   const [lists, setLists] = useState<ListWithItems[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Load all lists with their items
   const loadLists = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
       const data = await getListsWithItems();
       setLists(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load lists');
+      showErrorToast('Failed to load lists');
     } finally {
       setLoading(false);
     }
@@ -46,9 +45,10 @@ export const useTodoApi = () => {
     try {
       const newList = await listsApi.create({ type, title, variant });
       await loadLists(); // Reload to get the new list with items
+      showSuccessToast('List Created', `${type === 'task' ? 'Task' : 'Shopping'} list "${title}" created successfully`);
       return newList;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create list');
+      showErrorToast('Failed to create list');
       throw err;
     }
   }, [loadLists]);
@@ -59,9 +59,10 @@ export const useTodoApi = () => {
       setLists(prev => prev.map(list => 
         list.id === id ? { ...list, ...updatedList } : list
       ));
+      showSuccessToast('List Updated', 'List updated successfully');
       return updatedList;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update list');
+      showErrorToast('Failed to update list');
       throw err;
     }
   }, []);
@@ -70,8 +71,9 @@ export const useTodoApi = () => {
     try {
       await listsApi.delete(id);
       setLists(prev => prev.filter(list => list.id !== id));
+      showSuccessToast('List Deleted', 'List deleted successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete list');
+      showErrorToast('Failed to delete list');
       throw err;
     }
   }, []);
@@ -85,9 +87,10 @@ export const useTodoApi = () => {
           ? { ...list, tasks: [...(list.tasks || []), newTask] }
           : list
       ));
+      showSuccessToast('Task Created', `Task "${data.title}" created successfully`);
       return newTask;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create task');
+      showErrorToast('Failed to create task');
       throw err;
     }
   }, []);
@@ -102,9 +105,10 @@ export const useTodoApi = () => {
             )}
           : list
       ));
+      showSuccessToast('Task Updated', 'Task updated successfully');
       return updatedTask;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update task');
+      showErrorToast('Failed to update task');
       throw err;
     }
   }, []);
@@ -117,8 +121,9 @@ export const useTodoApi = () => {
           ? { ...list, tasks: (list.tasks || []).filter(task => task.id !== taskId) }
           : list
       ));
+      showSuccessToast('Task Deleted', 'Task deleted successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete task');
+      showErrorToast('Failed to delete task');
       throw err;
     }
   }, []);
@@ -133,9 +138,11 @@ export const useTodoApi = () => {
             )}
           : list
       ));
+      const status = updatedTask.checked ? 'completed' : 'incomplete';
+      showSuccessToast('Task Updated', `Task marked as ${status}`);
       return updatedTask;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to toggle task');
+      showErrorToast('Failed to toggle task');
       throw err;
     }
   }, []);
@@ -151,8 +158,9 @@ export const useTodoApi = () => {
             ).filter(Boolean) as any[] }
           : list
       ));
+      showSuccessToast('Tasks Reordered', 'Tasks reordered successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reorder tasks');
+      showErrorToast('Failed to reorder tasks');
       throw err;
     }
   }, []);
@@ -166,9 +174,10 @@ export const useTodoApi = () => {
           ? { ...list, items: [...(list.items || []), newItem] }
           : list
       ));
+      showSuccessToast('Item Added', `Shopping item "${data.title}" added successfully`);
       return newItem;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create item');
+      showErrorToast('Failed to create item');
       throw err;
     }
   }, []);
@@ -183,9 +192,10 @@ export const useTodoApi = () => {
             )}
           : list
       ));
+      showSuccessToast('Item Updated', 'Shopping item updated successfully');
       return updatedItem;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update item');
+      showErrorToast('Failed to update item');
       throw err;
     }
   }, []);
@@ -198,8 +208,9 @@ export const useTodoApi = () => {
           ? { ...list, items: (list.items || []).filter(item => item.id !== itemId) }
           : list
       ));
+      showSuccessToast('Item Deleted', 'Shopping item deleted successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete item');
+      showErrorToast('Failed to delete item');
       throw err;
     }
   }, []);
@@ -214,9 +225,11 @@ export const useTodoApi = () => {
             )}
           : list
       ));
+      const status = updatedItem.checked ? 'purchased' : 'not purchased';
+      showSuccessToast('Item Updated', `Item marked as ${status}`);
       return updatedItem;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to toggle item');
+      showErrorToast('Failed to toggle item');
       throw err;
     }
   }, []);
@@ -232,8 +245,9 @@ export const useTodoApi = () => {
             ).filter(Boolean) as any[] }
           : list
       ));
+      showSuccessToast('Items Reordered', 'Shopping items reordered successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reorder items');
+      showErrorToast('Failed to reorder items');
       throw err;
     }
   }, []);
@@ -243,7 +257,7 @@ export const useTodoApi = () => {
     try {
       return await searchApi.search(query);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to search');
+      showErrorToast('Failed to search');
       throw err;
     }
   }, []);
@@ -251,7 +265,6 @@ export const useTodoApi = () => {
   return {
     lists,
     loading,
-    error,
     loadLists,
     createList,
     updateList,

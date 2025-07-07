@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ChangelogDialog } from '@/components/ui/changelog-dialog';
+import { ErrorDemo } from '@/components/ui/error-demo';
 import { 
   Settings, 
   CheckSquare, 
@@ -379,6 +380,19 @@ export default function SettingsPage() {
                     <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1 transition-transform" />
                   </button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Error Handling Demo */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Error Handling Demo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ErrorDemo />
               </CardContent>
             </Card>
 

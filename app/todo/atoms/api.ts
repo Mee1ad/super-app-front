@@ -12,6 +12,7 @@ import {
   SearchResponse,
   ListWithItems,
 } from './types';
+import { handleApiError } from '@/lib/error-handler';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -36,7 +37,7 @@ async function apiRequest<T>(
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `API request failed: ${response.statusText}`);
+    await handleApiError(response);
   }
 
   return response.json();

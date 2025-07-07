@@ -22,7 +22,6 @@ export default function TodoPage() {
   const {
     lists,
     loading,
-    error,
     createList,
     updateList,
     deleteList,
@@ -191,10 +190,6 @@ export default function TodoPage() {
 
   if (!isClient || loading) {
     return <LoadingSpinner />;
-  }
-
-  if (error) {
-    return <div className="p-8 text-red-500">Error: {error}</div>;
   }
 
   return (
