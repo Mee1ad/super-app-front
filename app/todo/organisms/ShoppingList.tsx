@@ -206,7 +206,7 @@ export function ShoppingList({ id, title, items, variant = "default", onUpdateTi
           ) : (
             <NewShopping
               onCreate={(title, url, price, source) => {
-                onItemUpdate?.({ id: Date.now().toString(), title, url, price, source, variant });
+                onItemUpdate?.({ id: '', title, url, price, source, variant });
                 setShowAdd(false);
               }}
             />

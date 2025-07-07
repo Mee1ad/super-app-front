@@ -197,7 +197,7 @@ export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle,
           ) : (
             <NewTask
               onCreate={(title, description) => {
-                onTaskUpdate?.({ id: Date.now().toString(), title, description, checked: false, variant });
+                onTaskUpdate?.({ id: '', title, description, checked: false, variant });
                 setShowAdd(false);
               }}
             />
