@@ -123,7 +123,7 @@ export function ShoppingItem({ id, title, url, price, source, variant = "default
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <a 
-                      href={url} 
+                      href={url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`} 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className={`font-semibold text-lg text-blue-600 hover:underline leading-tight ${checked ? 'line-through text-gray-500' : ''}`}
