@@ -1,7 +1,3 @@
----
-alwaysApply: true
----
-
 use "shadcn" components only
 
 # UI Design Guidelines
@@ -139,6 +135,13 @@ config/
 ├── env.ts
 ├── theme.ts
 ├── meta.ts
+```
+
+## Error Handling
+
+* Always implement error handling in all async actions and API calls, and always notify the client (user) via a toast or visible UI feedback. Never allow silent failures or unhandled errors.
+
+---
 ```
 
 ---
