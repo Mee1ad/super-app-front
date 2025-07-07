@@ -141,6 +141,9 @@ config/
 
 * Always implement error handling in all async actions and API calls, and always notify the client (user) via a toast or visible UI feedback. Never allow silent failures or unhandled errors.
 
+# Rule: Always Write and Run Required Tests
+Whenever you add or change code, you must always write and run all types of required tests (unit, integration, E2E as appropriate) to ensure correctness and prevent regressions. This is mandatory for all code changes.
+
 ---
 ```
 
