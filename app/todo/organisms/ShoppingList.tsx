@@ -197,7 +197,7 @@ export function ShoppingList({ id, title, items, variant = "default", onUpdateTi
           {!showAdd ? (
             <Button 
               variant="ghost" 
-              className="text-green-600 hover:text-green-700 hover:bg-green-50" 
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
               onClick={() => setShowAdd(true)}
             >
               <Plus className="w-4 h-4 mr-2" />

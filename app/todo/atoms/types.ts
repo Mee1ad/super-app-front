@@ -42,6 +42,7 @@ export interface TaskCreate {
 }
 
 export interface TaskUpdate {
+  list_id?: string;
   title?: string | null;
   description?: string | null;
   checked?: boolean | null;
@@ -74,6 +75,7 @@ export interface ShoppingItemCreate {
 }
 
 export interface ShoppingItemUpdate {
+  list_id?: string;
   title?: string | null;
   url?: string | null;
   price?: string | null;

@@ -14,7 +14,8 @@ import {
 } from './types';
 import { handleApiError } from '@/lib/error-handler';
 
-const API_BASE_URL = 'http://localhost:8000';
+// Use environment variable for API base URL, fallback to localhost for development
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -28,19 +29,34 @@ async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
+  
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
 
-  if (!response.ok) {
-    await handleApiError(response);
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+
+    // Handle empty responses (like DELETE operations)
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    } else {
+      return response.text() as T;
+    }
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ApiError(0, 'Network error: Unable to connect to the server');
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 // Lists API
@@ -142,19 +158,30 @@ export const searchApi = {
 
 // Helper function to get lists with their items
 export const getListsWithItems = async (): Promise<ListWithItems[]> => {
-  const lists = await listsApi.getAll();
-  
-  const listsWithItems = await Promise.all(
-    lists.map(async (list) => {
-      if (list.type === 'task') {
-        const tasks = await tasksApi.getByList(list.id);
-        return { ...list, tasks };
-      } else {
-        const items = await itemsApi.getByList(list.id);
-        return { ...list, items };
-      }
-    })
-  );
+  try {
+    const lists = await listsApi.getAll();
+    
+    const listsWithItems = await Promise.all(
+      lists.map(async (list) => {
+        try {
+          if (list.type === 'task') {
+            const tasks = await tasksApi.getByList(list.id);
+            return { ...list, tasks };
+          } else {
+            const items = await itemsApi.getByList(list.id);
+            return { ...list, items };
+          }
+        } catch (error) {
+          // If fetching items fails, return list without items
+          console.warn(`Failed to fetch items for list ${list.id}:`, error);
+          return list;
+        }
+      })
+    );
 
-  return listsWithItems;
+    return listsWithItems;
+  } catch (error) {
+    console.error('Failed to fetch lists with items:', error);
+    throw error;
+  }
 }; 

@@ -97,7 +97,7 @@ export const useTodoApi = () => {
 
   const updateTask = useCallback(async (listId: string, taskId: string, data: TaskUpdate) => {
     try {
-      const updatedTask = await tasksApi.update(listId, taskId, data);
+      const updatedTask = await tasksApi.update(listId, taskId, { ...data, list_id: listId });
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'task'
           ? { ...list, tasks: (list.tasks || []).map(task => 
@@ -184,7 +184,7 @@ export const useTodoApi = () => {
 
   const updateItem = useCallback(async (listId: string, itemId: string, data: ShoppingItemUpdate) => {
     try {
-      const updatedItem = await itemsApi.update(listId, itemId, data);
+      const updatedItem = await itemsApi.update(listId, itemId, { ...data, list_id: listId });
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'shopping'
           ? { ...list, items: (list.items || []).map(item => 
