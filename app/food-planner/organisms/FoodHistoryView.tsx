@@ -96,10 +96,10 @@ export function FoodHistoryView({ entries, mealTypes, onDelete, onUpdate }: Food
                           {entry.comment}
                         </p>
                       )}
-                      {entry.images && entry.images.length > 0 && (
+                      {entry.image && (
                         <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                           <ImageIcon className="h-3 w-3" />
-                          {entry.images.length} image{entry.images.length !== 1 ? 's' : ''}
+                          1 image
                         </div>
                       )}
                     </div>

@@ -18,12 +18,12 @@ export type TaskItemProps = {
   onDelete?: (id: string) => void;
   onToggle?: (id: string, checked: boolean) => void;
   dragHandleProps?: {
-    attributes: any;
-    listeners: any;
+    attributes: React.HTMLAttributes<HTMLDivElement>;
+    listeners: React.HTMLAttributes<HTMLDivElement>;
   };
 };
 
-export function TaskItem({ id, title, description, checked = false, variant = "default", onUpdate, onDelete, onToggle, dragHandleProps }: TaskItemProps) {
+export function TaskItem({ id, title, description, checked = false, onUpdate, onDelete, onToggle, dragHandleProps }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editDesc, setEditDesc] = useState(description || "");

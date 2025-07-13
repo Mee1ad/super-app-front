@@ -14,10 +14,9 @@ interface EditDiaryDialogProps {
   onOpenChange: (open: boolean) => void
   entry: DiaryEntry
   onUpdate: (id: string, updatedEntry: Partial<DiaryEntry>) => void
-  mood: Mood
 }
 
-export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate, mood }: EditDiaryDialogProps) {
+export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDiaryDialogProps) {
   const [title, setTitle] = useState(entry.title)
   const [content, setContent] = useState(entry.content)
   const [moodId, setMoodId] = useState(entry.mood)

@@ -21,8 +21,6 @@ import {
   Upload,
   Eye,
   Bell,
-  Moon,
-  Sun
 } from 'lucide-react';
 
 export default function SettingsPage() {

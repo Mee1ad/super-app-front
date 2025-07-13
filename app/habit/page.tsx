@@ -39,7 +39,7 @@ export default function HabitPage() {
     today.setHours(0, 0, 0, 0);
     
     let streak = 0;
-    let currentDate = today;
+    const currentDate = new Date();
     
     for (const completedDate of sortedDates) {
       const completedDay = new Date(completedDate);

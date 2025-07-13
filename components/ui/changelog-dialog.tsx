@@ -42,7 +42,7 @@ const mockChangelogData: ChangelogEntry[] = [
     version: '1.1.5',
     date: '2024-01-10',
     title: 'Fixed Diary Image Upload',
-    description: 'Resolved issue where images weren\'t displaying correctly in diary entries.',
+                    description: 'Resolved issue where images weren&apos;t displaying correctly in diary entries.',
     type: 'bugfix'
   },
   {
@@ -118,7 +118,7 @@ export function ChangelogDialog({ isOpen, onClose }: ChangelogDialogProps) {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                What's New
+                What&apos;s New
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 Latest updates and improvements
@@ -231,7 +231,7 @@ export function ChangelogDialog({ isOpen, onClose }: ChangelogDialogProps) {
                 No updates available
               </h3>
               <p className="text-gray-600">
-                You're up to date with the latest version!
+                You&apos;re up to date with the latest version!
               </p>
             </div>
           )}

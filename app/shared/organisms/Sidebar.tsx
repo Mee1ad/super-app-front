@@ -3,16 +3,12 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
-  Home,
   ListTodo,
   Notebook,
   CheckSquare,
   Lightbulb,
   Utensils,
   Settings,
-  LogIn,
-  Map,
-  MessageSquare,
 } from "lucide-react";
 import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 

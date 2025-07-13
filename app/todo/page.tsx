@@ -5,7 +5,6 @@ import { SearchBox } from "./molecules/SearchBox";
 import { TaskList } from "./organisms/TaskList";
 import { ShoppingList } from "./organisms/ShoppingList";
 import { useTodoApi } from "./atoms/useTodoApi";
-import { ListWithItems } from "./atoms/types";
 import { 
   taskResponseToTaskItemProps, 
   shoppingItemResponseToShoppingItemProps,
@@ -14,6 +13,8 @@ import {
 } from "./atoms/adapters";
 import { ErrorBoundary } from "./atoms/ErrorBoundary";
 import { LoadingSpinner } from "./atoms/LoadingSpinner";
+import { TaskItemProps } from "./atoms/TaskItem";
+import { ShoppingItemProps } from "./atoms/ShoppingItem";
 
 export default function TodoPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +34,6 @@ export default function TodoPage() {
     createItem,
     updateItem,
     deleteItem,
-    toggleItem,
     reorderItems,
   } = useTodoApi();
 
@@ -67,7 +67,7 @@ export default function TodoPage() {
   };
 
   // Task handlers
-  const handleTaskUpdate = async (listId: string, task: any) => {
+  const handleTaskUpdate = async (listId: string, task: TaskItemProps) => {
     try {
       if (task.id && task.id.trim() !== '') {
         // Update existing task
@@ -76,7 +76,6 @@ export default function TodoPage() {
           description: task.description,
           checked: task.checked,
           variant: task.variant,
-          position: task.position,
         });
       } else {
         // Create new task
@@ -104,7 +103,7 @@ export default function TodoPage() {
     }
   };
 
-  const handleTaskReorder = async (listId: string, newTasks: any[]) => {
+  const handleTaskReorder = async (listId: string, newTasks: TaskItemProps[]) => {
     try {
       const taskIds = newTasks.map(task => task.id);
       await reorderTasks(listId, taskIds);
@@ -114,7 +113,7 @@ export default function TodoPage() {
   };
 
   // Shopping handlers
-  const handleShoppingUpdate = async (listId: string, item: any) => {
+  const handleShoppingUpdate = async (listId: string, item: ShoppingItemProps) => {
     try {
       if (item.id && item.id.trim() !== '') {
         // Update existing item
@@ -125,7 +124,6 @@ export default function TodoPage() {
           source: item.source,
           checked: item.checked,
           variant: item.variant,
-          position: item.position,
         });
       } else {
         // Create new item
@@ -145,7 +143,7 @@ export default function TodoPage() {
     }
   };
 
-  const handleShoppingReorder = async (listId: string, newItems: any[]) => {
+  const handleShoppingReorder = async (listId: string, newItems: ShoppingItemProps[]) => {
     try {
       const itemIds = newItems.map(item => item.id);
       await reorderItems(listId, itemIds);
@@ -164,13 +162,13 @@ export default function TodoPage() {
     
     return lists.map(list => {
       if (list.type === "task") {
-        const filteredTasks = (list.tasks || []).filter((task: any) =>
+        const filteredTasks = (list.tasks || []).filter((task) =>
           task.title.toLowerCase().includes(query) ||
           (task.description && task.description.toLowerCase().includes(query))
         );
         return { ...list, tasks: filteredTasks };
       } else {
-        const filteredItems = (list.items || []).filter((item: any) =>
+        const filteredItems = (list.items || []).filter((item) =>
           item.title.toLowerCase().includes(query) ||
           (item.url && item.url.toLowerCase().includes(query)) ||
           (item.price && item.price.toLowerCase().includes(query)) ||
@@ -212,7 +210,7 @@ export default function TodoPage() {
                   onDelete={handleDeleteList}
                   onTaskUpdate={task => handleTaskUpdate(list.id, task)}
                   onTaskDelete={taskId => handleTaskDelete(list.id, taskId)}
-                  onTaskToggle={(taskId, checked) => handleTaskToggle(list.id, taskId, checked)}
+                  onTaskToggle={(taskId) => handleTaskToggle(list.id, taskId, true)}
                   onTaskReorder={(listId, newTasks) => handleTaskReorder(listId, newTasks)}
                 />
               ) : (

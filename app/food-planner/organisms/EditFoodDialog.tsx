@@ -21,10 +21,10 @@ interface EditFoodDialogProps {
 export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes }: EditFoodDialogProps) {
   const [name, setName] = useState(entry.name)
   const [category, setCategory] = useState<'planned' | 'eaten'>(entry.category)
-  const [mealType, setMealType] = useState(entry.mealType)
+  const [mealType, setMealType] = useState<FoodEntry['mealType']>(entry.mealType)
   const [time, setTime] = useState(entry.time)
   const [comment, setComment] = useState(entry.comment || '')
-  const [images, setImages] = useState<string[]>(entry.images || [])
+  const [image, setImage] = useState<string>(entry.image || '')
   const [followedPlan, setFollowedPlan] = useState(entry.followedPlan || false)
 
   // Reset form when entry changes
@@ -34,7 +34,7 @@ export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes 
     setMealType(entry.mealType)
     setTime(entry.time)
     setComment(entry.comment || '')
-    setImages(entry.images || [])
+    setImage(entry.image || '')
     setFollowedPlan(entry.followedPlan || false)
   }, [entry])
 
@@ -45,10 +45,10 @@ export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes 
     onUpdate(entry.id, {
       name: name.trim(),
       category,
-      mealType: mealType as any,
+      mealType,
       time,
       comment: comment.trim() || undefined,
-      images,
+      image: image || undefined,
       followedPlan: category === 'eaten' ? followedPlan : undefined,
     })
 
@@ -95,7 +95,7 @@ export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes 
               <label htmlFor="edit-mealType" className="block text-sm font-medium mb-2">
                 Meal Type *
               </label>
-              <Select value={mealType} onValueChange={setMealType} required>
+              <Select value={mealType} onValueChange={value => setMealType(value as FoodEntry['mealType'])} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select meal type" />
                 </SelectTrigger>
@@ -154,8 +154,8 @@ export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes 
               Photos
             </label>
             <ImageAlbum
-              images={images}
-              onImagesChange={setImages}
+              images={image ? [image] : []}
+              onImagesChange={(images) => setImage(images[0] || '')}
             />
           </div>
 

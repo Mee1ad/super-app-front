@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   ListWithItems, 
-  ListCreate, 
   ListUpdate, 
   TaskCreate, 
   TaskUpdate, 
@@ -17,6 +16,7 @@ import {
   getListsWithItems 
 } from './api';
 import { showSuccessToast, showErrorToast } from '@/lib/error-handler';
+import { TaskResponse, ShoppingItemResponse } from './types';
 
 export const useTodoApi = () => {
   const [lists, setLists] = useState<ListWithItems[]>([]);
@@ -28,7 +28,7 @@ export const useTodoApi = () => {
       setLoading(true);
       const data = await getListsWithItems();
       setLists(data);
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to load lists');
     } finally {
       setLoading(false);
@@ -47,9 +47,9 @@ export const useTodoApi = () => {
       await loadLists(); // Reload to get the new list with items
       showSuccessToast('List Created', `${type === 'task' ? 'Task' : 'Shopping'} list "${title}" created successfully`);
       return newList;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to create list');
-      throw err;
+      throw new Error('Failed to create list');
     }
   }, [loadLists]);
 
@@ -61,9 +61,9 @@ export const useTodoApi = () => {
       ));
       showSuccessToast('List Updated', 'List updated successfully');
       return updatedList;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to update list');
-      throw err;
+      throw new Error('Failed to update list');
     }
   }, []);
 
@@ -72,9 +72,9 @@ export const useTodoApi = () => {
       await listsApi.delete(id);
       setLists(prev => prev.filter(list => list.id !== id));
       showSuccessToast('List Deleted', 'List deleted successfully');
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to delete list');
-      throw err;
+      throw new Error('Failed to delete list');
     }
   }, []);
 
@@ -89,9 +89,9 @@ export const useTodoApi = () => {
       ));
       showSuccessToast('Task Created', `Task "${data.title}" created successfully`);
       return newTask;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to create task');
-      throw err;
+      throw new Error('Failed to create task');
     }
   }, []);
 
@@ -107,9 +107,9 @@ export const useTodoApi = () => {
       ));
       showSuccessToast('Task Updated', 'Task updated successfully');
       return updatedTask;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to update task');
-      throw err;
+      throw new Error('Failed to update task');
     }
   }, []);
 
@@ -122,9 +122,9 @@ export const useTodoApi = () => {
           : list
       ));
       showSuccessToast('Task Deleted', 'Task deleted successfully');
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to delete task');
-      throw err;
+      throw new Error('Failed to delete task');
     }
   }, []);
 
@@ -141,9 +141,9 @@ export const useTodoApi = () => {
       const status = updatedTask.checked ? 'completed' : 'incomplete';
       showSuccessToast('Task Updated', `Task marked as ${status}`);
       return updatedTask;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to toggle task');
-      throw err;
+      throw new Error('Failed to toggle task');
     }
   }, []);
 
@@ -155,13 +155,13 @@ export const useTodoApi = () => {
         list.id === listId && list.type === 'task'
           ? { ...list, tasks: taskIds.map(id => 
               (list.tasks || []).find(task => task.id === id)
-            ).filter(Boolean) as any[] }
+            ).filter(Boolean) as TaskResponse[] }
           : list
       ));
       showSuccessToast('Tasks Reordered', 'Tasks reordered successfully');
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to reorder tasks');
-      throw err;
+      throw new Error('Failed to reorder tasks');
     }
   }, []);
 
@@ -176,9 +176,9 @@ export const useTodoApi = () => {
       ));
       showSuccessToast('Item Added', `Shopping item "${data.title}" added successfully`);
       return newItem;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to create item');
-      throw err;
+      throw new Error('Failed to create item');
     }
   }, []);
 
@@ -194,9 +194,9 @@ export const useTodoApi = () => {
       ));
       showSuccessToast('Item Updated', 'Shopping item updated successfully');
       return updatedItem;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to update item');
-      throw err;
+      throw new Error('Failed to update item');
     }
   }, []);
 
@@ -209,9 +209,9 @@ export const useTodoApi = () => {
           : list
       ));
       showSuccessToast('Item Deleted', 'Shopping item deleted successfully');
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to delete item');
-      throw err;
+      throw new Error('Failed to delete item');
     }
   }, []);
 
@@ -228,9 +228,9 @@ export const useTodoApi = () => {
       const status = updatedItem.checked ? 'purchased' : 'not purchased';
       showSuccessToast('Item Updated', `Item marked as ${status}`);
       return updatedItem;
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to toggle item');
-      throw err;
+      throw new Error('Failed to toggle item');
     }
   }, []);
 
@@ -242,13 +242,13 @@ export const useTodoApi = () => {
         list.id === listId && list.type === 'shopping'
           ? { ...list, items: itemIds.map(id => 
               (list.items || []).find(item => item.id === id)
-            ).filter(Boolean) as any[] }
+            ).filter(Boolean) as ShoppingItemResponse[] }
           : list
       ));
       showSuccessToast('Items Reordered', 'Shopping items reordered successfully');
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to reorder items');
-      throw err;
+      throw new Error('Failed to reorder items');
     }
   }, []);
 
@@ -256,9 +256,9 @@ export const useTodoApi = () => {
   const search = useCallback(async (query: string) => {
     try {
       return await searchApi.search(query);
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to search');
-      throw err;
+      throw new Error('Failed to search');
     }
   }, []);
 

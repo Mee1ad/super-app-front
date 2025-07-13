@@ -20,10 +20,10 @@ interface AddFoodDialogProps {
 export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodDialogProps) {
   const [name, setName] = useState('')
   const [category, setCategory] = useState<'planned' | 'eaten'>('planned')
-  const [mealType, setMealType] = useState('')
+  const [mealType, setMealType] = useState<FoodEntry['mealType']>('breakfast')
   const [time, setTime] = useState('')
   const [comment, setComment] = useState('')
-  const [images, setImages] = useState<string[]>([])
+  const [image, setImage] = useState<string>('')
   const [followedPlan, setFollowedPlan] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,20 +33,20 @@ export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodD
     onAdd({
       name: name.trim(),
       category,
-      mealType: mealType as any,
+      mealType,
       time,
       comment: comment.trim() || undefined,
-      images,
+      image: image || undefined,
       followedPlan: category === 'eaten' ? followedPlan : undefined,
     })
 
     // Reset form
     setName('')
     setCategory('planned')
-    setMealType('')
+    setMealType('breakfast')
     setTime('')
     setComment('')
-    setImages([])
+    setImage('')
     setFollowedPlan(false)
   }
 
@@ -90,7 +90,7 @@ export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodD
               <label htmlFor="mealType" className="block text-sm font-medium mb-2">
                 Meal Type *
               </label>
-              <Select value={mealType} onValueChange={setMealType} required>
+              <Select value={mealType} onValueChange={value => setMealType(value as FoodEntry['mealType'])} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select meal type" />
                 </SelectTrigger>
@@ -149,8 +149,8 @@ export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodD
               Photos
             </label>
             <ImageAlbum
-              images={images}
-              onImagesChange={setImages}
+              images={image ? [image] : []}
+              onImagesChange={(images) => setImage(images[0] || '')}
             />
           </div>
 

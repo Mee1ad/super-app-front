@@ -19,12 +19,12 @@ export type ShoppingItemProps = {
   onDelete?: (id: string) => void;
   onToggle?: (id: string, checked: boolean) => void;
   dragHandleProps?: {
-    attributes: any;
-    listeners: any;
+    attributes: React.HTMLAttributes<HTMLDivElement>;
+    listeners: React.HTMLAttributes<HTMLDivElement>;
   };
 };
 
-export function ShoppingItem({ id, title, url, price, source, variant = "default", checked = false, onUpdate, onDelete, onToggle, dragHandleProps }: ShoppingItemProps) {
+export function ShoppingItem({ id, title, url, price, source, checked = false, onUpdate, onDelete, onToggle, dragHandleProps }: ShoppingItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editUrl, setEditUrl] = useState(url);

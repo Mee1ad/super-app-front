@@ -25,7 +25,7 @@ jest.mock('@/lib/error-handler', () => ({
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
 
 // Helper function to create mock Response objects
-const createMockResponse = (data: any, contentType: string = 'application/json') => ({
+const createMockResponse = (data: unknown, contentType: string = 'application/json') => ({
   ok: true,
   status: 200,
   statusText: 'OK',

@@ -15,10 +15,9 @@ interface EditIdeaDialogProps {
   onOpenChange: (open: boolean) => void
   idea: Idea
   onUpdate: (id: string, updatedIdea: Partial<Idea>) => void
-  category: Category
 }
 
-export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate, category }: EditIdeaDialogProps) {
+export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaDialogProps) {
   const [title, setTitle] = useState(idea.title)
   const [description, setDescription] = useState(idea.description || '')
   const [categoryId, setCategoryId] = useState(idea.category)

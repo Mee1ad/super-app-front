@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react'
 import { X, Send, Upload, Trash2 } from 'lucide-react'
 import { Button } from './button'
 import { Textarea } from './textarea'
+import Image from 'next/image'
 
 interface FeedbackDialogProps {
   isOpen: boolean
@@ -108,9 +109,9 @@ export function FeedbackDialog({ isOpen, onClose }: FeedbackDialogProps) {
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
-              We'd love your feedback
-            </h2>
+                          <h2 className="text-xl font-semibold text-gray-900">
+                We&apos;d love your feedback
+              </h2>
             <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -169,9 +170,11 @@ export function FeedbackDialog({ isOpen, onClose }: FeedbackDialogProps) {
                   <div className="grid grid-cols-3 gap-2 mb-3">
                     {images.map((image, index) => (
                       <div key={index} className="relative group">
-                        <img
+                        <Image
                           src={URL.createObjectURL(image)}
                           alt={`Upload ${index + 1}`}
+                          width={80}
+                          height={80}
                           className="w-full h-20 object-cover rounded-lg"
                         />
                         <button

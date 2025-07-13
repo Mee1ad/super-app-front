@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Calendar, Heart } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { AddDiaryDialog } from './organisms/AddDiaryDialog'
 import { DiaryCard } from './molecules/DiaryCard'
 import { DiaryEntry, Mood } from './atoms/types'

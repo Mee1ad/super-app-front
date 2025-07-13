@@ -8,7 +8,6 @@ import {
   ShoppingItemResponse,
   ShoppingItemCreate,
   ShoppingItemUpdate,
-  ReorderRequest,
   SearchResponse,
   ListWithItems,
 } from './types';

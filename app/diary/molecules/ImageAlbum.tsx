@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { X, Plus, Image as ImageIcon } from 'lucide-react'
+import { useRef } from 'react'
+import { X, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ImageFile } from '../atoms/types'
 
 interface ImageAlbumProps {
   images: string[]
