@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { X, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 
 interface ImageAlbumProps {
   images: string[]
@@ -78,9 +79,11 @@ export function ImageAlbum({ images, onImagesChange, readOnly = false }: ImageAl
           {images.map((image, index) => (
             <div key={index} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                <img
+                <Image
                   src={image}
-                  alt={`Food image ${index + 1}`}
+                  alt={`Image ${index + 1}`}
+                  width={80}
+                  height={80}
                   className="w-full h-full object-cover"
                 />
               </div>

@@ -6,6 +6,7 @@ import { Card, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EditDiaryDialog } from '../organisms/EditDiaryDialog'
 import { DiaryEntry, Mood } from '../atoms/types'
+import Image from 'next/image'
 
 interface DiaryCardProps {
   entry: DiaryEntry
@@ -66,13 +67,13 @@ export function DiaryCard({ entry, mood, onDelete, onUpdate }: DiaryCardProps) {
                     <div className="flex gap-2 overflow-x-auto">
                       {entry.images.slice(0, 3).map((image, index) => (
                         <div key={index} className="flex-shrink-0">
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                            <img
-                              src={image}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                          <Image
+                            src={image}
+                            alt="Diary image"
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded-lg"
+                          />
                         </div>
                       ))}
                       {entry.images.length > 3 && (
@@ -107,7 +108,6 @@ export function DiaryCard({ entry, mood, onDelete, onUpdate }: DiaryCardProps) {
         onOpenChange={setIsEditDialogOpen}
         entry={entry}
         onUpdate={onUpdate}
-        mood={mood}
       />
     </>
   )

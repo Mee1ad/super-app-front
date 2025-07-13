@@ -528,7 +528,7 @@ describe('useTodoApi', () => {
 
   describe('error handling', () => {
     it('should handle API errors gracefully', async () => {
-      const { showErrorToast } = require('@/lib/error-handler');
+      const { showErrorToast } = jest.requireMock('@/lib/error-handler');
       
       mockGetListsWithItems.mockRejectedValue(new Error('API Error'));
 

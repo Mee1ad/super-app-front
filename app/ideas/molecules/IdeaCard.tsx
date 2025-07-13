@@ -84,7 +84,6 @@ export function IdeaCard({ idea, category, onDelete, onUpdate }: IdeaCardProps) 
         onOpenChange={setIsEditDialogOpen}
         idea={idea}
         onUpdate={onUpdate}
-        category={category}
       />
     </>
   )

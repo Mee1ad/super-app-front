@@ -95,7 +95,7 @@ export default function TodoPage() {
     }
   };
 
-  const handleTaskToggle = async (listId: string, taskId: string, checked: boolean) => {
+  const handleTaskToggle = async (listId: string, taskId: string) => {
     try {
       await toggleTask(listId, taskId);
     } catch (err) {
@@ -210,7 +210,7 @@ export default function TodoPage() {
                   onDelete={handleDeleteList}
                   onTaskUpdate={task => handleTaskUpdate(list.id, task)}
                   onTaskDelete={taskId => handleTaskDelete(list.id, taskId)}
-                  onTaskToggle={(taskId) => handleTaskToggle(list.id, taskId, true)}
+                  onTaskToggle={(taskId) => handleTaskToggle(list.id, taskId)}
                   onTaskReorder={(listId, newTasks) => handleTaskReorder(listId, newTasks)}
                 />
               ) : (

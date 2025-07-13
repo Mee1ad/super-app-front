@@ -19,8 +19,8 @@ export type ShoppingItemProps = {
   onDelete?: (id: string) => void;
   onToggle?: (id: string, checked: boolean) => void;
   dragHandleProps?: {
-    attributes: React.HTMLAttributes<HTMLDivElement>;
-    listeners: React.HTMLAttributes<HTMLDivElement>;
+    attributes?: React.HTMLAttributes<HTMLDivElement>;
+    listeners?: React.HTMLAttributes<HTMLDivElement>;
   };
 };
 

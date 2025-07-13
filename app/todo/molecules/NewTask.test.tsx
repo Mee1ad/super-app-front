@@ -50,7 +50,6 @@ describe('NewTask', () => {
 
   it('does not call onCreate for empty title', () => {
     render(<NewTask onCreate={mockOnCreate} />);
-    const titleInput = screen.getByPlaceholderText(/task title/i);
     const submitButton = screen.getByRole('button', { name: /add task/i });
     
     fireEvent.click(submitButton);

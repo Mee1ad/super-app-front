@@ -555,7 +555,7 @@ describe('Todo API', () => {
 
   describe('Error handling', () => {
     it('should handle API errors', async () => {
-      const { handleApiError } = require('@/lib/error-handler');
+      const { handleApiError } = jest.requireMock('@/lib/error-handler');
       
       mockFetch.mockResolvedValueOnce({
         ok: false,

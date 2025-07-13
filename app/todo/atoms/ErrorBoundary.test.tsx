@@ -6,7 +6,6 @@ import { ErrorBoundary } from './ErrorBoundary';
 describe('ErrorBoundary', () => {
   function ProblemChild() {
     throw new Error('Boom!');
-    // eslint-disable-next-line no-unreachable
     return <div />;
   }
 
