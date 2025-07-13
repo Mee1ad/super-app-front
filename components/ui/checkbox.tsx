@@ -12,13 +12,14 @@ export interface CheckboxProps
 }
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, checked, onCheckedChange }) => {
+  ({ className, checked, onCheckedChange, ...props }, ref) => {
     const handleClick = () => {
       onCheckedChange?.(!checked);
     };
 
     return (
       <div 
+        ref={ref}
         className={cn(
           "h-4 w-4 shrink-0 rounded-sm border-2 transition-colors cursor-pointer flex items-center justify-center",
           checked 
@@ -27,6 +28,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           className
         )}
         onClick={handleClick}
+        {...props}
       >
         {checked && (
           <Check className="h-3 w-3 text-white" />
