@@ -23,12 +23,12 @@ export function MealPlanView({ entries, mealTypes, onDelete, onUpdate }: MealPla
     setIsEditDialogOpen(true)
   }
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    }).format(date)
+    }).format(new Date(date))
   }
 
   const getMealType = (mealTypeId: string) => {
@@ -52,7 +52,7 @@ export function MealPlanView({ entries, mealTypes, onDelete, onUpdate }: MealPla
     <>
       <div className="space-y-4">
         {entries.map(entry => {
-          const mealType = getMealType(entry.mealType)
+          const mealType = getMealType(entry.meal_type_id)
           return (
             <Card 
               key={entry.id} 

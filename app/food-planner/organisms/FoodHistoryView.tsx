@@ -24,12 +24,12 @@ export function FoodHistoryView({ entries, mealTypes, onDelete, onUpdate }: Food
     setIsEditDialogOpen(true)
   }
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    }).format(date)
+    }).format(new Date(date))
   }
 
   const getMealType = (mealTypeId: string) => {
@@ -53,7 +53,7 @@ export function FoodHistoryView({ entries, mealTypes, onDelete, onUpdate }: Food
     <>
       <div className="space-y-4">
         {entries.map(entry => {
-          const mealType = getMealType(entry.mealType)
+          const mealType = getMealType(entry.meal_type_id)
           return (
             <Card 
               key={entry.id} 
@@ -67,9 +67,9 @@ export function FoodHistoryView({ entries, mealTypes, onDelete, onUpdate }: Food
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-lg">{entry.name}</h3>
-                        {entry.followedPlan !== undefined && (
-                          <Badge variant={entry.followedPlan ? "default" : "secondary"}>
-                            {entry.followedPlan ? (
+                        {entry.followed_plan !== undefined && (
+                          <Badge variant={entry.followed_plan ? "default" : "secondary"}>
+                            {entry.followed_plan ? (
                               <>
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Followed Plan

@@ -13,41 +13,55 @@ import { FoodEntry, MealType } from '../atoms/types'
 interface AddFoodDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAdd: (entry: Omit<FoodEntry, 'id' | 'date'>) => void
+  onSubmit: (entry: Omit<FoodEntry, 'id' | 'created_at' | 'updated_at' | 'meal_type'>) => Promise<void>
   mealTypes: MealType[]
 }
 
-export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodDialogProps) {
+export function AddFoodDialog({ open, onOpenChange, onSubmit, mealTypes }: AddFoodDialogProps) {
   const [name, setName] = useState('')
   const [category, setCategory] = useState<'planned' | 'eaten'>('planned')
-  const [mealType, setMealType] = useState<FoodEntry['mealType']>('breakfast')
+  const [mealTypeId, setMealTypeId] = useState<string>('')
   const [time, setTime] = useState('')
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [comment, setComment] = useState('')
   const [image, setImage] = useState<string>('')
   const [followedPlan, setFollowedPlan] = useState(false)
+  const [symptoms, setSymptoms] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !mealType || !time) return
+    if (!name.trim() || !mealTypeId || !time) return
 
-    onAdd({
-      name: name.trim(),
-      category,
-      mealType,
-      time,
-      comment: comment.trim() || undefined,
-      image: image || undefined,
-      followedPlan: category === 'eaten' ? followedPlan : undefined,
-    })
+    setIsSubmitting(true)
+    try {
+      await onSubmit({
+        name: name.trim(),
+        category,
+        meal_type_id: mealTypeId,
+        time,
+        date,
+        comment: comment.trim() || undefined,
+        image: image || undefined,
+        followed_plan: category === 'eaten' ? followedPlan : undefined,
+        symptoms
+      })
 
-    // Reset form
-    setName('')
-    setCategory('planned')
-    setMealType('breakfast')
-    setTime('')
-    setComment('')
-    setImage('')
-    setFollowedPlan(false)
+      // Reset form
+      setName('')
+      setCategory('planned')
+      setMealTypeId('')
+      setTime('')
+      setDate(new Date().toISOString().split('T')[0])
+      setComment('')
+      setImage('')
+      setFollowedPlan(false)
+      setSymptoms([])
+    } catch (error) {
+      // Error is handled by the parent component
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -90,7 +104,7 @@ export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodD
               <label htmlFor="mealType" className="block text-sm font-medium mb-2">
                 Meal Type *
               </label>
-              <Select value={mealType} onValueChange={value => setMealType(value as FoodEntry['mealType'])} required>
+              <Select value={mealTypeId} onValueChange={setMealTypeId} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select meal type" />
                 </SelectTrigger>
@@ -105,17 +119,32 @@ export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodD
             </div>
           </div>
 
-          <div>
-            <label htmlFor="time" className="block text-sm font-medium mb-2">
-              Time *
-            </label>
-            <Input
-              id="time"
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="time" className="block text-sm font-medium mb-2">
+                Time *
+              </label>
+              <Input
+                id="time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium mb-2">
+                Date *
+              </label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div>
@@ -155,11 +184,11 @@ export function AddFoodDialog({ open, onOpenChange, onAdd, mealTypes }: AddFoodD
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || !mealType || !time}>
-              Add Entry
+            <Button type="submit" disabled={!name.trim() || !mealTypeId || !time || isSubmitting}>
+              {isSubmitting ? 'Adding...' : 'Add Entry'}
             </Button>
           </div>
         </form>

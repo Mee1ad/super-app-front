@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Search, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,78 +11,110 @@ import { AddFoodDialog } from './organisms/AddFoodDialog'
 import { MealPlanView } from './organisms/MealPlanView'
 import { FoodHistoryView } from './organisms/FoodHistoryView'
 import { CalendarView } from './organisms/CalendarView'
-import { FoodEntry, MealType } from './atoms/types'
-
-const mealTypes: MealType[] = [
-  { id: 'breakfast', name: 'Breakfast', emoji: '🍳', time: '08:00' },
-  { id: 'lunch', name: 'Lunch', emoji: '🍕', time: '12:00' },
-  { id: 'dinner', name: 'Dinner', emoji: '🍽️', time: '18:00' },
-  { id: 'snack', name: 'Snack', emoji: '☕', time: '15:00' },
-]
+import { useFoodPlannerApi } from './atoms/useFoodPlannerApi'
+import { FoodEntry } from './atoms/types'
 
 export default function FoodPlannerPage() {
-  const [entries, setEntries] = useState<FoodEntry[]>([
-    {
-      id: '1',
-      name: 'Oatmeal with berries',
-      category: 'planned',
-      mealType: 'breakfast',
-      time: '08:00',
-      date: new Date('2024-01-15'),
-      comment: 'Healthy start to the day',
-    },
-    {
-      id: '2',
-      name: 'Grilled chicken salad',
-      category: 'eaten',
-      mealType: 'lunch',
-      time: '12:30',
-      date: new Date('2024-01-15'),
-      comment: 'Felt great after this meal',
-      followedPlan: true,
-    },
-  ])
+  const {
+    mealTypes,
+    foodEntries,
+    summary,
+    loading,
+    error,
+    loadMealTypes,
+    loadFoodEntries,
+    createFoodEntry,
+    updateFoodEntry,
+    deleteFoodEntry,
+    loadSummary
+  } = useFoodPlannerApi()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedMealType, setSelectedMealType] = useState<string>('all')
   const [selectedDate, setSelectedDate] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  const filteredEntries = entries.filter(entry => {
+  // Load data on mount
+  useEffect(() => {
+    loadMealTypes()
+    loadFoodEntries()
+    loadSummary()
+  }, [loadMealTypes, loadFoodEntries, loadSummary])
+
+  const filteredEntries = foodEntries.filter(entry => {
     const matchesSearch = entry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.comment?.toLowerCase().includes(searchTerm.toLowerCase())
+                         (entry.comment && entry.comment.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesCategory = selectedCategory === 'all' || entry.category === selectedCategory
-    const matchesDate = selectedDate === 'all' || 
-                       entry.date.toDateString() === new Date(selectedDate).toDateString()
-    return matchesSearch && matchesCategory && matchesDate
+    const matchesMealType = selectedMealType === 'all' || entry.meal_type_id === selectedMealType
+    const matchesDate = selectedDate === 'all' || entry.date === selectedDate
+    return matchesSearch && matchesCategory && matchesMealType && matchesDate
   })
 
-  const addEntry = (newEntry: Omit<FoodEntry, 'id' | 'date'>) => {
-    const entry: FoodEntry = {
-      ...newEntry,
-      id: Date.now().toString(),
-      date: new Date(),
+  const handleAddEntry = async (newEntry: Omit<FoodEntry, 'id' | 'created_at' | 'updated_at' | 'meal_type'>) => {
+    try {
+      await createFoodEntry({
+        name: newEntry.name,
+        category: newEntry.category,
+        meal_type_id: newEntry.meal_type_id,
+        time: newEntry.time,
+        date: newEntry.date,
+        comment: newEntry.comment,
+        image: newEntry.image,
+        followed_plan: newEntry.followed_plan,
+        symptoms: newEntry.symptoms
+      })
+      setIsAddDialogOpen(false)
+    } catch (error) {
+      // Error is handled by the hook
     }
-    setEntries(prev => [entry, ...prev])
-    setIsAddDialogOpen(false)
   }
 
-  const deleteEntry = (id: string) => {
-    setEntries(prev => prev.filter(entry => entry.id !== id))
+  const handleDeleteEntry = async (id: string) => {
+    try {
+      await deleteFoodEntry(id)
+    } catch (error) {
+      // Error is handled by the hook
+    }
   }
 
-  const updateEntry = (id: string, updatedEntry: Partial<FoodEntry>) => {
-    setEntries(prev => prev.map(entry => 
-      entry.id === id ? { ...entry, ...updatedEntry } : entry
-    ))
+  const handleUpdateEntry = async (id: string, updatedEntry: Partial<FoodEntry>) => {
+    try {
+      await updateFoodEntry(id, {
+        name: updatedEntry.name,
+        category: updatedEntry.category,
+        meal_type_id: updatedEntry.meal_type_id,
+        time: updatedEntry.time,
+        date: updatedEntry.date,
+        comment: updatedEntry.comment,
+        image: updatedEntry.image,
+        followed_plan: updatedEntry.followed_plan,
+        symptoms: updatedEntry.symptoms
+      })
+    } catch (error) {
+      // Error is handled by the hook
+    }
   }
 
   const getDateOptions = () => {
-    const dates = [...new Set(entries.map(entry => entry.date.toDateString()))]
+    const dates = [...new Set(foodEntries.map(entry => entry.date))]
     return dates.map(date => ({
-      value: new Date(date).toISOString().split('T')[0],
+      value: date,
       label: new Date(date).toLocaleDateString()
     }))
+  }
+
+  if (loading && foodEntries.length === 0) {
+    return (
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p>Loading food planner...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -119,6 +151,19 @@ export default function FoodPlannerPage() {
             <SelectItem value="eaten">Eaten</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={selectedMealType} onValueChange={setSelectedMealType}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Meal Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Meals</SelectItem>
+            {mealTypes.map(mealType => (
+              <SelectItem key={mealType.id} value={mealType.id}>
+                {mealType.emoji} {mealType.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={selectedDate} onValueChange={setSelectedDate}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Date" />
@@ -147,8 +192,8 @@ export default function FoodPlannerPage() {
           <MealPlanView
             entries={filteredEntries.filter(e => e.category === 'planned')}
             mealTypes={mealTypes}
-            onDelete={deleteEntry}
-            onUpdate={updateEntry}
+            onDelete={handleDeleteEntry}
+            onUpdate={handleUpdateEntry}
           />
         </TabsContent>
 
@@ -156,17 +201,45 @@ export default function FoodPlannerPage() {
           <FoodHistoryView
             entries={filteredEntries.filter(e => e.category === 'eaten')}
             mealTypes={mealTypes}
-            onDelete={deleteEntry}
-            onUpdate={updateEntry}
+            onDelete={handleDeleteEntry}
+            onUpdate={handleUpdateEntry}
           />
         </TabsContent>
 
         <TabsContent value="calendar" className="space-y-4">
-          <CalendarView entries={entries} />
+          <CalendarView entries={foodEntries} />
         </TabsContent>
 
         <TabsContent value="summary" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  Planned
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {summary?.planned_count || 0}
+                </p>
+                <p className="text-sm text-muted-foreground">meals planned</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-blue-500" />
+                  Eaten
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold">
+                  {summary?.eaten_count || 0}
+                </p>
+                <p className="text-sm text-muted-foreground">meals eaten</p>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -176,9 +249,9 @@ export default function FoodPlannerPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">
-                  {entries.filter(e => e.category === 'eaten' && e.followedPlan).length}
+                  {summary?.followed_plan_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">meals this week</p>
+                <p className="text-sm text-muted-foreground">meals on plan</p>
               </CardContent>
             </Card>
             <Card>
@@ -190,18 +263,9 @@ export default function FoodPlannerPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">
-                  {entries.filter(e => e.category === 'eaten' && !e.followedPlan).length}
+                  {summary?.off_plan_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">meals this week</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Total Entries</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{entries.length}</p>
-                <p className="text-sm text-muted-foreground">food entries</p>
+                <p className="text-sm text-muted-foreground">meals off plan</p>
               </CardContent>
             </Card>
           </div>
@@ -211,8 +275,8 @@ export default function FoodPlannerPage() {
       <AddFoodDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
-        onAdd={addEntry}
         mealTypes={mealTypes}
+        onSubmit={handleAddEntry}
       />
     </div>
   )

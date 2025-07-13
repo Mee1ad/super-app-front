@@ -10,13 +10,14 @@ interface CalendarViewProps {
 
 export function CalendarView({ entries }: CalendarViewProps) {
   const getDaySummary = (date: Date) => {
+    const dateString = date.toISOString().split('T')[0]
     const dayEntries = entries.filter(entry => 
-      entry.date.toDateString() === date.toDateString()
+      entry.date === dateString
     )
     
     const plannedCount = dayEntries.filter(e => e.category === 'planned').length
     const eatenCount = dayEntries.filter(e => e.category === 'eaten').length
-    const followedPlan = dayEntries.filter(e => e.category === 'eaten' && e.followedPlan).length > 0
+    const followedPlan = dayEntries.filter(e => e.category === 'eaten' && e.followed_plan).length > 0
     
     return { plannedCount, eatenCount, followedPlan }
   }
