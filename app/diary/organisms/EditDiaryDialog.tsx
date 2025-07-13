@@ -6,17 +6,27 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Loader2 } from 'lucide-react'
 import { ImageAlbum } from '../molecules/ImageAlbum'
-import { DiaryEntry, Mood } from '../atoms/types'
+import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
 
 interface EditDiaryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   entry: DiaryEntry
-  onUpdate: (id: string, updatedEntry: Partial<DiaryEntry>) => void
+  moods: Mood[]
+  onUpdate: (id: string, updatedEntry: DiaryEntryUpdate) => Promise<void>
+  loading?: boolean
 }
 
-export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDiaryDialogProps) {
+export function EditDiaryDialog({ 
+  open, 
+  onOpenChange, 
+  entry, 
+  moods, 
+  onUpdate, 
+  loading = false 
+}: EditDiaryDialogProps) {
   const [title, setTitle] = useState(entry.title)
   const [content, setContent] = useState(entry.content)
   const [moodId, setMoodId] = useState(entry.mood)
@@ -30,28 +40,22 @@ export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDia
     setImages(entry.images)
   }, [entry])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !content.trim() || !moodId) return
 
-    onUpdate(entry.id, {
-      title: title.trim(),
-      content: content.trim(),
-      mood: moodId,
-      images,
-    })
-
-    onOpenChange(false)
+    try {
+      await onUpdate(entry.id, {
+        title: title.trim(),
+        content: content.trim(),
+        mood: moodId,
+        images,
+      })
+      onOpenChange(false)
+    } catch (error) {
+      // Error is handled by the parent component
+    }
   }
-
-  const moods: Mood[] = [
-    { id: 'happy', name: 'Happy', emoji: '😊', color: 'text-yellow-500' },
-    { id: 'excited', name: 'Excited', emoji: '🤩', color: 'text-orange-500' },
-    { id: 'calm', name: 'Calm', emoji: '😌', color: 'text-blue-500' },
-    { id: 'sad', name: 'Sad', emoji: '😔', color: 'text-gray-500' },
-    { id: 'angry', name: 'Angry', emoji: '😠', color: 'text-red-500' },
-    { id: 'neutral', name: 'Neutral', emoji: '😐', color: 'text-gray-400' },
-  ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -70,6 +74,7 @@ export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDia
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What's on your mind?"
               required
+              disabled={loading}
             />
           </div>
 
@@ -84,6 +89,7 @@ export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDia
               placeholder="Write about your day..."
               rows={6}
               required
+              disabled={loading}
             />
           </div>
 
@@ -91,7 +97,7 @@ export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDia
             <label htmlFor="edit-mood" className="block text-sm font-medium mb-2">
               How are you feeling? *
             </label>
-            <Select value={moodId} onValueChange={setMoodId} required>
+            <Select value={moodId} onValueChange={setMoodId} required disabled={loading}>
               <SelectTrigger>
                 <SelectValue placeholder="Select your mood" />
               </SelectTrigger>
@@ -99,7 +105,7 @@ export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDia
                 {moods.map(m => (
                   <SelectItem key={m.id} value={m.id}>
                     <span className="flex items-center gap-2">
-                      <span className={m.color}>{m.emoji}</span>
+                      <span style={{ color: m.color }}>{m.emoji}</span>
                       {m.name}
                     </span>
                   </SelectItem>
@@ -115,15 +121,23 @@ export function EditDiaryDialog({ open, onOpenChange, entry, onUpdate }: EditDia
             <ImageAlbum
               images={images}
               onImagesChange={setImages}
+              disabled={loading}
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim() || !content.trim() || !moodId}>
-              Save Changes
+            <Button type="submit" disabled={!title.trim() || !content.trim() || !moodId || loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </form>

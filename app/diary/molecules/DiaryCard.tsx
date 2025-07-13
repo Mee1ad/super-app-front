@@ -5,20 +5,23 @@ import { Trash2, Calendar, Image as ImageIcon } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EditDiaryDialog } from '../organisms/EditDiaryDialog'
-import { DiaryEntry, Mood } from '../atoms/types'
+import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
 import Image from 'next/image'
 
 interface DiaryCardProps {
   entry: DiaryEntry
   mood: Mood
+  moods: Mood[]
   onDelete: (id: string) => void
-  onUpdate: (id: string, updatedEntry: Partial<DiaryEntry>) => void
+  onUpdate: (id: string, updatedEntry: DiaryEntryUpdate) => Promise<void>
+  loading?: boolean
 }
 
-export function DiaryCard({ entry, mood, onDelete, onUpdate }: DiaryCardProps) {
+export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = false }: DiaryCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
@@ -44,14 +47,14 @@ export function DiaryCard({ entry, mood, onDelete, onUpdate }: DiaryCardProps) {
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3 flex-1">
-              <span className={`text-2xl ${mood.color}`}>{mood.emoji}</span>
+              <span className="text-2xl" style={{ color: mood.color }}>{mood.emoji}</span>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-lg mb-1">{entry.title}</h3>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                   <Calendar className="h-3 w-3" />
                   {formatDate(entry.date)}
                   <span className="text-xs">•</span>
-                  <span className={mood.color}>{mood.name}</span>
+                  <span style={{ color: mood.color }}>{mood.name}</span>
                 </div>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-3">
                   {truncateContent(entry.content)}
@@ -95,6 +98,8 @@ export function DiaryCard({ entry, mood, onDelete, onUpdate }: DiaryCardProps) {
                   onDelete(entry.id)
                 }}
                 className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                disabled={loading}
+                aria-label="Delete entry"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -107,7 +112,9 @@ export function DiaryCard({ entry, mood, onDelete, onUpdate }: DiaryCardProps) {
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         entry={entry}
+        moods={moods}
         onUpdate={onUpdate}
+        loading={loading}
       />
     </>
   )

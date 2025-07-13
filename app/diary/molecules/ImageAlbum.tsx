@@ -9,9 +9,10 @@ interface ImageAlbumProps {
   images: string[]
   onImagesChange: (images: string[]) => void
   readOnly?: boolean
+  disabled?: boolean
 }
 
-export function ImageAlbum({ images, onImagesChange, readOnly = false }: ImageAlbumProps) {
+export function ImageAlbum({ images, onImagesChange, readOnly = false, disabled = false }: ImageAlbumProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +39,9 @@ export function ImageAlbum({ images, onImagesChange, readOnly = false }: ImageAl
   }
 
   const openFileDialog = () => {
-    fileInputRef.current?.click()
+    if (!disabled) {
+      fileInputRef.current?.click()
+    }
   }
 
   if (readOnly && images.length === 0) {
@@ -55,6 +58,7 @@ export function ImageAlbum({ images, onImagesChange, readOnly = false }: ImageAl
             size="sm"
             onClick={openFileDialog}
             className="flex items-center gap-2"
+            disabled={disabled}
           >
             <Plus className="h-4 w-4" />
             Add Images
@@ -72,6 +76,7 @@ export function ImageAlbum({ images, onImagesChange, readOnly = false }: ImageAl
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
+        disabled={disabled}
       />
 
       {images.length > 0 && (
@@ -87,7 +92,7 @@ export function ImageAlbum({ images, onImagesChange, readOnly = false }: ImageAl
                   className="w-full h-full object-cover"
                 />
               </div>
-              {!readOnly && (
+              {!readOnly && !disabled && (
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
