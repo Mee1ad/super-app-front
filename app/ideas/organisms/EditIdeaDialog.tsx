@@ -8,19 +8,29 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
-import { Category, Idea } from '../atoms/types'
+import { Category, Idea, IdeaUpdate } from '../atoms/types'
+import { LoadingSpinner } from '../atoms/LoadingSpinner'
 
 interface EditIdeaDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   idea: Idea
-  onUpdate: (id: string, updatedIdea: Partial<Idea>) => void
+  onUpdate: (id: string, updatedIdea: IdeaUpdate) => Promise<any>
+  categories?: Category[]
+  isLoading?: boolean
 }
 
-export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaDialogProps) {
+export function EditIdeaDialog({ 
+  open, 
+  onOpenChange, 
+  idea, 
+  onUpdate, 
+  categories = [],
+  isLoading = false 
+}: EditIdeaDialogProps) {
   const [title, setTitle] = useState(idea.title)
   const [description, setDescription] = useState(idea.description || '')
-  const [categoryId, setCategoryId] = useState(idea.category)
+  const [categoryId, setCategoryId] = useState(idea.category_id)
   const [tags, setTags] = useState<string[]>(idea.tags || [])
   const [tagInput, setTagInput] = useState('')
 
@@ -28,23 +38,25 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
   useEffect(() => {
     setTitle(idea.title)
     setDescription(idea.description || '')
-    setCategoryId(idea.category)
+    setCategoryId(idea.category_id)
     setTags(idea.tags || [])
     setTagInput('')
   }, [idea])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !categoryId) return
 
-    onUpdate(idea.id, {
+    const result = await onUpdate(idea.id, {
       title: title.trim(),
       description: description.trim() || undefined,
       category: categoryId,
       tags: tags.length > 0 ? tags : undefined,
     })
 
-    onOpenChange(false)
+    if (result) {
+      onOpenChange(false)
+    }
   }
 
   const addTag = () => {
@@ -66,15 +78,6 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
     }
   }
 
-  const categories: Category[] = [
-    { id: 'project', name: 'Project', emoji: '🚀' },
-    { id: 'article', name: 'Article', emoji: '📝' },
-    { id: 'shopping', name: 'Shopping', emoji: '🛒' },
-    { id: 'learning', name: 'Learning', emoji: '📚' },
-    { id: 'personal', name: 'Personal', emoji: '💭' },
-    { id: 'work', name: 'Work', emoji: '💼' },
-  ]
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -92,6 +95,7 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter idea title..."
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -105,6 +109,7 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional description..."
               rows={3}
+              disabled={isLoading}
             />
           </div>
 
@@ -112,7 +117,7 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
             <label htmlFor="edit-category" className="block text-sm font-medium mb-2">
               Category *
             </label>
-            <Select value={categoryId} onValueChange={setCategoryId} required>
+            <Select value={categoryId} onValueChange={setCategoryId} required disabled={isLoading}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -138,8 +143,9 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
                 onKeyPress={handleKeyPress}
                 placeholder="Add tags..."
                 className="flex-1"
+                disabled={isLoading}
               />
-              <Button type="button" variant="outline" onClick={addTag}>
+              <Button type="button" variant="outline" onClick={addTag} disabled={isLoading}>
                 Add
               </Button>
             </div>
@@ -152,6 +158,7 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
                       type="button"
                       onClick={() => removeTag(tag)}
                       className="ml-1 hover:text-destructive"
+                      disabled={isLoading}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -162,11 +169,18 @@ export function EditIdeaDialog({ open, onOpenChange, idea, onUpdate }: EditIdeaD
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim() || !categoryId}>
-              Save Changes
+            <Button type="submit" disabled={!title.trim() || !categoryId || isLoading}>
+              {isLoading ? (
+                <>
+                  <LoadingSpinner size={16} className="mr-2" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </form>

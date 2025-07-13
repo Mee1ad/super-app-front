@@ -11,19 +11,20 @@ import { Idea, Category } from '../atoms/types'
 interface IdeaCardProps {
   idea: Idea
   category: Category
-  onDelete: (id: string) => void
-  onUpdate: (id: string, updatedIdea: Partial<Idea>) => void
+  onDelete: (id: string) => Promise<boolean>
+  onUpdate: (id: string, updatedIdea: any) => Promise<any>
+  categories: Category[]
 }
 
-export function IdeaCard({ idea, category, onDelete, onUpdate }: IdeaCardProps) {
+export function IdeaCard({ idea, category, onDelete, onUpdate, categories }: IdeaCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    }).format(date)
+    }).format(new Date(dateString))
   }
 
   const handleCardClick = () => {
@@ -44,7 +45,7 @@ export function IdeaCard({ idea, category, onDelete, onUpdate }: IdeaCardProps) 
                 <h3 className="font-semibold text-lg">{idea.title}</h3>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-3 w-3" />
-                  {formatDate(idea.createdAt)}
+                  {formatDate(idea.created_at)}
                 </div>
               </div>
             </div>
@@ -84,6 +85,7 @@ export function IdeaCard({ idea, category, onDelete, onUpdate }: IdeaCardProps) 
         onOpenChange={setIsEditDialogOpen}
         idea={idea}
         onUpdate={onUpdate}
+        categories={categories}
       />
     </>
   )

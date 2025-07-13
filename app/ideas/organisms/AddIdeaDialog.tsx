@@ -8,39 +8,43 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
-import { Category, Idea } from '../atoms/types'
+import { Category, IdeaCreate } from '../atoms/types'
+import { LoadingSpinner } from '../atoms/LoadingSpinner'
 
 interface AddIdeaDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAdd: (idea: Omit<Idea, 'id' | 'createdAt'>) => void
+  onAdd: (idea: IdeaCreate) => Promise<any>
   categories: Category[]
+  isLoading?: boolean
 }
 
-export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdeaDialogProps) {
+export function AddIdeaDialog({ open, onOpenChange, onAdd, categories, isLoading = false }: AddIdeaDialogProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !category) return
 
-    onAdd({
+    const result = await onAdd({
       title: title.trim(),
       description: description.trim() || undefined,
       category,
       tags: tags.length > 0 ? tags : undefined,
     })
 
-    // Reset form
-    setTitle('')
-    setDescription('')
-    setCategory('')
-    setTags([])
-    setTagInput('')
+    if (result) {
+      // Reset form
+      setTitle('')
+      setDescription('')
+      setCategory('')
+      setTags([])
+      setTagInput('')
+    }
   }
 
   const addTag = () => {
@@ -79,6 +83,7 @@ export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdea
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter idea title..."
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -92,6 +97,7 @@ export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdea
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional description..."
               rows={3}
+              disabled={isLoading}
             />
           </div>
 
@@ -99,7 +105,7 @@ export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdea
             <label htmlFor="category" className="block text-sm font-medium mb-2">
               Category *
             </label>
-            <Select value={category} onValueChange={setCategory} required>
+            <Select value={category} onValueChange={setCategory} required disabled={isLoading}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -125,8 +131,9 @@ export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdea
                 onKeyPress={handleKeyPress}
                 placeholder="Add tags..."
                 className="flex-1"
+                disabled={isLoading}
               />
-              <Button type="button" variant="outline" onClick={addTag}>
+              <Button type="button" variant="outline" onClick={addTag} disabled={isLoading}>
                 Add
               </Button>
             </div>
@@ -139,6 +146,7 @@ export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdea
                       type="button"
                       onClick={() => removeTag(tag)}
                       className="ml-1 hover:text-destructive"
+                      disabled={isLoading}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -149,11 +157,18 @@ export function AddIdeaDialog({ open, onOpenChange, onAdd, categories }: AddIdea
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim() || !category}>
-              Add Idea
+            <Button type="submit" disabled={!title.trim() || !category || isLoading}>
+              {isLoading ? (
+                <>
+                  <LoadingSpinner size={16} className="mr-2" />
+                  Adding...
+                </>
+              ) : (
+                'Add Idea'
+              )}
             </Button>
           </div>
         </form>

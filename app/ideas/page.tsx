@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,68 +8,62 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 import { AddIdeaDialog } from './organisms/AddIdeaDialog'
 import { IdeaCard } from './molecules/IdeaCard'
-import { Idea, Category } from './atoms/types'
-
-const categories: Category[] = [
-  { id: 'project', name: 'Project', emoji: '🚀' },
-  { id: 'article', name: 'Article', emoji: '📝' },
-  { id: 'shopping', name: 'Shopping', emoji: '🛒' },
-  { id: 'learning', name: 'Learning', emoji: '📚' },
-  { id: 'personal', name: 'Personal', emoji: '💭' },
-  { id: 'work', name: 'Work', emoji: '💼' },
-]
+import { LoadingSpinner } from './atoms/LoadingSpinner'
+import { useIdeasApi } from './atoms/useIdeasApi'
+import { IdeaCreate, IdeaUpdate } from './atoms/types'
 
 export default function IdeasPage() {
-  const [ideas, setIdeas] = useState<Idea[]>([
-    {
-      id: '1',
-      title: 'Build a habit tracker app',
-      description: 'Simple app to track daily habits with streaks and analytics',
-      category: 'project',
-      tags: ['react', 'typescript', 'productivity'],
-      createdAt: new Date('2024-01-15'),
-    },
-    {
-      id: '2',
-      title: 'Write about AI in education',
-      description: 'Article exploring how AI can personalize learning experiences',
-      category: 'article',
-      tags: ['ai', 'education', 'writing'],
-      createdAt: new Date('2024-01-14'),
-    },
-  ])
+  const {
+    ideas,
+    categories,
+    isLoading,
+    isCreating,
+    error,
+    loadIdeas,
+    createIdea,
+    updateIdea,
+    deleteIdea,
+    clearError,
+  } = useIdeasApi()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadIdeas({
+        search: searchTerm || undefined,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      })
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, selectedCategory, loadIdeas])
+
+  const handleAddIdea = async (newIdea: IdeaCreate) => {
+    const result = await createIdea(newIdea)
+    if (result) {
+      setIsAddDialogOpen(false)
+    }
+  }
+
+  const handleUpdateIdea = async (id: string, updatedIdea: IdeaUpdate) => {
+    await updateIdea(id, updatedIdea)
+  }
+
+  const handleDeleteIdea = async (id: string) => {
+    return await deleteIdea(id)
+  }
+
   const filteredIdeas = ideas.filter(idea => {
     const matchesSearch = idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          idea.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          idea.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesCategory = selectedCategory === 'all' || idea.category === selectedCategory
+    const matchesCategory = selectedCategory === 'all' || idea.category_id === selectedCategory
     return matchesSearch && matchesCategory
   })
-
-  const addIdea = (newIdea: Omit<Idea, 'id' | 'createdAt'>) => {
-    const idea: Idea = {
-      ...newIdea,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    }
-    setIdeas(prev => [idea, ...prev])
-    setIsAddDialogOpen(false)
-  }
-
-  const deleteIdea = (id: string) => {
-    setIdeas(prev => prev.filter(idea => idea.id !== id))
-  }
-
-  const updateIdea = (id: string, updatedIdea: Partial<Idea>) => {
-    setIdeas(prev => prev.map(idea => 
-      idea.id === id ? { ...idea, ...updatedIdea } : idea
-    ))
-  }
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -78,8 +72,16 @@ export default function IdeasPage() {
           <h1 className="text-3xl font-bold">Daily Ideas</h1>
           <p className="text-muted-foreground">Capture and organize your thoughts</p>
         </div>
-        <Button onClick={() => setIsAddDialogOpen(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
+        <Button 
+          onClick={() => setIsAddDialogOpen(true)} 
+          className="flex items-center gap-2"
+          disabled={isCreating}
+        >
+          {isCreating ? (
+            <LoadingSpinner size={16} />
+          ) : (
+            <Plus className="h-4 w-4" />
+          )}
           Add Idea
         </Button>
       </div>
@@ -110,9 +112,32 @@ export default function IdeasPage() {
         </Select>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <Card className="mb-6 border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <p className="text-destructive">{error}</p>
+              <Button variant="ghost" size="sm" onClick={clearError}>
+                Dismiss
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Ideas List */}
       <div className="space-y-4">
-        {filteredIdeas.length === 0 ? (
+        {isLoading ? (
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <div className="flex items-center gap-3">
+                <LoadingSpinner />
+                <span className="text-muted-foreground">Loading ideas...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : filteredIdeas.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="text-muted-foreground text-center">
@@ -127,23 +152,30 @@ export default function IdeasPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredIdeas.map(idea => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              category={categories.find(c => c.id === idea.category)!}
-              onDelete={deleteIdea}
-              onUpdate={updateIdea}
-            />
-          ))
+          filteredIdeas.map(idea => {
+            const category = categories.find(c => c.id === idea.category_id)
+            if (!category) return null
+            
+            return (
+              <IdeaCard
+                key={idea.id}
+                idea={idea}
+                category={category}
+                onDelete={handleDeleteIdea}
+                onUpdate={handleUpdateIdea}
+                categories={categories}
+              />
+            )
+          })
         )}
       </div>
 
       <AddIdeaDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
-        onAdd={addIdea}
+        onAdd={handleAddIdea}
         categories={categories}
+        isLoading={isCreating}
       />
     </div>
   )
