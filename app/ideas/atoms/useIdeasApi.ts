@@ -47,10 +47,10 @@ export function useIdeasApi(): UseIdeasApiReturn {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
   
   // Use mock API for non-authenticated users, real API for authenticated users
-  const api = user ? ideasApi : mockIdeasApi
+  const api = isAuthenticated ? ideasApi : mockIdeasApi
 
   const clearError = useCallback(() => {
     setError(null)
@@ -145,12 +145,15 @@ export function useIdeasApi(): UseIdeasApiReturn {
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       setIdeas([])
       setMeta(null)
       setError(null)
+      // Reload data from real API when user becomes authenticated
+      loadCategories()
+      loadIdeas()
     }
-  }, [user])
+  }, [isAuthenticated, loadCategories, loadIdeas])
 
   return {
     ideas,

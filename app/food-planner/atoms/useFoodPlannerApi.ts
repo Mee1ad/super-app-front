@@ -20,10 +20,10 @@ export function useFoodPlannerApi() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
   
   // Use mock API for non-authenticated users, real API for authenticated users
-  const api = user ? foodPlannerApi : mockFoodPlannerApi
+  const api = isAuthenticated ? foodPlannerApi : mockFoodPlannerApi
 
   const showError = useCallback((message: string) => {
     setError(message)
@@ -195,13 +195,17 @@ export function useFoodPlannerApi() {
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       setFoodEntries([])
       setSummary(null)
       setCalendarData(null)
       setError(null)
+      // Reload data from real API when user becomes authenticated
+      loadMealTypes()
+      loadFoodEntries()
+      loadSummary()
     }
-  }, [user])
+  }, [isAuthenticated, loadMealTypes, loadFoodEntries, loadSummary])
 
   return {
     // State

@@ -22,7 +22,7 @@ export const useDiaryApi = () => {
   } | null>(null)
   
   const { toast } = useToast()
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   // Load moods
   const loadMoods = useCallback(async () => {
@@ -182,12 +182,15 @@ export const useDiaryApi = () => {
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       setEntries([])
       setMeta(null)
       setError(null)
+      // Reload data from real API when user becomes authenticated
+      loadMoods()
+      loadEntries()
     }
-  }, [user])
+  }, [isAuthenticated, loadMoods, loadEntries])
 
   return {
     moods,

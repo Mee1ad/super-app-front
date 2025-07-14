@@ -49,8 +49,10 @@ export const useTodoApi = () => {
   useEffect(() => {
     if (isAuthenticated) {
       setLists([]);
+      // Reload data from real API when user becomes authenticated
+      loadLists();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadLists]);
 
   // List operations
   const createList = useCallback(async (type: "task" | "shopping", title: string, variant: Variant = "default") => {
