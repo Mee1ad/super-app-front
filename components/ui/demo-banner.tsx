@@ -11,13 +11,19 @@ interface DemoBannerProps {
 
 export function DemoBanner({ className = '' }: DemoBannerProps) {
   const [isVisible, setIsVisible] = useState(true)
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+
+  // Don't render anything while auth is loading to prevent flash
+  if (authLoading) {
+    return null
+  }
 
   // Don't show banner if user is authenticated
   if (isAuthenticated) {
     return null
   }
 
+  // Don't show banner if user has dismissed it
   if (!isVisible) {
     return null
   }
