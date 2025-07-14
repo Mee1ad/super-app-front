@@ -14,8 +14,10 @@ import {
 import { handleApiError } from '@/lib/error-handler';
 import { getAccessToken } from '@/lib/auth-token';
 
-// Use environment variable for API base URL, fallback to localhost for development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// API base URL - change this for different environments
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000/api/v1' 
+  : '';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -68,22 +70,22 @@ async function apiRequest<T>(
 // Lists API
 export const listsApi = {
   getAll: (): Promise<ListResponse[]> => 
-    apiRequest<ListResponse[]>('/api/lists'),
+    apiRequest<ListResponse[]>('/lists'),
 
   create: (data: ListCreate): Promise<ListResponse> => 
-    apiRequest<ListResponse>('/api/lists', {
+    apiRequest<ListResponse>('/lists', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   update: (id: string, data: ListUpdate): Promise<ListResponse> => 
-    apiRequest<ListResponse>(`/api/lists/${id}`, {
+    apiRequest<ListResponse>(`/lists/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   delete: (id: string): Promise<string> => 
-    apiRequest<string>(`/api/lists/${id}`, {
+    apiRequest<string>(`/lists/${id}`, {
       method: 'DELETE',
     }),
 };
@@ -91,32 +93,32 @@ export const listsApi = {
 // Tasks API
 export const tasksApi = {
   getByList: (listId: string): Promise<TaskResponse[]> => 
-    apiRequest<TaskResponse[]>(`/api/lists/${listId}/tasks`),
+    apiRequest<TaskResponse[]>(`/lists/${listId}/tasks`),
 
   create: (listId: string, data: TaskCreate): Promise<TaskResponse> => 
-    apiRequest<TaskResponse>(`/api/lists/${listId}/tasks`, {
+    apiRequest<TaskResponse>(`/lists/${listId}/tasks`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   update: (listId: string, taskId: string, data: TaskUpdate): Promise<TaskResponse> => 
-    apiRequest<TaskResponse>(`/api/lists/${listId}/tasks/${taskId}`, {
+    apiRequest<TaskResponse>(`/lists/${listId}/tasks/${taskId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   delete: (listId: string, taskId: string): Promise<string> => 
-    apiRequest<string>(`/api/lists/${listId}/tasks/${taskId}`, {
+    apiRequest<string>(`/lists/${listId}/tasks/${taskId}`, {
       method: 'DELETE',
     }),
 
   toggle: (listId: string, taskId: string): Promise<TaskResponse> => 
-    apiRequest<TaskResponse>(`/api/lists/${listId}/tasks/${taskId}/toggle`, {
+    apiRequest<TaskResponse>(`/lists/${listId}/tasks/${taskId}/toggle`, {
       method: 'PUT',
     }),
 
   reorder: (listId: string, itemIds: string[]): Promise<string> => 
-    apiRequest<string>(`/api/lists/${listId}/tasks/reorder`, {
+    apiRequest<string>(`/lists/${listId}/tasks/reorder`, {
       method: 'PUT',
       body: JSON.stringify({ item_ids: itemIds }),
     }),
@@ -125,32 +127,32 @@ export const tasksApi = {
 // Shopping Items API
 export const itemsApi = {
   getByList: (listId: string): Promise<ShoppingItemResponse[]> => 
-    apiRequest<ShoppingItemResponse[]>(`/api/lists/${listId}/items`),
+    apiRequest<ShoppingItemResponse[]>(`/lists/${listId}/items`),
 
   create: (listId: string, data: ShoppingItemCreate): Promise<ShoppingItemResponse> => 
-    apiRequest<ShoppingItemResponse>(`/api/lists/${listId}/items`, {
+    apiRequest<ShoppingItemResponse>(`/lists/${listId}/items`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   update: (listId: string, itemId: string, data: ShoppingItemUpdate): Promise<ShoppingItemResponse> => 
-    apiRequest<ShoppingItemResponse>(`/api/lists/${listId}/items/${itemId}`, {
+    apiRequest<ShoppingItemResponse>(`/lists/${listId}/items/${itemId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   delete: (listId: string, itemId: string): Promise<string> => 
-    apiRequest<string>(`/api/lists/${listId}/items/${itemId}`, {
+    apiRequest<string>(`/lists/${listId}/items/${itemId}`, {
       method: 'DELETE',
     }),
 
   toggle: (listId: string, itemId: string): Promise<ShoppingItemResponse> => 
-    apiRequest<ShoppingItemResponse>(`/api/lists/${listId}/items/${itemId}/toggle`, {
+    apiRequest<ShoppingItemResponse>(`/lists/${listId}/items/${itemId}/toggle`, {
       method: 'PUT',
     }),
 
   reorder: (listId: string, itemIds: string[]): Promise<string> => 
-    apiRequest<string>(`/api/lists/${listId}/items/reorder`, {
+    apiRequest<string>(`/lists/${listId}/items/reorder`, {
       method: 'PUT',
       body: JSON.stringify({ item_ids: itemIds }),
     }),

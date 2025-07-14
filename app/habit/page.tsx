@@ -17,7 +17,7 @@ export default function HabitPage() {
             Coming Soon
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            We're working on building an amazing habit tracking experience for you
+            We&apos;re working on building an amazing habit tracking experience for you
           </p>
         </div>
       </div>

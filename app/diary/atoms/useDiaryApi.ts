@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { diaryApi } from './api'
+import { useAuth } from '@/app/auth/atoms/useAuth'
 import { 
   Mood, 
   DiaryEntry, 
   DiaryEntryCreate, 
-  DiaryEntryUpdate, 
-  DiaryEntriesResponse 
+  DiaryEntryUpdate
 } from './types'
 
 export const useDiaryApi = () => {
@@ -22,6 +22,7 @@ export const useDiaryApi = () => {
   } | null>(null)
   
   const { toast } = useToast()
+  const { user } = useAuth()
 
   // Load moods
   const loadMoods = useCallback(async () => {
@@ -172,6 +173,21 @@ export const useDiaryApi = () => {
       setLoading(false)
     }
   }, [toast])
+
+  // Load initial data
+  useEffect(() => {
+    loadMoods()
+    loadEntries()
+  }, [loadMoods, loadEntries])
+
+  // Clear mock data when user logs in
+  useEffect(() => {
+    if (user) {
+      setEntries([])
+      setMeta(null)
+      setError(null)
+    }
+  }, [user])
 
   return {
     moods,

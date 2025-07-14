@@ -57,7 +57,7 @@ export function AddFoodDialog({ open, onOpenChange, onSubmit, mealTypes }: AddFo
       setImage('')
       setFollowedPlan(false)
       setSymptoms([])
-    } catch (error) {
+    } catch {
       // Error is handled by the parent component
     } finally {
       setIsSubmitting(false)

@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const backendFormData = new FormData()
     backendFormData.append('file', file)
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/diary/upload`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/upload-image`, {
       method: 'POST',
       body: backendFormData,
       headers: {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     
     const result = await response.json()
     return NextResponse.json(result)
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to upload image' },
       { status: 500 }

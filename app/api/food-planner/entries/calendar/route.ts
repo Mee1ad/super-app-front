@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (startDate) queryParams.append('start_date', startDate)
     if (endDate) queryParams.append('end_date', endDate)
     
-    const url = `${API_BASE_URL}/api/v1/food-planner/entries/calendar${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    const url = `${API_BASE_URL}/api/v1/food-entries/calendar${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
     
     const response = await fetch(url, {
       headers: {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     
     const data = await response.json()
     return NextResponse.json(data)
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch calendar data' },
       { status: 500 }

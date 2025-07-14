@@ -9,8 +9,12 @@ import {
   DeleteResponse 
 } from './types'
 import { getAccessToken } from '@/lib/auth-token'
+import { mockIdeasApi } from './mock-data'
 
-const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000/api' : '/api'
+// API base URL - change this for different environments
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000/api/v1' 
+  : '/api'
 
 class ApiError extends Error {
   constructor(

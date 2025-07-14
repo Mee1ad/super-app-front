@@ -61,7 +61,7 @@ export default function DiaryPage() {
         search: searchTerm || undefined,
         mood: selectedMood !== 'all' ? selectedMood : undefined
       })
-    } catch (error) {
+    } catch {
       // Error is already handled in the hook
     }
   }
@@ -69,7 +69,7 @@ export default function DiaryPage() {
   const handleUpdateEntry = async (id: string, updatedEntry: DiaryEntryUpdate) => {
     try {
       await updateEntry(id, updatedEntry)
-    } catch (error) {
+    } catch {
       // Error is already handled in the hook
     }
   }
@@ -77,7 +77,7 @@ export default function DiaryPage() {
   const handleDeleteEntry = async (id: string) => {
     try {
       await deleteEntry(id)
-    } catch (error) {
+    } catch {
       // Error is already handled in the hook
     }
   }

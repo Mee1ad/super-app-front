@@ -20,7 +20,6 @@ export default function FoodPlannerPage() {
     foodEntries,
     summary,
     loading,
-    error,
     loadMealTypes,
     loadFoodEntries,
     createFoodEntry,
@@ -65,7 +64,7 @@ export default function FoodPlannerPage() {
         symptoms: newEntry.symptoms
       })
       setIsAddDialogOpen(false)
-    } catch (error) {
+    } catch {
       // Error is handled by the hook
     }
   }
@@ -73,7 +72,7 @@ export default function FoodPlannerPage() {
   const handleDeleteEntry = async (id: string) => {
     try {
       await deleteFoodEntry(id)
-    } catch (error) {
+    } catch {
       // Error is handled by the hook
     }
   }
@@ -91,7 +90,7 @@ export default function FoodPlannerPage() {
         followed_plan: updatedEntry.followed_plan,
         symptoms: updatedEntry.symptoms
       })
-    } catch (error) {
+    } catch {
       // Error is handled by the hook
     }
   }

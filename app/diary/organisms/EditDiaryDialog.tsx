@@ -52,7 +52,7 @@ export function EditDiaryDialog({
         images,
       })
       onOpenChange(false)
-    } catch (error) {
+    } catch {
       // Error is handled by the parent component
     }
   }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { FoodEntry, FoodEntryUpdate } from '@/app/food-planner/atoms/types'
+import { FoodEntryUpdate } from '@/app/food-planner/atoms/types'
 
 // API base URL - adjust based on environment
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -16,7 +16,7 @@ export async function GET(
   try {
     const { id } = await params
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/food-planner/entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/food-entries/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)
@@ -35,7 +35,7 @@ export async function GET(
     
     const entry = await response.json()
     return NextResponse.json(entry)
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch food entry' },
       { status: 500 }
@@ -51,7 +51,7 @@ export async function PUT(
     const data: FoodEntryUpdate = await request.json()
     const { id } = await params
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/food-planner/entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/food-entries/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export async function PUT(
     
     const updatedEntry = await response.json()
     return NextResponse.json(updatedEntry)
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to update food entry' },
       { status: 500 }
@@ -87,7 +87,7 @@ export async function DELETE(
   try {
     const { id } = await params
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/food-planner/entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/food-entries/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export async function DELETE(
     
     const result = await response.json()
     return NextResponse.json(result)
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete food entry' },
       { status: 500 }

@@ -17,33 +17,47 @@ import {
 } from './api';
 import { showSuccessToast, showErrorToast } from '@/lib/error-handler';
 import { TaskResponse, ShoppingItemResponse } from './types';
+import { useAuth } from '@/app/auth/atoms/useAuth';
+import { mockApi } from './mock-data';
 
 export const useTodoApi = () => {
   const [lists, setLists] = useState<ListWithItems[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   // Load all lists with their items
   const loadLists = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getListsWithItems();
+      const data = isAuthenticated 
+        ? await getListsWithItems()
+        : await mockApi.getListsWithItems();
       setLists(data);
     } catch {
       showErrorToast('Failed to load lists');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Initialize on mount
   useEffect(() => {
     loadLists();
   }, [loadLists]);
 
+  // Clear mock data when user logs in
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLists([]);
+    }
+  }, [isAuthenticated]);
+
   // List operations
   const createList = useCallback(async (type: "task" | "shopping", title: string, variant: Variant = "default") => {
     try {
-      const newList = await listsApi.create({ type, title, variant });
+      const newList = isAuthenticated 
+        ? await listsApi.create({ type, title, variant })
+        : await mockApi.createList({ type, title, variant });
       await loadLists(); // Reload to get the new list with items
       showSuccessToast('List Created', `${type === 'task' ? 'Task' : 'Shopping'} list "${title}" created successfully`);
       return newList;
@@ -51,11 +65,13 @@ export const useTodoApi = () => {
       showErrorToast('Failed to create list');
       throw new Error('Failed to create list');
     }
-  }, [loadLists]);
+  }, [loadLists, isAuthenticated]);
 
   const updateList = useCallback(async (id: string, data: ListUpdate) => {
     try {
-      const updatedList = await listsApi.update(id, data);
+      const updatedList = isAuthenticated 
+        ? await listsApi.update(id, data)
+        : await mockApi.updateList(id, data);
       setLists(prev => prev.map(list => 
         list.id === id ? { ...list, ...updatedList } : list
       ));
@@ -65,23 +81,29 @@ export const useTodoApi = () => {
       showErrorToast('Failed to update list');
       throw new Error('Failed to update list');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const deleteList = useCallback(async (id: string) => {
     try {
-      await listsApi.delete(id);
+      if (isAuthenticated) {
+        await listsApi.delete(id);
+      } else {
+        await mockApi.deleteList(id);
+      }
       setLists(prev => prev.filter(list => list.id !== id));
       showSuccessToast('List Deleted', 'List deleted successfully');
     } catch {
       showErrorToast('Failed to delete list');
       throw new Error('Failed to delete list');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Task operations
   const createTask = useCallback(async (listId: string, data: TaskCreate) => {
     try {
-      const newTask = await tasksApi.create(listId, data);
+      const newTask = isAuthenticated 
+        ? await tasksApi.create(listId, data)
+        : await mockApi.createTask(listId, data);
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'task'
           ? { ...list, tasks: [...(list.tasks || []), newTask] }
@@ -93,11 +115,13 @@ export const useTodoApi = () => {
       showErrorToast('Failed to create task');
       throw new Error('Failed to create task');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const updateTask = useCallback(async (listId: string, taskId: string, data: TaskUpdate) => {
     try {
-      const updatedTask = await tasksApi.update(listId, taskId, { ...data, list_id: listId });
+      const updatedTask = isAuthenticated 
+        ? await tasksApi.update(listId, taskId, { ...data, list_id: listId })
+        : await mockApi.updateTask(listId, taskId, { ...data, list_id: listId });
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'task'
           ? { ...list, tasks: (list.tasks || []).map(task => 
@@ -111,11 +135,15 @@ export const useTodoApi = () => {
       showErrorToast('Failed to update task');
       throw new Error('Failed to update task');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const deleteTask = useCallback(async (listId: string, taskId: string) => {
     try {
-      await tasksApi.delete(listId, taskId);
+      if (isAuthenticated) {
+        await tasksApi.delete(listId, taskId);
+      } else {
+        await mockApi.deleteTask(listId, taskId);
+      }
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'task'
           ? { ...list, tasks: (list.tasks || []).filter(task => task.id !== taskId) }
@@ -126,11 +154,13 @@ export const useTodoApi = () => {
       showErrorToast('Failed to delete task');
       throw new Error('Failed to delete task');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const toggleTask = useCallback(async (listId: string, taskId: string) => {
     try {
-      const updatedTask = await tasksApi.toggle(listId, taskId);
+      const updatedTask = isAuthenticated 
+        ? await tasksApi.toggle(listId, taskId)
+        : await mockApi.toggleTask(listId, taskId);
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'task'
           ? { ...list, tasks: (list.tasks || []).map(task => 
@@ -145,11 +175,15 @@ export const useTodoApi = () => {
       showErrorToast('Failed to toggle task');
       throw new Error('Failed to toggle task');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const reorderTasks = useCallback(async (listId: string, taskIds: string[]) => {
     try {
-      await tasksApi.reorder(listId, taskIds);
+      if (isAuthenticated) {
+        await tasksApi.reorder(listId, taskIds);
+      } else {
+        await mockApi.reorderTasks(listId, taskIds);
+      }
       // Update local state to reflect the new order
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'task'
@@ -163,12 +197,14 @@ export const useTodoApi = () => {
       showErrorToast('Failed to reorder tasks');
       throw new Error('Failed to reorder tasks');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Shopping item operations
   const createItem = useCallback(async (listId: string, data: ShoppingItemCreate) => {
     try {
-      const newItem = await itemsApi.create(listId, data);
+      const newItem = isAuthenticated 
+        ? await itemsApi.create(listId, data)
+        : await mockApi.createItem(listId, data);
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'shopping'
           ? { ...list, items: [...(list.items || []), newItem] }
@@ -180,11 +216,13 @@ export const useTodoApi = () => {
       showErrorToast('Failed to create item');
       throw new Error('Failed to create item');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const updateItem = useCallback(async (listId: string, itemId: string, data: ShoppingItemUpdate) => {
     try {
-      const updatedItem = await itemsApi.update(listId, itemId, { ...data, list_id: listId });
+      const updatedItem = isAuthenticated 
+        ? await itemsApi.update(listId, itemId, { ...data, list_id: listId })
+        : await mockApi.updateItem(listId, itemId, { ...data, list_id: listId });
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'shopping'
           ? { ...list, items: (list.items || []).map(item => 
@@ -198,11 +236,15 @@ export const useTodoApi = () => {
       showErrorToast('Failed to update item');
       throw new Error('Failed to update item');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const deleteItem = useCallback(async (listId: string, itemId: string) => {
     try {
-      await itemsApi.delete(listId, itemId);
+      if (isAuthenticated) {
+        await itemsApi.delete(listId, itemId);
+      } else {
+        await mockApi.deleteItem(listId, itemId);
+      }
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'shopping'
           ? { ...list, items: (list.items || []).filter(item => item.id !== itemId) }
@@ -213,11 +255,13 @@ export const useTodoApi = () => {
       showErrorToast('Failed to delete item');
       throw new Error('Failed to delete item');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const toggleItem = useCallback(async (listId: string, itemId: string) => {
     try {
-      const updatedItem = await itemsApi.toggle(listId, itemId);
+      const updatedItem = isAuthenticated 
+        ? await itemsApi.toggle(listId, itemId)
+        : await mockApi.toggleItem(listId, itemId);
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'shopping'
           ? { ...list, items: (list.items || []).map(item => 
@@ -232,11 +276,15 @@ export const useTodoApi = () => {
       showErrorToast('Failed to toggle item');
       throw new Error('Failed to toggle item');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const reorderItems = useCallback(async (listId: string, itemIds: string[]) => {
     try {
-      await itemsApi.reorder(listId, itemIds);
+      if (isAuthenticated) {
+        await itemsApi.reorder(listId, itemIds);
+      } else {
+        await mockApi.reorderItems(listId, itemIds);
+      }
       // Update local state to reflect the new order
       setLists(prev => prev.map(list => 
         list.id === listId && list.type === 'shopping'
@@ -250,17 +298,19 @@ export const useTodoApi = () => {
       showErrorToast('Failed to reorder items');
       throw new Error('Failed to reorder items');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Search
   const search = useCallback(async (query: string) => {
     try {
-      return await searchApi.search(query);
+      return isAuthenticated 
+        ? await searchApi.search(query)
+        : await mockApi.search(query);
     } catch {
       showErrorToast('Failed to search');
       throw new Error('Failed to search');
     }
-  }, []);
+  }, [isAuthenticated]);
 
   return {
     lists,

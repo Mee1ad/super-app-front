@@ -8,6 +8,32 @@ import {
   getListsWithItems 
 } from './api';
 
+// Mock the auth hook
+jest.mock('@/app/auth/atoms/useAuth', () => ({
+  useAuth: jest.fn(),
+}));
+
+// Mock the mock data API
+jest.mock('./mock-data', () => ({
+  mockApi: {
+    getListsWithItems: jest.fn(),
+    createList: jest.fn(),
+    updateList: jest.fn(),
+    deleteList: jest.fn(),
+    createTask: jest.fn(),
+    updateTask: jest.fn(),
+    deleteTask: jest.fn(),
+    toggleTask: jest.fn(),
+    reorderTasks: jest.fn(),
+    createItem: jest.fn(),
+    updateItem: jest.fn(),
+    deleteItem: jest.fn(),
+    toggleItem: jest.fn(),
+    reorderItems: jest.fn(),
+    search: jest.fn(),
+  },
+}));
+
 // Mock the API modules
 jest.mock('./api', () => ({
   listsApi: {
@@ -50,9 +76,109 @@ const mockItemsApi = itemsApi as jest.Mocked<typeof itemsApi>;
 const mockSearchApi = searchApi as jest.Mocked<typeof searchApi>;
 const mockGetListsWithItems = getListsWithItems as jest.MockedFunction<typeof getListsWithItems>;
 
+// Import mocked modules
+import { useAuth } from '@/app/auth/atoms/useAuth';
+import { mockApi } from './mock-data';
+
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockMockApi = mockApi as jest.Mocked<typeof mockApi>;
+
 describe('useTodoApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default to authenticated user
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      loading: false,
+      error: null,
+      getGoogleAuthUrl: jest.fn(),
+      loginWithGoogle: jest.fn(),
+      logout: jest.fn(),
+      handleOAuthCallback: jest.fn(),
+    });
+  });
+
+  describe('authentication scenarios', () => {
+    it('should use real API when authenticated', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        loading: false,
+        error: null,
+        getGoogleAuthUrl: jest.fn(),
+        loginWithGoogle: jest.fn(),
+        logout: jest.fn(),
+        handleOAuthCallback: jest.fn(),
+      });
+
+      const mockLists = [
+        {
+          id: '1',
+          type: 'task' as const,
+          title: 'Task List',
+          variant: 'default' as const,
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+          tasks: []
+        }
+      ];
+
+      mockGetListsWithItems.mockResolvedValue(mockLists);
+
+      const { result } = renderHook(() => useTodoApi());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.lists).toEqual(mockLists);
+      expect(mockGetListsWithItems).toHaveBeenCalledTimes(1);
+      expect(mockMockApi.getListsWithItems).not.toHaveBeenCalled();
+    });
+
+    it('should use mock API when not authenticated', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        loading: false,
+        error: null,
+        getGoogleAuthUrl: jest.fn(),
+        loginWithGoogle: jest.fn(),
+        logout: jest.fn(),
+        handleOAuthCallback: jest.fn(),
+      });
+
+      const mockLists = [
+        {
+          id: 'demo-list-1',
+          type: 'task' as const,
+          title: 'My Tasks',
+          variant: 'default' as const,
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+          tasks: []
+        }
+      ];
+
+      mockMockApi.getListsWithItems.mockResolvedValue(mockLists);
+
+      const { result } = renderHook(() => useTodoApi());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.lists).toEqual(mockLists);
+      expect(mockMockApi.getListsWithItems).toHaveBeenCalledTimes(1);
+      expect(mockGetListsWithItems).not.toHaveBeenCalled();
+    });
   });
 
   describe('initialization', () => {
@@ -109,7 +235,7 @@ describe('useTodoApi', () => {
   });
 
   describe('list operations', () => {
-    it('should create a new list', async () => {
+    it('should create a new list when authenticated', async () => {
       const mockList = {
         id: '1',
         type: 'task' as const,
@@ -139,6 +265,53 @@ describe('useTodoApi', () => {
         variant: 'default',
       });
       expect(mockGetListsWithItems).toHaveBeenCalledTimes(2);
+      expect(mockMockApi.createList).not.toHaveBeenCalled();
+    });
+
+    it('should create a new list when not authenticated', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        loading: false,
+        error: null,
+        getGoogleAuthUrl: jest.fn(),
+        loginWithGoogle: jest.fn(),
+        logout: jest.fn(),
+        handleOAuthCallback: jest.fn(),
+      });
+
+      const mockList = {
+        id: 'demo-list-3',
+        type: 'task' as const,
+        title: 'New List',
+        variant: 'default' as const,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      };
+
+      mockMockApi.getListsWithItems.mockResolvedValue([]);
+      mockMockApi.createList.mockResolvedValue(mockList);
+      mockMockApi.getListsWithItems.mockResolvedValue([mockList]);
+
+      const { result } = renderHook(() => useTodoApi());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await act(async () => {
+        await result.current.createList('task', 'New List', 'default');
+      });
+
+      expect(mockMockApi.createList).toHaveBeenCalledWith({
+        type: 'task',
+        title: 'New List',
+        variant: 'default',
+      });
+      expect(mockMockApi.getListsWithItems).toHaveBeenCalledTimes(2);
+      expect(mockListsApi.create).not.toHaveBeenCalled();
     });
 
     it('should update a list', async () => {

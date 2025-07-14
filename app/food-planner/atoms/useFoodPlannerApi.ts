@@ -1,6 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { foodPlannerApi } from './api'
+import { mockFoodPlannerApi } from './mock-data'
+import { useAuth } from '@/app/auth/atoms/useAuth'
 import {
   MealType,
   FoodEntry,
@@ -18,6 +20,10 @@ export function useFoodPlannerApi() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const { user } = useAuth()
+  
+  // Use mock API for non-authenticated users, real API for authenticated users
+  const api = user ? foodPlannerApi : mockFoodPlannerApi
 
   const showError = useCallback((message: string) => {
     setError(message)
@@ -40,7 +46,7 @@ export function useFoodPlannerApi() {
     try {
       setLoading(true)
       setError(null)
-      const response = await foodPlannerApi.getMealTypes()
+      const response = await api.getMealTypes()
       setMealTypes(response.meal_types)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load meal types'
@@ -48,7 +54,7 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError])
+  }, [showError, api])
 
   // Load food entries
   const loadFoodEntries = useCallback(async (params?: {
@@ -62,7 +68,7 @@ export function useFoodPlannerApi() {
     try {
       setLoading(true)
       setError(null)
-      const response = await foodPlannerApi.getFoodEntries(params)
+      const response = await api.getFoodEntries(params)
       setFoodEntries(response.entries)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load food entries'
@@ -70,14 +76,14 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError])
+  }, [showError, api])
 
   // Create food entry
   const createFoodEntry = useCallback(async (data: FoodEntryCreate) => {
     try {
       setLoading(true)
       setError(null)
-      const newEntry = await foodPlannerApi.createFoodEntry(data)
+      const newEntry = await api.createFoodEntry(data)
       setFoodEntries(prev => [newEntry, ...prev])
       showSuccess('Food entry created successfully')
       return newEntry
@@ -88,14 +94,14 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError, showSuccess])
+  }, [showError, showSuccess, api])
 
   // Update food entry
   const updateFoodEntry = useCallback(async (id: string, data: FoodEntryUpdate) => {
     try {
       setLoading(true)
       setError(null)
-      const updatedEntry = await foodPlannerApi.updateFoodEntry(id, data)
+      const updatedEntry = await api.updateFoodEntry(id, data)
       setFoodEntries(prev => prev.map(entry => 
         entry.id === id ? updatedEntry : entry
       ))
@@ -108,14 +114,14 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError, showSuccess])
+  }, [showError, showSuccess, api])
 
   // Delete food entry
   const deleteFoodEntry = useCallback(async (id: string) => {
     try {
       setLoading(true)
       setError(null)
-      await foodPlannerApi.deleteFoodEntry(id)
+      await api.deleteFoodEntry(id)
       setFoodEntries(prev => prev.filter(entry => entry.id !== id))
       showSuccess('Food entry deleted successfully')
     } catch (err) {
@@ -125,7 +131,7 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError, showSuccess])
+  }, [showError, showSuccess, api])
 
   // Load summary
   const loadSummary = useCallback(async (params?: {
@@ -135,7 +141,7 @@ export function useFoodPlannerApi() {
     try {
       setLoading(true)
       setError(null)
-      const response = await foodPlannerApi.getFoodSummary(params)
+      const response = await api.getFoodSummary(params)
       setSummary(response)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load summary'
@@ -143,7 +149,7 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError])
+  }, [showError, api])
 
   // Load calendar data
   const loadCalendarData = useCallback(async (params?: {
@@ -153,7 +159,7 @@ export function useFoodPlannerApi() {
     try {
       setLoading(true)
       setError(null)
-      const response = await foodPlannerApi.getCalendarData(params)
+      const response = await api.getCalendarData(params)
       setCalendarData(response)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load calendar data'
@@ -161,14 +167,14 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError])
+  }, [showError, api])
 
   // Upload food image
   const uploadFoodImage = useCallback(async (file: File) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await foodPlannerApi.uploadFoodImage(file)
+      const response = await api.uploadFoodImage(file)
       showSuccess('Image uploaded successfully')
       return response
     } catch (err) {
@@ -178,7 +184,24 @@ export function useFoodPlannerApi() {
     } finally {
       setLoading(false)
     }
-  }, [showError, showSuccess])
+  }, [showError, showSuccess, api])
+
+  // Load initial data
+  useEffect(() => {
+    loadMealTypes()
+    loadFoodEntries()
+    loadSummary()
+  }, [loadMealTypes, loadFoodEntries, loadSummary])
+
+  // Clear mock data when user logs in
+  useEffect(() => {
+    if (user) {
+      setFoodEntries([])
+      setSummary(null)
+      setCalendarData(null)
+      setError(null)
+    }
+  }, [user])
 
   return {
     // State

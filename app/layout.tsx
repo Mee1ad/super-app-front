@@ -5,6 +5,7 @@ import { Sidebar } from "./shared/organisms/Sidebar";
 import { ChangelogProvider } from "@/app/shared/organisms/ChangelogProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./auth/organisms/AuthProvider";
+import { DemoBanner } from "@/components/ui/demo-banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <ChangelogProvider>
+            <DemoBanner />
             <Sidebar />
             <main className="ml-64">
               {children}
