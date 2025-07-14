@@ -15,6 +15,7 @@ export interface GoogleLoginResponse {
   user: {
     id: string
     email: string
+    username: string
     name: string
     picture?: string
   }
@@ -25,6 +26,7 @@ export interface AuthState {
   user: {
     id: string
     email: string
+    username: string
     name: string
     picture?: string
   } | null

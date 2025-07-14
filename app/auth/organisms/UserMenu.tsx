@@ -39,7 +39,7 @@ export function UserMenu() {
       >
         {/* Only show user initial or name, no image */}
         <span className="text-sm font-medium truncate">
-          {user.name || user.email || 'User'}
+          {user.username || user.name || user.email || 'User'}
         </span>
         <svg
           className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -62,7 +62,7 @@ export function UserMenu() {
           <div className="absolute right-0 bottom-12 mb-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20 animate-fade-in-up">
             <div className="p-4 border-b border-gray-100">
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-gray-900">{user.name || user.email || 'User'}</p>
+                <p className="text-sm font-medium text-gray-900">{user.username || user.name || user.email || 'User'}</p>
                 <p className="text-xs text-gray-500">{user.email}</p>
               </div>
             </div>

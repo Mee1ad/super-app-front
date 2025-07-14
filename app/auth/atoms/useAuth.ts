@@ -35,6 +35,7 @@ export function useAuth() {
           const normalizedUser = {
             id: user.id,
             email: user.email,
+            username: user.username,
             name: user.name,
             picture: user.picture
           }
@@ -110,7 +111,7 @@ export function useAuth() {
 
       toast({
         title: "Success",
-        description: `Welcome back, ${response.user.name}!`,
+        description: `Welcome back, ${response.user.username || response.user.name}!`,
       })
 
       return response
