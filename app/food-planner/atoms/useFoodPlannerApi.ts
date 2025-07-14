@@ -23,7 +23,8 @@ export function useFoodPlannerApi() {
   const { isAuthenticated, loading: authLoading } = useAuth()
   
   // Use mock API for non-authenticated users, real API for authenticated users
-  const api = isAuthenticated ? foodPlannerApi : mockFoodPlannerApi
+  // Only decide after auth loading is complete
+  const api = authLoading ? null : (isAuthenticated ? foodPlannerApi : mockFoodPlannerApi)
 
   const showError = useCallback((message: string) => {
     setError(message)
@@ -43,6 +44,7 @@ export function useFoodPlannerApi() {
 
   // Load meal types
   const loadMealTypes = useCallback(async () => {
+    if (!api) return
     try {
       setLoading(true)
       setError(null)
@@ -65,6 +67,7 @@ export function useFoodPlannerApi() {
     page?: number
     limit?: number
   }) => {
+    if (!api) return
     try {
       setLoading(true)
       setError(null)
@@ -80,6 +83,7 @@ export function useFoodPlannerApi() {
 
   // Create food entry
   const createFoodEntry = useCallback(async (data: FoodEntryCreate) => {
+    if (!api) throw new Error('API not ready')
     try {
       setLoading(true)
       setError(null)
@@ -98,6 +102,7 @@ export function useFoodPlannerApi() {
 
   // Update food entry
   const updateFoodEntry = useCallback(async (id: string, data: FoodEntryUpdate) => {
+    if (!api) throw new Error('API not ready')
     try {
       setLoading(true)
       setError(null)
@@ -118,6 +123,7 @@ export function useFoodPlannerApi() {
 
   // Delete food entry
   const deleteFoodEntry = useCallback(async (id: string) => {
+    if (!api) throw new Error('API not ready')
     try {
       setLoading(true)
       setError(null)
@@ -138,6 +144,7 @@ export function useFoodPlannerApi() {
     start_date?: string
     end_date?: string
   }) => {
+    if (!api) return
     try {
       setLoading(true)
       setError(null)
@@ -156,6 +163,7 @@ export function useFoodPlannerApi() {
     start_date?: string
     end_date?: string
   }) => {
+    if (!api) return
     try {
       setLoading(true)
       setError(null)
@@ -171,6 +179,7 @@ export function useFoodPlannerApi() {
 
   // Upload food image
   const uploadFoodImage = useCallback(async (file: File) => {
+    if (!api) throw new Error('API not ready')
     try {
       setLoading(true)
       setError(null)
@@ -188,12 +197,12 @@ export function useFoodPlannerApi() {
 
   // Load initial data - wait for auth loading to complete first
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && api) {
       loadMealTypes()
       loadFoodEntries()
       loadSummary()
     }
-  }, [loadMealTypes, loadFoodEntries, loadSummary, authLoading])
+  }, [loadMealTypes, loadFoodEntries, loadSummary, authLoading, api])
 
   // Clear mock data when user logs in
   useEffect(() => {
