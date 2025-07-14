@@ -29,7 +29,7 @@ describe('ideasApi', () => {
 
       const result = await ideasApi.getCategories()
 
-      expect(fetch).toHaveBeenCalledWith('/api/categories')
+      expect(fetch).toHaveBeenCalledWith('/api/categories', { headers: {} })
       expect(result).toEqual(mockCategories)
     })
 
@@ -90,7 +90,7 @@ describe('ideasApi', () => {
 
       const result = await ideasApi.getIdeas()
 
-      expect(fetch).toHaveBeenCalledWith('/api/ideas')
+      expect(fetch).toHaveBeenCalledWith('/api/ideas', { headers: {} })
       expect(result).toEqual(mockResponse)
     })
 
@@ -112,7 +112,7 @@ describe('ideasApi', () => {
         limit: 10,
       })
 
-      expect(fetch).toHaveBeenCalledWith('/api/ideas?search=test&category=1&page=2&limit=10')
+      expect(fetch).toHaveBeenCalledWith('/api/ideas?search=test&category=1&page=2&limit=10', { headers: {} })
     })
   })
 
@@ -140,11 +140,7 @@ describe('ideasApi', () => {
 
       const result = await ideasApi.createIdea(newIdea)
 
-      expect(fetch).toHaveBeenCalledWith('/api/ideas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newIdea),
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/ideas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newIdea) })
       expect(result).toEqual(mockResponse)
       expect(toast).toHaveBeenCalledWith({
         title: 'Idea created',
@@ -176,11 +172,7 @@ describe('ideasApi', () => {
 
       const result = await ideasApi.updateIdea('1', updateData)
 
-      expect(fetch).toHaveBeenCalledWith('/api/ideas/1', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData),
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/ideas/1', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updateData) })
       expect(result).toEqual(mockResponse)
       expect(toast).toHaveBeenCalledWith({
         title: 'Idea updated',
@@ -198,9 +190,7 @@ describe('ideasApi', () => {
 
       await ideasApi.deleteIdea('1')
 
-      expect(fetch).toHaveBeenCalledWith('/api/ideas/1', {
-        method: 'DELETE',
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/ideas/1', { method: 'DELETE', headers: {} })
       expect(toast).toHaveBeenCalledWith({
         title: 'Idea deleted',
         description: 'Your idea has been successfully deleted',

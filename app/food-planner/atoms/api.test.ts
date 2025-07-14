@@ -70,7 +70,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getMealTypes()
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/meal-types')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/meal-types', { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -84,7 +84,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodEntries()
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should filter entries by search term', async () => {
@@ -96,7 +96,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodEntries({ search: 'oatmeal' })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?search=oatmeal')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?search=oatmeal', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should filter entries by category', async () => {
@@ -108,7 +108,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodEntries({ category: 'planned' })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?category=planned')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?category=planned', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should filter entries by meal type', async () => {
@@ -120,7 +120,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodEntries({ meal_type: 'breakfast' })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?meal_type=breakfast')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?meal_type=breakfast', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should apply pagination correctly', async () => {
@@ -132,7 +132,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodEntries({ page: 1, limit: 1 })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?page=1&limit=1')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries?page=1&limit=1', { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -145,7 +145,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodEntry('550e8400-e29b-41d4-a716-446655440000')
       expect(result).toEqual(mockFoodEntries[0])
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/550e8400-e29b-41d4-a716-446655440000')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/550e8400-e29b-41d4-a716-446655440000', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should throw error for non-existent entry', async () => {
@@ -188,11 +188,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.createFoodEntry(newEntry)
       expect(result).toEqual(createdEntry)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry)
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newEntry) })
     })
   })
 
@@ -216,11 +212,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.updateFoodEntry('550e8400-e29b-41d4-a716-446655440000', updateData)
       expect(result).toEqual(updatedEntry)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/550e8400-e29b-41d4-a716-446655440000', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData)
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/550e8400-e29b-41d4-a716-446655440000', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updateData) })
     })
 
     it('should throw error for non-existent entry', async () => {
@@ -248,9 +240,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.deleteFoodEntry('550e8400-e29b-41d4-a716-446655440000')
       expect(result).toEqual(deleteResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/550e8400-e29b-41d4-a716-446655440000', {
-        method: 'DELETE'
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/550e8400-e29b-41d4-a716-446655440000', { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should throw error for non-existent entry', async () => {
@@ -279,7 +269,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getFoodSummary()
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/summary')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/summary', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should return food summary with date range', async () => {
@@ -299,7 +289,7 @@ describe('foodPlannerApi', () => {
         end_date: '2024-12-31'
       })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/summary?start_date=2024-12-01&end_date=2024-12-31')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/summary?start_date=2024-12-01&end_date=2024-12-31', { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -322,7 +312,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.getCalendarData()
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/calendar')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/calendar', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should return calendar data with date range', async () => {
@@ -346,7 +336,7 @@ describe('foodPlannerApi', () => {
         end_date: '2024-12-31'
       })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/calendar?start_date=2024-12-01&end_date=2024-12-31')
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/entries/calendar?start_date=2024-12-01&end_date=2024-12-31', { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -362,10 +352,7 @@ describe('foodPlannerApi', () => {
 
       const result = await foodPlannerApi.uploadFoodImage(file)
       expect(result).toEqual(uploadResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/food-planner/upload-food-image', {
-        method: 'POST',
-        body: expect.any(FormData)
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/food-planner/upload-food-image', { method: 'POST', headers: {}, body: expect.any(FormData) })
     })
 
     it('should reject invalid file types', async () => {

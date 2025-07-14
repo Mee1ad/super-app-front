@@ -8,12 +8,18 @@ import {
   ImageUploadResponse,
   PaginationMeta 
 } from './types'
+import { getAccessToken } from '@/lib/auth-token'
 
 // API functions
 export const diaryApi = {
   // Get all moods
   async getMoods(): Promise<MoodsResponse> {
-    const response = await fetch('/api/diary/moods')
+    const response = await fetch('/api/diary/moods', {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     if (!response.ok) {
       throw new Error('Failed to fetch moods')
     }
@@ -34,7 +40,12 @@ export const diaryApi = {
     if (params?.limit) searchParams.append('limit', params.limit.toString())
     
     const url = `/api/diary/entries${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     
     if (!response.ok) {
       throw new Error('Failed to fetch diary entries')
@@ -45,7 +56,12 @@ export const diaryApi = {
 
   // Get single diary entry
   async getDiaryEntry(id: string): Promise<DiaryEntry> {
-    const response = await fetch(`/api/diary/entries/${id}`)
+    const response = await fetch(`/api/diary/entries/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     if (!response.ok) {
       throw new Error('Diary entry not found')
     }
@@ -58,6 +74,7 @@ export const diaryApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
       },
       body: JSON.stringify(data),
     })
@@ -75,6 +92,7 @@ export const diaryApi = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
       },
       body: JSON.stringify(data),
     })
@@ -90,6 +108,10 @@ export const diaryApi = {
   async deleteDiaryEntry(id: string): Promise<{ message: string }> {
     const response = await fetch(`/api/diary/entries/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
     })
     
     if (!response.ok) {
@@ -107,6 +129,9 @@ export const diaryApi = {
     const response = await fetch('/api/diary/upload', {
       method: 'POST',
       body: formData,
+      headers: {
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
     })
     
     if (!response.ok) {

@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// API base URL - adjust based on environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+function authHeaders(request: NextRequest): HeadersInit {
+  const authHeader = request.headers.get('authorization')
+  return authHeader ? { Authorization: authHeader } : {}
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -29,12 +37,25 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // In a real app, you would save the file to a storage service
-    // For now, we'll generate a mock URL
-    const fileName = `${Date.now()}-${file.name}`
-    const url = `/static/uploads/food/${fileName}`
+    // Forward the file to the backend API
+    const backendFormData = new FormData()
+    backendFormData.append('file', file)
     
-    return NextResponse.json({ url })
+    const response = await fetch(`${API_BASE_URL}/api/v1/food-planner/upload-food-image`, {
+      method: 'POST',
+      body: backendFormData,
+      headers: {
+        ...authHeaders(request)
+      }
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || 'Failed to upload food image')
+    }
+    
+    const result = await response.json()
+    return NextResponse.json(result)
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to upload food image' },

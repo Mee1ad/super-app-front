@@ -60,7 +60,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getMoods()
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/moods')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/moods', { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -74,7 +74,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getDiaryEntries()
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should filter entries by search term', async () => {
@@ -86,7 +86,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getDiaryEntries({ search: 'great' })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?search=great')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?search=great', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should filter entries by mood', async () => {
@@ -98,7 +98,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getDiaryEntries({ mood: 'happy' })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?mood=happy')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?mood=happy', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should apply pagination correctly', async () => {
@@ -110,7 +110,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getDiaryEntries({ page: 1, limit: 1 })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?page=1&limit=1')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?page=1&limit=1', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should respect maximum limit', async () => {
@@ -122,7 +122,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getDiaryEntries({ limit: 150 })
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?limit=150')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries?limit=150', { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -135,7 +135,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.getDiaryEntry('550e8400-e29b-41d4-a716-446655440000')
       expect(result).toEqual(mockEntries[0])
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries/550e8400-e29b-41d4-a716-446655440000')
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries/550e8400-e29b-41d4-a716-446655440000', { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should throw error for non-existent entry', async () => {
@@ -175,11 +175,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.createDiaryEntry(newEntry)
       expect(result).toEqual(createdEntry)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry)
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newEntry) })
     })
 
     it('should use current date when no date is provided', async () => {
@@ -258,11 +254,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.updateDiaryEntry('550e8400-e29b-41d4-a716-446655440000', updateData)
       expect(result).toEqual(updatedEntry)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries/550e8400-e29b-41d4-a716-446655440000', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData)
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries/550e8400-e29b-41d4-a716-446655440000', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updateData) })
     })
 
     it('should throw error for non-existent entry', async () => {
@@ -290,9 +282,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.deleteDiaryEntry('550e8400-e29b-41d4-a716-446655440000')
       expect(result).toEqual(deleteResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/entries/550e8400-e29b-41d4-a716-446655440000', {
-        method: 'DELETE'
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/diary/entries/550e8400-e29b-41d4-a716-446655440000', { method: 'DELETE', headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should throw error for non-existent entry', async () => {
@@ -318,10 +308,7 @@ describe('diaryApi', () => {
 
       const result = await diaryApi.uploadImage(file)
       expect(result).toEqual(uploadResponse)
-      expect(fetch).toHaveBeenCalledWith('/api/diary/upload', {
-        method: 'POST',
-        body: expect.any(FormData)
-      })
+      expect(fetch).toHaveBeenCalledWith('/api/diary/upload', { method: 'POST', headers: {}, body: expect.any(FormData) })
     })
 
     it('should reject invalid file types', async () => {

@@ -10,12 +10,18 @@ import {
   ImageUploadResponse,
   PaginationMeta
 } from './types'
+import { getAccessToken } from '@/lib/auth-token'
 
 // API functions
 export const foodPlannerApi = {
   // Get all meal types
   async getMealTypes(): Promise<MealTypesResponse> {
-    const response = await fetch('/api/food-planner/meal-types')
+    const response = await fetch('/api/food-planner/meal-types', {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     if (!response.ok) {
       throw new Error('Failed to fetch meal types')
     }
@@ -40,7 +46,12 @@ export const foodPlannerApi = {
     if (params?.limit) searchParams.append('limit', params.limit.toString())
     
     const url = `/api/food-planner/entries${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     
     if (!response.ok) {
       throw new Error('Failed to fetch food entries')
@@ -51,7 +62,12 @@ export const foodPlannerApi = {
 
   // Get single food entry
   async getFoodEntry(id: string): Promise<FoodEntry> {
-    const response = await fetch(`/api/food-planner/entries/${id}`)
+    const response = await fetch(`/api/food-planner/entries/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     if (!response.ok) {
       throw new Error('Food entry not found')
     }
@@ -64,6 +80,7 @@ export const foodPlannerApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
       },
       body: JSON.stringify(data),
     })
@@ -81,6 +98,7 @@ export const foodPlannerApi = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
       },
       body: JSON.stringify(data),
     })
@@ -96,6 +114,10 @@ export const foodPlannerApi = {
   async deleteFoodEntry(id: string): Promise<{ message: string }> {
     const response = await fetch(`/api/food-planner/entries/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
     })
     
     if (!response.ok) {
@@ -115,7 +137,12 @@ export const foodPlannerApi = {
     if (params?.end_date) searchParams.append('end_date', params.end_date)
     
     const url = `/api/food-planner/entries/summary${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     
     if (!response.ok) {
       throw new Error('Failed to fetch food summary')
@@ -134,7 +161,12 @@ export const foodPlannerApi = {
     if (params?.end_date) searchParams.append('end_date', params.end_date)
     
     const url = `/api/food-planner/entries/calendar${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
+    })
     
     if (!response.ok) {
       throw new Error('Failed to fetch calendar data')
@@ -151,6 +183,9 @@ export const foodPlannerApi = {
     const response = await fetch('/api/food-planner/upload-food-image', {
       method: 'POST',
       body: formData,
+      headers: {
+        ...(getAccessToken() && { 'Authorization': `Bearer ${getAccessToken()}` })
+      }
     })
     
     if (!response.ok) {

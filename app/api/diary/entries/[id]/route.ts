@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DiaryEntry, DiaryEntryUpdate } from '@/app/diary/atoms/types'
-import { diaryEntries } from '../../data'
+
+// API base URL - adjust based on environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+function authHeaders(request: NextRequest): HeadersInit {
+  const authHeader = request.headers.get('authorization')
+  return authHeader ? { Authorization: authHeader } : {}
+}
 
 export async function GET(
   request: NextRequest,
@@ -8,13 +15,25 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const entry = diaryEntries.find(e => e.id === id)
-    if (!entry) {
-      return NextResponse.json(
-        { error: 'Diary entry not found' },
-        { status: 404 }
-      )
+    
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary/entries/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(request)
+      }
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: 'Diary entry not found' },
+          { status: 404 }
+        )
+      }
+      throw new Error('Failed to fetch diary entry')
     }
+    
+    const entry = await response.json()
     return NextResponse.json(entry)
   } catch (error) {
     return NextResponse.json(
@@ -32,21 +51,26 @@ export async function PUT(
     const data: DiaryEntryUpdate = await request.json()
     const { id } = await params
     
-    const entryIndex = diaryEntries.findIndex(e => e.id === id)
-    if (entryIndex === -1) {
-      return NextResponse.json(
-        { error: 'Diary entry not found' },
-        { status: 404 }
-      )
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary/entries/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(request)
+      },
+      body: JSON.stringify(data)
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: 'Diary entry not found' },
+          { status: 404 }
+        )
+      }
+      throw new Error('Failed to update diary entry')
     }
     
-    const updatedEntry: DiaryEntry = {
-      ...diaryEntries[entryIndex],
-      ...data,
-      updated_at: new Date().toISOString()
-    }
-    
-    diaryEntries[entryIndex] = updatedEntry
+    const updatedEntry = await response.json()
     return NextResponse.json(updatedEntry)
   } catch (error) {
     return NextResponse.json(
@@ -62,16 +86,27 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const entryIndex = diaryEntries.findIndex(e => e.id === id)
-    if (entryIndex === -1) {
-      return NextResponse.json(
-        { error: 'Diary entry not found' },
-        { status: 404 }
-      )
+    
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary/entries/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(request)
+      }
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: 'Diary entry not found' },
+          { status: 404 }
+        )
+      }
+      throw new Error('Failed to delete diary entry')
     }
     
-    diaryEntries.splice(entryIndex, 1)
-    return NextResponse.json({ message: "Diary entry deleted successfully" })
+    const result = await response.json()
+    return NextResponse.json(result)
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to delete diary entry' },

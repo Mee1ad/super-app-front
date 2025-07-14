@@ -1,47 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DiaryEntry, DiaryEntryCreate, PaginationMeta } from '@/app/diary/atoms/types'
-import { diaryEntries, generateId } from '../data'
+
+// API base URL - adjust based on environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+function authHeaders(request: NextRequest): HeadersInit {
+  const authHeader = request.headers.get('authorization')
+  return authHeader ? { Authorization: authHeader } : {}
+}
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
     const mood = searchParams.get('mood')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
+    const page = searchParams.get('page')
+    const limit = searchParams.get('limit')
     
-    let filteredEntries = [...diaryEntries]
+    // Build query string for backend API
+    const queryParams = new URLSearchParams()
+    if (search) queryParams.append('search', search)
+    if (mood) queryParams.append('mood', mood)
+    if (page) queryParams.append('page', page)
+    if (limit) queryParams.append('limit', limit)
     
-    // Apply search filter
-    if (search) {
-      const searchTerm = search.toLowerCase()
-      filteredEntries = filteredEntries.filter(entry =>
-        entry.title.toLowerCase().includes(searchTerm) ||
-        entry.content.toLowerCase().includes(searchTerm)
-      )
-    }
+    const url = `${API_BASE_URL}/api/v1/diary/entries${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
     
-    // Apply mood filter
-    if (mood) {
-      filteredEntries = filteredEntries.filter(entry => entry.mood === mood)
-    }
-    
-    // Apply pagination
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedEntries = filteredEntries.slice(startIndex, endIndex)
-    
-    const meta: PaginationMeta = {
-      total: filteredEntries.length,
-      page,
-      limit,
-      pages: Math.ceil(filteredEntries.length / limit)
-    }
-    
-    return NextResponse.json({
-      entries: paginatedEntries,
-      meta
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(request)
+      }
     })
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch diary entries')
+    }
+    
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch diary entries' },
@@ -54,20 +51,20 @@ export async function POST(request: NextRequest) {
   try {
     const data: DiaryEntryCreate = await request.json()
     
-    const now = new Date().toISOString()
-    const newEntry: DiaryEntry = {
-      id: generateId(),
-      title: data.title,
-      content: data.content,
-      mood: data.mood,
-      date: data.date || new Date().toISOString().split('T')[0],
-      images: data.images || [],
-      created_at: now,
-      updated_at: now
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary/entries`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(request)
+      },
+      body: JSON.stringify(data)
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to create diary entry')
     }
     
-    diaryEntries.unshift(newEntry)
-    
+    const newEntry = await response.json()
     return NextResponse.json(newEntry, { status: 201 })
   } catch (error) {
     return NextResponse.json(

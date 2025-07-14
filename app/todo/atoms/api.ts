@@ -12,6 +12,7 @@ import {
   ListWithItems,
 } from './types';
 import { handleApiError } from '@/lib/error-handler';
+import { getAccessToken } from '@/lib/auth-token';
 
 // Use environment variable for API base URL, fallback to localhost for development
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -21,6 +22,11 @@ class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+function authHeaders(): HeadersInit {
+  const token = getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 async function apiRequest<T>(
@@ -33,8 +39,9 @@ async function apiRequest<T>(
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
-      },
+        ...authHeaders(),
+        ...(options.headers || {})
+      } as HeadersInit,
       ...options,
     });
 

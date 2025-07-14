@@ -26,7 +26,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-30 flex flex-col p-6 border-r border-gray-200">

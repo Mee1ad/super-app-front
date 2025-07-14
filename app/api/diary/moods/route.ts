@@ -1,40 +1,28 @@
-import { NextResponse } from 'next/server'
-import { Mood } from '@/app/diary/atoms/types'
+import { NextRequest, NextResponse } from 'next/server'
 
-const moods: Mood[] = [
-  {
-    id: "happy",
-    name: "Happy",
-    emoji: "😊",
-    color: "#4CAF50",
-    created_at: "2024-12-01T10:00:00Z"
-  },
-  {
-    id: "sad",
-    name: "Sad",
-    emoji: "😢",
-    color: "#2196F3",
-    created_at: "2024-12-01T10:00:00Z"
-  },
-  {
-    id: "angry",
-    name: "Angry",
-    emoji: "😠",
-    color: "#F44336",
-    created_at: "2024-12-01T10:00:00Z"
-  },
-  {
-    id: "calm",
-    name: "Calm",
-    emoji: "😌",
-    color: "#9C27B0",
-    created_at: "2024-12-01T10:00:00Z"
-  }
-]
+// API base URL - adjust based on environment
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-export async function GET() {
+function authHeaders(request: NextRequest): HeadersInit {
+  const authHeader = request.headers.get('authorization')
+  return authHeader ? { Authorization: authHeader } : {}
+}
+
+export async function GET(request: NextRequest) {
   try {
-    return NextResponse.json({ moods })
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary/moods`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(request)
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch moods')
+    }
+    
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch moods' },

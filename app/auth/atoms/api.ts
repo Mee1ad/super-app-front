@@ -1,7 +1,13 @@
 import { GoogleAuthUrlResponse, GoogleLoginRequest, GoogleLoginResponse } from './types'
+import { getAccessToken } from '@/lib/auth-token'
 
 // API base URL - adjust based on environment
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+function authHeaders(): HeadersInit {
+  const token = getAccessToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export const authApi = {
   // Get Google OAuth URL
@@ -19,7 +25,7 @@ export const authApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      },
+      } as HeadersInit,
       body: JSON.stringify({ code } as GoogleLoginRequest),
     })
     
@@ -28,6 +34,19 @@ export const authApi = {
       throw new Error(errorData.error || 'Failed to login with Google')
     }
     
+    return response.json()
+  },
+
+  // Example of a protected endpoint:
+  async getProfile(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile`, {
+      headers: {
+        ...authHeaders()
+      } as HeadersInit
+    })
+    if (!response.ok) {
+      throw new Error('Failed to fetch profile')
+    }
     return response.json()
   }
 } 

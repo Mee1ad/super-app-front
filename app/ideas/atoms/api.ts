@@ -8,6 +8,7 @@ import {
   IdeasResponse, 
   DeleteResponse 
 } from './types'
+import { getAccessToken } from '@/lib/auth-token'
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000/api' : '/api'
 
@@ -42,11 +43,20 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json()
 }
 
+function authHeaders(): HeadersInit {
+  const token = getAccessToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 export const ideasApi = {
   // Categories
   async getCategories(): Promise<Category[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/categories`)
+      const response = await fetch(`${API_BASE_URL}/categories`, {
+        headers: {
+          ...authHeaders()
+        } as HeadersInit
+      })
       const data: CategoriesResponse = await handleResponse(response)
       return data.categories
     } catch (error) {
@@ -82,7 +92,11 @@ export const ideasApi = {
       if (params?.limit) searchParams.append('limit', params.limit.toString())
 
       const url = `${API_BASE_URL}/ideas${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        headers: {
+          ...authHeaders()
+        } as HeadersInit
+      })
       const data: IdeasResponse = await handleResponse(response)
       
       return {
@@ -109,7 +123,11 @@ export const ideasApi = {
 
   async getIdea(id: string): Promise<Idea> {
     try {
-      const response = await fetch(`${API_BASE_URL}/ideas/${id}`)
+      const response = await fetch(`${API_BASE_URL}/ideas/${id}`, {
+        headers: {
+          ...authHeaders()
+        } as HeadersInit
+      })
       return await handleResponse(response)
     } catch (error) {
       if (error instanceof ApiError) {
@@ -135,6 +153,7 @@ export const ideasApi = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders()
         },
         body: JSON.stringify(idea),
       })
@@ -171,6 +190,7 @@ export const ideasApi = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders()
         },
         body: JSON.stringify(idea),
       })
@@ -205,6 +225,9 @@ export const ideasApi = {
     try {
       const response = await fetch(`${API_BASE_URL}/ideas/${id}`, {
         method: 'DELETE',
+        headers: {
+          ...authHeaders()
+        } as HeadersInit
       })
       
       await handleResponse<DeleteResponse>(response)
