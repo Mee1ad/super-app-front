@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "./shared/organisms/Sidebar";
 import { ChangelogProvider } from "@/app/shared/organisms/ChangelogProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "./auth/organisms/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,12 +31,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ChangelogProvider>
-          <Sidebar />
-          <main className="ml-64">
-            {children}
-          </main>
-        </ChangelogProvider>
+        <AuthProvider>
+          <ChangelogProvider>
+            <Sidebar />
+            <main className="ml-64">
+              {children}
+            </main>
+          </ChangelogProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

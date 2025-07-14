@@ -1,7 +1,7 @@
 import { DiaryEntry } from '@/app/diary/atoms/types'
 
 // Shared in-memory storage for all diary API routes
-export let diaryEntries: DiaryEntry[] = [
+export const diaryEntries: DiaryEntry[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440000",
     title: "My First Entry",

@@ -4,10 +4,11 @@ import { foodEntries, mealTypes } from '../../data'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const entry = foodEntries.find(e => e.id === params.id)
+    const { id } = await params
+    const entry = foodEntries.find(e => e.id === id)
     if (!entry) {
       return NextResponse.json(
         { error: 'Food entry not found' },
@@ -25,12 +26,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const data: FoodEntryUpdate = await request.json()
+    const { id } = await params
     
-    const entryIndex = foodEntries.findIndex(e => e.id === params.id)
+    const entryIndex = foodEntries.findIndex(e => e.id === id)
     if (entryIndex === -1) {
       return NextResponse.json(
         { error: 'Food entry not found' },
@@ -70,10 +72,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const entryIndex = foodEntries.findIndex(e => e.id === params.id)
+    const { id } = await params
+    const entryIndex = foodEntries.findIndex(e => e.id === id)
     if (entryIndex === -1) {
       return NextResponse.json(
         { error: 'Food entry not found' },

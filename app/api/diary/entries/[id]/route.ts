@@ -4,10 +4,11 @@ import { diaryEntries } from '../../data'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const entry = diaryEntries.find(e => e.id === params.id)
+    const { id } = await params
+    const entry = diaryEntries.find(e => e.id === id)
     if (!entry) {
       return NextResponse.json(
         { error: 'Diary entry not found' },
@@ -25,12 +26,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const data: DiaryEntryUpdate = await request.json()
+    const { id } = await params
     
-    const entryIndex = diaryEntries.findIndex(e => e.id === params.id)
+    const entryIndex = diaryEntries.findIndex(e => e.id === id)
     if (entryIndex === -1) {
       return NextResponse.json(
         { error: 'Diary entry not found' },
@@ -56,10 +58,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const entryIndex = diaryEntries.findIndex(e => e.id === params.id)
+    const { id } = await params
+    const entryIndex = diaryEntries.findIndex(e => e.id === id)
     if (entryIndex === -1) {
       return NextResponse.json(
         { error: 'Diary entry not found' },
