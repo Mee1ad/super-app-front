@@ -47,7 +47,7 @@ export function useIdeasApi(): UseIdeasApiReturn {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   
   // Use mock API for non-authenticated users, real API for authenticated users
   const api = isAuthenticated ? ideasApi : mockIdeasApi
@@ -137,15 +137,17 @@ export function useIdeasApi(): UseIdeasApiReturn {
     }
   }, [api])
 
-  // Load initial data
+  // Load initial data - wait for auth loading to complete first
   useEffect(() => {
-    loadCategories()
-    loadIdeas()
-  }, [loadCategories, loadIdeas])
+    if (!authLoading) {
+      loadCategories()
+      loadIdeas()
+    }
+  }, [loadCategories, loadIdeas, authLoading])
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
       setIdeas([])
       setMeta(null)
       setError(null)
@@ -153,7 +155,7 @@ export function useIdeasApi(): UseIdeasApiReturn {
       loadCategories()
       loadIdeas()
     }
-  }, [isAuthenticated, loadCategories, loadIdeas])
+  }, [isAuthenticated, authLoading, loadCategories, loadIdeas])
 
   return {
     ideas,

@@ -23,7 +23,7 @@ import { mockApi } from './mock-data';
 export const useTodoApi = () => {
   const [lists, setLists] = useState<ListWithItems[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Load all lists with their items
   const loadLists = useCallback(async () => {
@@ -40,19 +40,21 @@ export const useTodoApi = () => {
     }
   }, [isAuthenticated]);
 
-  // Initialize on mount
+  // Initialize on mount - wait for auth loading to complete first
   useEffect(() => {
-    loadLists();
-  }, [loadLists]);
+    if (!authLoading) {
+      loadLists();
+    }
+  }, [loadLists, authLoading]);
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
       setLists([]);
       // Reload data from real API when user becomes authenticated
       loadLists();
     }
-  }, [isAuthenticated, loadLists]);
+  }, [isAuthenticated, authLoading, loadLists]);
 
   // List operations
   const createList = useCallback(async (type: "task" | "shopping", title: string, variant: Variant = "default") => {

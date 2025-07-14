@@ -22,7 +22,7 @@ export const useDiaryApi = () => {
   } | null>(null)
   
   const { toast } = useToast()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
 
   // Load moods
   const loadMoods = useCallback(async () => {
@@ -174,15 +174,17 @@ export const useDiaryApi = () => {
     }
   }, [toast])
 
-  // Load initial data
+  // Load initial data - wait for auth loading to complete first
   useEffect(() => {
-    loadMoods()
-    loadEntries()
-  }, [loadMoods, loadEntries])
+    if (!authLoading) {
+      loadMoods()
+      loadEntries()
+    }
+  }, [loadMoods, loadEntries, authLoading])
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
       setEntries([])
       setMeta(null)
       setError(null)
@@ -190,7 +192,7 @@ export const useDiaryApi = () => {
       loadMoods()
       loadEntries()
     }
-  }, [isAuthenticated, loadMoods, loadEntries])
+  }, [isAuthenticated, authLoading, loadMoods, loadEntries])
 
   return {
     moods,
