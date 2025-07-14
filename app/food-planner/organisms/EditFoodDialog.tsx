@@ -21,35 +21,35 @@ interface EditFoodDialogProps {
 export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes }: EditFoodDialogProps) {
   const [name, setName] = useState(entry.name)
   const [category, setCategory] = useState<'planned' | 'eaten'>(entry.category)
-  const [mealType, setMealType] = useState<FoodEntry['mealType']>(entry.mealType)
+  const [mealTypeId, setMealTypeId] = useState(entry.meal_type_id)
   const [time, setTime] = useState(entry.time)
   const [comment, setComment] = useState(entry.comment || '')
   const [image, setImage] = useState<string>(entry.image || '')
-  const [followedPlan, setFollowedPlan] = useState(entry.followedPlan || false)
+  const [followedPlan, setFollowedPlan] = useState(entry.followed_plan || false)
 
   // Reset form when entry changes
   useEffect(() => {
     setName(entry.name)
     setCategory(entry.category)
-    setMealType(entry.mealType)
+    setMealTypeId(entry.meal_type_id)
     setTime(entry.time)
     setComment(entry.comment || '')
     setImage(entry.image || '')
-    setFollowedPlan(entry.followedPlan || false)
+    setFollowedPlan(entry.followed_plan || false)
   }, [entry])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !mealType || !time) return
+    if (!name.trim() || !mealTypeId || !time) return
 
     onUpdate(entry.id, {
       name: name.trim(),
       category,
-      mealType,
+      meal_type_id: mealTypeId,
       time,
       comment: comment.trim() || undefined,
       image: image || undefined,
-      followedPlan: category === 'eaten' ? followedPlan : undefined,
+      followed_plan: category === 'eaten' ? followedPlan : undefined,
     })
 
     onOpenChange(false)
@@ -95,14 +95,14 @@ export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes 
               <label htmlFor="edit-mealType" className="block text-sm font-medium mb-2">
                 Meal Type *
               </label>
-              <Select value={mealType} onValueChange={value => setMealType(value as FoodEntry['mealType'])} required>
+              <Select value={mealTypeId} onValueChange={setMealTypeId} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select meal type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mealTypes.map(meal => (
+                  {mealTypes?.map(meal => (
                     <SelectItem key={meal.id} value={meal.id}>
-                      {meal.emoji} {meal.name}
+                      {meal?.emoji} {meal?.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -163,7 +163,7 @@ export function EditFoodDialog({ open, onOpenChange, entry, onUpdate, mealTypes 
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || !mealType || !time}>
+            <Button type="submit" disabled={!name.trim() || !mealTypeId || !time}>
               Save Changes
             </Button>
           </div>

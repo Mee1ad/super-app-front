@@ -32,7 +32,7 @@ export function MealPlanView({ entries, mealTypes, onDelete, onUpdate }: MealPla
   }
 
   const getMealType = (mealTypeId: string) => {
-    return mealTypes.find(meal => meal.id === mealTypeId)!
+    return mealTypes.find(meal => meal.id === mealTypeId)
   }
 
   if (entries.length === 0) {
@@ -62,7 +62,7 @@ export function MealPlanView({ entries, mealTypes, onDelete, onUpdate }: MealPla
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                    <span className="text-2xl">{mealType.emoji}</span>
+                    <span className="text-2xl">{mealType?.emoji || '🍽️'}</span>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg mb-1">{entry.name}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -71,7 +71,7 @@ export function MealPlanView({ entries, mealTypes, onDelete, onUpdate }: MealPla
                         <span className="text-xs">•</span>
                         {formatDate(entry.date)}
                         <span className="text-xs">•</span>
-                        {mealType.name}
+                        {mealType?.name || 'Unknown Meal'}
                       </div>
                       {entry.comment && (
                         <p className="text-muted-foreground text-sm leading-relaxed">

@@ -157,9 +157,9 @@ export default function FoodPlannerPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Meals</SelectItem>
-            {mealTypes.map(mealType => (
+            {mealTypes?.map(mealType => (
               <SelectItem key={mealType.id} value={mealType.id}>
-                {mealType.emoji} {mealType.name}
+                {mealType?.emoji} {mealType?.name}
               </SelectItem>
             ))}
           </SelectContent>

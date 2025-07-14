@@ -109,9 +109,9 @@ export function AddFoodDialog({ open, onOpenChange, onSubmit, mealTypes }: AddFo
                   <SelectValue placeholder="Select meal type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mealTypes.map(meal => (
+                  {mealTypes?.map(meal => (
                     <SelectItem key={meal.id} value={meal.id}>
-                      {meal.emoji} {meal.name}
+                      {meal?.emoji} {meal?.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
