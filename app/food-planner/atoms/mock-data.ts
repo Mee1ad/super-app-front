@@ -1,5 +1,4 @@
 import { 
-  MealType, 
   FoodEntry, 
   FoodEntryCreate, 
   FoodEntryUpdate, 
@@ -13,6 +12,7 @@ import {
 import { mockMealTypes, mockFoodEntries, generateId } from '@/app/api/food-planner/mock-data'
 
 // Mock data storage for demo mode
+// eslint-disable-next-line prefer-const
 let demoFoodEntries = [...mockFoodEntries]
 
 // Mock API functions for demo mode

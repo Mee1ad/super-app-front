@@ -3,13 +3,12 @@ import {
   Idea, 
   IdeaCreate, 
   IdeaUpdate, 
-  CategoriesResponse, 
-  IdeasResponse,
-  DeleteResponse
+  IdeasResponse
 } from './types'
 import { mockCategories, mockIdeas, generateId } from '@/app/api/ideas/mock-data'
 
 // Mock data storage for demo mode
+// eslint-disable-next-line prefer-const
 let demoIdeas = [...mockIdeas]
 
 // Mock API functions for demo mode
