@@ -80,12 +80,9 @@ class ChangelogApi {
       }
 
       return await response.json();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
+    } catch {
       throw new ApiError(
-        error instanceof Error ? error.message : 'Network error',
+        'Network error',
         0
       );
     }
@@ -113,7 +110,7 @@ class ChangelogApi {
       console.log('Changelog API request:', endpoint);
       
       return await this.request<ChangelogListResponse>(endpoint);
-    } catch (error) {
+    } catch {
       // Fallback to mock data if API is not available
       console.log('API not available, using mock data');
       
@@ -226,7 +223,7 @@ class ChangelogApi {
   async getAvailableVersions(): Promise<VersionsResponse> {
     try {
       return await this.request<VersionsResponse>('/changelog/versions');
-    } catch (error) {
+    } catch {
       // Fallback to mock data if API is not available
       console.log('API not available, using mock versions data');
       
@@ -244,7 +241,7 @@ class ChangelogApi {
   async getCurrentVersion(): Promise<CurrentVersionResponse> {
     try {
       return await this.request<CurrentVersionResponse>('/changelog/current-version');
-    } catch (error) {
+    } catch {
       // Fallback to mock data if API is not available
       console.log('API not available, using mock current version data');
       

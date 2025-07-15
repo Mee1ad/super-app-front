@@ -13,13 +13,14 @@ function authHeaders(request: NextRequest): HeadersInit {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     // Check if user is authenticated
     if (shouldUseMockData(request)) {
       // Return mock data for non-authenticated users
-      const idea = mockIdeas.find(i => i.id === params.id)
+      const idea = mockIdeas.find(i => i.id === id)
       if (!idea) {
         return NextResponse.json(
           { error: 'Idea not found' },
@@ -30,7 +31,7 @@ export async function GET(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/api/v1/ideas/${params.id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/ideas/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)
@@ -53,15 +54,16 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const data: IdeaUpdate = await request.json()
     
     // Check if user is authenticated
     if (shouldUseMockData(request)) {
       // Return mock response for non-authenticated users
-      const idea = mockIdeas.find(i => i.id === params.id)
+      const idea = mockIdeas.find(i => i.id === id)
       if (!idea) {
         return NextResponse.json(
           { error: 'Idea not found' },
@@ -80,7 +82,7 @@ export async function PUT(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/api/v1/ideas/${params.id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/ideas/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -105,13 +107,14 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     // Check if user is authenticated
     if (shouldUseMockData(request)) {
       // Return mock response for non-authenticated users
-      const idea = mockIdeas.find(i => i.id === params.id)
+      const idea = mockIdeas.find(i => i.id === id)
       if (!idea) {
         return NextResponse.json(
           { error: 'Idea not found' },
@@ -123,7 +126,7 @@ export async function DELETE(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/api/v1/ideas/${params.id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/ideas/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

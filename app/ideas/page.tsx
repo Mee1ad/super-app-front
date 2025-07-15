@@ -10,7 +10,7 @@ import { AddIdeaDialog } from './organisms/AddIdeaDialog'
 import { IdeaCard } from './molecules/IdeaCard'
 import { LoadingSpinner } from './atoms/LoadingSpinner'
 import { useIdeasApi } from './atoms/useIdeasApi'
-import { IdeaCreate, IdeaUpdate } from './atoms/types'
+import { IdeaCreate, IdeaUpdate, Idea } from './atoms/types'
 
 export default function IdeasPage() {
   const {
@@ -42,15 +42,21 @@ export default function IdeasPage() {
     return () => clearTimeout(timeoutId)
   }, [searchTerm, selectedCategory, loadIdeas])
 
-  const handleAddIdea = async (newIdea: IdeaCreate) => {
+  const handleAddIdea = async (newIdea: IdeaCreate): Promise<Idea> => {
     const result = await createIdea(newIdea)
     if (result) {
       setIsAddDialogOpen(false)
+      return result
     }
+    throw new Error('Failed to create idea')
   }
 
-  const handleUpdateIdea = async (id: string, updatedIdea: IdeaUpdate) => {
-    await updateIdea(id, updatedIdea)
+  const handleUpdateIdea = async (id: string, updatedIdea: IdeaUpdate): Promise<Idea> => {
+    const result = await updateIdea(id, updatedIdea)
+    if (result) {
+      return result
+    }
+    throw new Error('Failed to update idea')
   }
 
   const handleDeleteIdea = async (id: string) => {

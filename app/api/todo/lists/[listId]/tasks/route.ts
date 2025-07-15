@@ -13,18 +13,19 @@ function authHeaders(request: NextRequest): HeadersInit {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { listId: string } }
+  { params }: { params: Promise<{ listId: string }> }
 ) {
+  const { listId } = await params
   try {
     // Check if user is authenticated
     if (shouldUseMockData(request)) {
       // Return mock data for non-authenticated users
-      const tasks = mockTasks.filter((task) => task.list_id === params.listId)
+      const tasks = mockTasks.filter((task) => task.list_id === listId)
       return NextResponse.json(tasks)
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/lists/${params.listId}/tasks`, {
+    const response = await fetch(`${API_BASE_URL}/lists/${listId}/tasks`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)
@@ -47,8 +48,9 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { listId: string } }
+  { params }: { params: Promise<{ listId: string }> }
 ) {
+  const { listId } = await params
   try {
     const data: TaskCreate = await request.json()
     
@@ -58,7 +60,7 @@ export async function POST(
       const now = new Date().toISOString()
       const newTask = {
         id: generateId(),
-        list_id: params.listId,
+        list_id: listId,
         title: data.title,
         description: data.description,
         checked: data.checked,
@@ -72,7 +74,7 @@ export async function POST(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/lists/${params.listId}/tasks`, {
+    const response = await fetch(`${API_BASE_URL}/lists/${listId}/tasks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

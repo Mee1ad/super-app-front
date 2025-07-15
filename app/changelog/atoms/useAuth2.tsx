@@ -30,8 +30,22 @@ export function useAuth() {
   return context;
 }
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<{
+    id: string;
+    email: string;
+    username: string;
+    is_active: boolean;
+    is_superuser: boolean;
+    role: {
+      id: string;
+      name: string;
+      description: string;
+      permissions: string[];
+    };
+    created_at: string;
+    updated_at: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,7 +70,7 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = (token) => {
+  const login = (token: string) => {
     localStorage.setItem('auth_token', token);
     setUser({
       id: '1',
@@ -80,11 +94,11 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const hasPermission = (permission) => {
+  const hasPermission = (permission: string) => {
     return !!user && !!user.role && user.role.permissions.includes(permission);
   };
 
-  const hasRole = (roleName) => {
+  const hasRole = (roleName: string) => {
     return !!user && !!user.role && user.role.name === roleName;
   };
 
@@ -95,7 +109,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function PermissionGuard(props) {
+export function PermissionGuard(props: { permission: string; fallback?: React.ReactNode; children: React.ReactNode }) {
   const { permission, fallback, children } = props;
   const { hasPermission, loading } = useAuth();
   if (loading) return <div>Loading...</div>;
@@ -103,7 +117,7 @@ export function PermissionGuard(props) {
   return <>{children}</>;
 }
 
-export function RoleGuard(props) {
+export function RoleGuard(props: { role: string; fallback?: React.ReactNode; children: React.ReactNode }) {
   const { role, fallback, children } = props;
   const { hasRole, loading } = useAuth();
   if (loading) return <div>Loading...</div>;

@@ -2,13 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  BarChart3, 
   FileText, 
   Eye, 
   EyeOff, 
-  GitBranch, 
-  Users, 
-  Settings,
   RefreshCw,
   TrendingUp,
   AlertTriangle
@@ -57,7 +53,6 @@ export function AdminDashboard({ className = '' }: AdminDashboardProps) {
   } = useCurrentVersion();
 
   const {
-    data: processCommitsData,
     loading: processCommitsLoading,
     processCommits,
   } = useProcessCommits();

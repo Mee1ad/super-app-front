@@ -1,10 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { DiaryCard } from './DiaryCard'
 import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
 
 // Mock the EditDiaryDialog component
 jest.mock('../organisms/EditDiaryDialog', () => ({
-  EditDiaryDialog: ({ open, onOpenChange, entry, moods, onUpdate, loading }: {
+  EditDiaryDialog: ({ open, onOpenChange, entry, onUpdate }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     entry: DiaryEntry;

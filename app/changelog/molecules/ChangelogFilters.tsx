@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { ChangeType, CHANGE_TYPE_CONFIG } from '../atoms/types';
 import type { ChangelogFilters } from '../atoms/types';
@@ -24,8 +24,6 @@ export function ChangelogFilters({
   versions = [],
   className = '',
 }: ChangelogFiltersProps) {
-  const { user } = useAuth();
-  
   // Use the centralized permission system
   const { hasPermission } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');

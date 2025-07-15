@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react'
 import { ImageAlbum } from '../molecules/ImageAlbum'
 import { DiaryEntryCreate, Mood } from '../atoms/types'
 import { DatePicker } from "@/components/ui/date-picker";
-import { addDays } from "date-fns";
+
 import React from 'react';
 
 interface AddDiaryDialogProps {
@@ -26,8 +26,6 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
   const [content, setContent] = useState('')
   const [mood, setMood] = useState('')
   const [images, setImages] = useState<string[]>([])
-  // Add a date state to the form
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +37,7 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
         content: content.trim(),
         mood,
         images,
-        date: date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split('T')[0],
       };
       await onAdd(entryData)
 
@@ -114,7 +112,7 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
             <label htmlFor="date" className="block text-sm font-medium mb-2">
               Date *
             </label>
-            <DatePicker date={date} onChange={setDate} />
+            <DatePicker />
           </div>
 
           <div>

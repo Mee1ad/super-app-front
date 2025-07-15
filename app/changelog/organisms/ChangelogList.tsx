@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, AlertCircle, FileText } from 'lucide-react';
+import { RefreshCw, FileText } from 'lucide-react';
 import { ChangelogCard } from '../molecules/ChangelogCard';
 import { Pagination } from '../molecules/Pagination';
 import { useChangelogEntries, useChangelogMutations } from '../atoms/useChangelogApi';
@@ -19,7 +19,7 @@ interface ChangelogListProps {
 
 export function ChangelogList({ className = '', statusFilter = 'all' }: ChangelogListProps) {
   const { toast } = useToast();
-  const { user, hasPermission } = useAuth();
+  const { hasPermission } = useAuth();
   
   // State
   const [filters, setFilters] = useState<ChangelogFiltersType>({
@@ -34,7 +34,6 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
   const {
     data: changelogData,
     loading: changelogLoading,
-    error: changelogError,
     refetch: refetchChangelog,
   } = useChangelogEntries(filters);
 
@@ -42,7 +41,6 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
 
   const {
     loading: mutationsLoading,
-    error: mutationsError,
     publishChangelog,
     unpublishChangelog,
     deleteChangelogEntry,
@@ -61,16 +59,6 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
     refetchChangelog();
   }, [filters]);
 
-  useEffect(() => {
-    if (mutationsError) {
-      toast({
-        title: "Error",
-        description: mutationsError,
-        variant: "destructive",
-      });
-    }
-  }, [mutationsError, toast]);
-
   // Handlers
   const handlePageChange = (page: number) => {
     setFilters(prev => ({ ...prev, page }));
@@ -84,7 +72,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
         description: "Changelog entry published successfully",
       });
       refetchChangelog();
-    } catch (error) {
+    } catch {
       // Error is handled by the mutation hook
     }
   };
@@ -97,7 +85,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
         description: "Changelog entry unpublished successfully",
       });
       refetchChangelog();
-    } catch (error) {
+    } catch {
       // Error is handled by the mutation hook
     }
   };
@@ -111,7 +99,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
           description: "Changelog entry deleted successfully",
         });
         refetchChangelog();
-      } catch (error) {
+      } catch {
         // Error is handled by the mutation hook
       }
     }
@@ -130,27 +118,6 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
 
 
   // Remove the full-page loading state. Instead, show a skeleton or spinner in the list area.
-
-  // Error state
-  if (changelogError && !changelogData) {
-    return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
-        <Card className="max-w-md">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Error Loading Changelog</h3>
-              <p className="text-gray-600 mb-4">{changelogError}</p>
-              <Button onClick={refetchChangelog} variant="outline">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // Empty state (only if not loading)
   if (!changelogLoading && (!changelogData?.entries.length)) {

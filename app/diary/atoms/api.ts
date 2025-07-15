@@ -102,7 +102,7 @@ const mockDiaryApi = {
     return { message: 'Diary entry deleted successfully' }
   },
 
-  async uploadImage(_file: File): Promise<ImageUploadResponse> {
+  async uploadImage(): Promise<ImageUploadResponse> {
     // Mock image upload - return a fake URL
     return { url: `https://via.placeholder.com/400x300?text=Mock+Image` }
   }
@@ -276,7 +276,7 @@ export const diaryApi = {
   async uploadImage(file: File): Promise<ImageUploadResponse> {
     const token = getAccessToken()
     if (!token) {
-      return mockDiaryApi.uploadImage(file)
+      return mockDiaryApi.uploadImage()
     }
 
     const formData = new FormData()
@@ -292,7 +292,7 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
-        return mockDiaryApi.uploadImage(file)
+        return mockDiaryApi.uploadImage()
       }
       const errorData = await response.json()
       throw new Error(errorData.error || 'Failed to upload image')

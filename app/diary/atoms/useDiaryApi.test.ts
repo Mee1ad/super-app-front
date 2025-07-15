@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useDiaryApi } from './useDiaryApi'
 import { diaryApi } from './api'
 import { DiaryEntryCreate, DiaryEntryUpdate, DiaryEntry } from './types'

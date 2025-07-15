@@ -33,7 +33,7 @@ export function OAuthCallback() {
             // Redirect to home page
             window.location.href = '/'
             return
-          } catch (parseError) {
+          } catch {
             setProcessingError('Invalid auth data format')
             setIsProcessing(false)
             return

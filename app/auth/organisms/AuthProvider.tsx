@@ -46,7 +46,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         window.history.replaceState({}, '', url.pathname + url.search)
         // Reload to update state
         window.location.reload()
-      } catch (e) {
+      } catch {
         // Ignore parse errors
       }
     }

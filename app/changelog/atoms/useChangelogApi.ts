@@ -1,14 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { changelogApi, ApiError } from './api';
 import {
-  ChangelogEntry,
-  ChangelogListResponse,
-  ChangelogSummary,
   ChangelogUpdateRequest,
   ChangelogFilters,
-  UnreadChangelogResponse,
-  VersionsResponse,
-  CurrentVersionResponse,
   ProcessCommitsResponse,
   MarkViewedRequest,
   PublishRequest,
@@ -29,8 +23,7 @@ interface UseChangelogApiReturn<T> extends UseChangelogApiState<T> {
 
 // Generic hook for API operations
 function useApiOperation<T>(
-  operation: () => Promise<T>,
-  dependencies: unknown[] = []
+  operation: () => Promise<T>
 ): UseChangelogApiReturn<T> {
   const [state, setState] = useState<UseChangelogApiState<T>>({
     data: null,
@@ -79,7 +72,7 @@ export function useChangelogEntries(filters: ChangelogFilters = {}) {
     [filters]
   );
 
-  return useApiOperation(operation, [filters]);
+  return useApiOperation(operation);
 }
 
 // Hook for single changelog entry
@@ -92,7 +85,7 @@ export function useChangelogEntry(entryId: string | null) {
     [entryId]
   );
 
-  return useApiOperation(operation, [entryId]);
+  return useApiOperation(operation);
 }
 
 // Hook for changelog summary
@@ -105,7 +98,7 @@ export function useChangelogSummary(version: string | null) {
     [version]
   );
 
-  return useApiOperation(operation, [version]);
+  return useApiOperation(operation);
 }
 
 // Hook for unread changelog
@@ -118,7 +111,7 @@ export function useUnreadChangelog(userIdentifier: string | null) {
     [userIdentifier]
   );
 
-  return useApiOperation(operation, [userIdentifier]);
+  return useApiOperation(operation);
 }
 
 // Hook for available versions

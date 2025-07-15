@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { authApi } from './api'
 import { AuthState, GoogleLoginResponse } from './types'
-import { getCurrentUser, hasPermission, hasRole, setupTokenExpiration, logout as logoutUser } from '@/lib/permissions'
+import { hasPermission, hasRole, setupTokenExpiration, logout as logoutUser } from '@/lib/permissions'
 
 // Storage keys matching backend documentation
 const STORAGE_KEYS = {

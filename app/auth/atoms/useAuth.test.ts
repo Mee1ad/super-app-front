@@ -45,8 +45,10 @@ describe('useAuth', () => {
     const mockUser = { 
       id: '1', 
       email: 'test@example.com',
-      name: 'Test User',
-      picture: 'https://example.com/avatar.jpg'
+      username: 'testuser',
+      is_active: true,
+      is_superuser: false,
+      role_name: 'user'
     }
     const mockTokens = {
       access_token: 'access123',
@@ -94,7 +96,7 @@ describe('useAuth', () => {
     await act(async () => {
       try {
         await result.current.getGoogleAuthUrl()
-      } catch (e) {
+      } catch {
         // Expected to throw
       }
     })
@@ -106,8 +108,10 @@ describe('useAuth', () => {
     const mockUser = { 
       id: '1', 
       email: 'test@example.com',
-      name: 'Test User',
-      picture: 'https://example.com/avatar.jpg'
+      username: 'testuser',
+      is_active: true,
+      is_superuser: false,
+      role_name: 'user'
     }
     const mockTokens = {
       access_token: 'access123',
@@ -115,8 +119,11 @@ describe('useAuth', () => {
     }
     const mockResponse = {
       user: mockUser,
-      access_token: mockTokens.access_token,
-      refresh_token: mockTokens.refresh_token
+      tokens: {
+        access_token: mockTokens.access_token,
+        refresh_token: mockTokens.refresh_token,
+        expires_in: 3600
+      }
     }
 
     mockAuthApi.loginWithGoogle.mockResolvedValue(mockResponse)
