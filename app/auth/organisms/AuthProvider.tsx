@@ -38,9 +38,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const authData = JSON.parse(decodeURIComponent(authParam))
         const user = authData.user
         const tokens = authData.tokens
-        localStorage.setItem('auth_access_token', tokens.access_token)
-        localStorage.setItem('auth_refresh_token', tokens.refresh_token)
-        localStorage.setItem('auth_user', JSON.stringify(user))
+        localStorage.setItem('access_token', tokens.access_token)
+        localStorage.setItem('refresh_token', tokens.refresh_token)
+        localStorage.setItem('user', JSON.stringify(user))
         // Remove the auth param from the URL
         url.searchParams.delete('auth')
         window.history.replaceState({}, '', url.pathname + url.search)

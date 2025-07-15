@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.idea/inspectionProfiles/Project_Default.xml
+.idea/vcs.xml
+.idea/super-app-2.iml
+.idea/modules.xml

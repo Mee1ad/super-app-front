@@ -9,6 +9,7 @@ import {
   Lightbulb,
   Utensils,
   Settings,
+  GitCommit,
 } from "lucide-react";
 import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { GoogleLoginButton } from "@/app/auth/molecules/GoogleLoginButton";
@@ -21,6 +22,7 @@ const navItems = [
   { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Diary", icon: Notebook, href: "/diary" },
   { label: "Habit", icon: CheckSquare, href: "/habit" },
+  { label: "Changelog", icon: GitCommit, href: "/changelog" },
 ];
 
 export function Sidebar() {

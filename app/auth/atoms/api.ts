@@ -37,10 +37,11 @@ export const authApi = {
     return response.json()
   },
 
-  // Example of a protected endpoint:
+  // Get user profile with role information
   async getProfile(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile`, {
+    const response = await fetch('/api/auth/profile', {
       headers: {
+        'Content-Type': 'application/json',
         ...authHeaders()
       } as HeadersInit
     })
