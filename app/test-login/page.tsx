@@ -6,7 +6,12 @@ import { getCurrentUser } from '@/lib/permissions';
 
 export default function TestLoginPage() {
   const { user, isAuthenticated, loading } = useAuth();
-  const [storageData, setStorageData] = useState<any>(null);
+  const [storageData, setStorageData] = useState<{
+    accessToken: string;
+    refreshToken: string;
+    user: Record<string, unknown> | string;
+    allKeys: string[];
+  } | null>(null);
 
   useEffect(() => {
     // Get raw storage data

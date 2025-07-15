@@ -8,13 +8,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
-import { Category, IdeaCreate } from '../atoms/types'
+import { Category, IdeaCreate, Idea } from '../atoms/types'
 import { LoadingSpinner } from '../atoms/LoadingSpinner'
 
 interface AddIdeaDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAdd: (idea: IdeaCreate) => Promise<any>
+  onAdd: (idea: IdeaCreate) => Promise<Idea>
   categories: Category[]
   isLoading?: boolean
 }

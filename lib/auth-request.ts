@@ -68,7 +68,7 @@ export async function refreshToken(): Promise<void> {
 }
 
 // Handle OAuth callback and exchange code for tokens
-export async function handleAuthCallback(code: string): Promise<any> {
+export async function handleAuthCallback(code: string): Promise<{ tokens: { access_token: string; refresh_token: string }; user: { id: string; email: string; username: string; is_active: boolean; is_superuser: boolean; role_name: string } }> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/google`, {
       method: 'POST',

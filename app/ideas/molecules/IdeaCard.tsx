@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EditIdeaDialog } from '../organisms/EditIdeaDialog'
-import { Idea, Category } from '../atoms/types'
+import { Idea, Category, IdeaUpdate } from '../atoms/types'
 
 interface IdeaCardProps {
   idea: Idea
   category: Category
   onDelete: (id: string) => Promise<boolean>
-  onUpdate: (id: string, updatedIdea: any) => Promise<any>
+  onUpdate: (id: string, updatedIdea: IdeaUpdate) => Promise<Idea>
   categories: Category[]
 }
 

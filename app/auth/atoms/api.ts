@@ -1,4 +1,4 @@
-import { GoogleAuthUrlResponse, GoogleLoginRequest, GoogleLoginResponse } from './types'
+import { GoogleAuthUrlResponse, GoogleLoginRequest, GoogleLoginResponse, User } from './types'
 import { getAccessToken } from '@/lib/auth-token'
 
 // API base URL - adjust based on environment
@@ -38,7 +38,7 @@ export const authApi = {
   },
 
   // Get user profile with role information
-  async getProfile(): Promise<any> {
+  async getProfile(): Promise<User> {
     const response = await fetch('/api/auth/profile', {
       headers: {
         'Content-Type': 'application/json',

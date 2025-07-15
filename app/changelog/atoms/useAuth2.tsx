@@ -1,7 +1,28 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { PERMISSIONS } from './types';
 
-const AuthContext = createContext<any>(undefined);
+const AuthContext = createContext<{
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    is_active: boolean;
+    is_superuser: boolean;
+    role: {
+      id: string;
+      name: string;
+      description: string;
+      permissions: string[];
+    };
+    created_at: string;
+    updated_at: string;
+  } | null;
+  loading: boolean;
+  login: (token: string) => void;
+  logout: () => void;
+  hasPermission: (permission: string) => boolean;
+  hasRole: (roleName: string) => boolean;
+} | undefined>(undefined);
 
 export function useAuth() {
   const context = useContext(AuthContext);

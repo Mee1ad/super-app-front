@@ -22,7 +22,7 @@ export const PERMISSIONS = {
 } as const;
 
 // Role-based permission mapping
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<string, string[]> = {
   admin: [
     PERMISSIONS.CHANGELOG_VIEW,
     PERMISSIONS.CHANGELOG_CREATE,
@@ -49,7 +49,7 @@ export const ROLE_PERMISSIONS = {
   viewer: [
     PERMISSIONS.CHANGELOG_VIEW,
   ]
-} as const;
+};
 
 // User interface matching backend response
 export interface User {
@@ -86,7 +86,7 @@ export function hasPermission(permission: string): boolean {
   const userRole = user.role_name;
   const permissions = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS] || [];
   
-  return permissions.includes(permission as any);
+  return permissions.includes(permission as string);
 }
 
 // Check if user has a specific role

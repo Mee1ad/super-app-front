@@ -1,4 +1,4 @@
-import { ListWithItems, TaskResponse, ShoppingItemResponse, ListResponse } from './types';
+import { ListWithItems, TaskResponse, ShoppingItemResponse, ListResponse, TaskCreate, TaskUpdate, ShoppingItemCreate, ShoppingItemUpdate } from './types';
 import { mockTasks, mockShoppingItems, generateId } from '@/app/api/todo/mock-data';
 
 // Mock lists for non-authenticated users
@@ -87,7 +87,7 @@ export const mockApi = {
   },
 
   // Task operations
-  createTask: async (listId: string, data: any): Promise<TaskResponse> => {
+  createTask: async (listId: string, data: TaskCreate): Promise<TaskResponse> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     const newTask: TaskResponse = {
       id: generateId(),
@@ -109,7 +109,7 @@ export const mockApi = {
     return newTask;
   },
 
-  updateTask: async (listId: string, taskId: string, data: any): Promise<TaskResponse> => {
+  updateTask: async (listId: string, taskId: string, data: TaskUpdate): Promise<TaskResponse> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     const listIndex = demoLists.findIndex(list => list.id === listId && list.type === 'task');
     if (listIndex === -1) throw new Error('List not found');
@@ -117,9 +117,13 @@ export const mockApi = {
     const taskIndex = demoLists[listIndex].tasks?.findIndex(task => task.id === taskId);
     if (taskIndex === undefined || taskIndex === -1) throw new Error('Task not found');
     
-    const updatedTask = { 
+    const updatedTask: TaskResponse = { 
       ...demoLists[listIndex].tasks![taskIndex], 
-      ...data, 
+      ...(data.title !== undefined && data.title !== null && { title: data.title }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.checked !== undefined && data.checked !== null && { checked: data.checked }),
+      ...(data.variant !== undefined && data.variant !== null && { variant: data.variant }),
+      ...(data.position !== undefined && data.position !== null && { position: data.position }),
       updated_at: new Date().toISOString() 
     };
     demoLists[listIndex].tasks![taskIndex] = updatedTask;
@@ -165,7 +169,7 @@ export const mockApi = {
   },
 
   // Shopping item operations
-  createItem: async (listId: string, data: any): Promise<ShoppingItemResponse> => {
+  createItem: async (listId: string, data: ShoppingItemCreate): Promise<ShoppingItemResponse> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     const newItem: ShoppingItemResponse = {
       id: generateId(),
@@ -189,7 +193,7 @@ export const mockApi = {
     return newItem;
   },
 
-  updateItem: async (listId: string, itemId: string, data: any): Promise<ShoppingItemResponse> => {
+  updateItem: async (listId: string, itemId: string, data: ShoppingItemUpdate): Promise<ShoppingItemResponse> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     const listIndex = demoLists.findIndex(list => list.id === listId && list.type === 'shopping');
     if (listIndex === -1) throw new Error('List not found');
@@ -197,9 +201,15 @@ export const mockApi = {
     const itemIndex = demoLists[listIndex].items?.findIndex(item => item.id === itemId);
     if (itemIndex === undefined || itemIndex === -1) throw new Error('Item not found');
     
-    const updatedItem = { 
+    const updatedItem: ShoppingItemResponse = { 
       ...demoLists[listIndex].items![itemIndex], 
-      ...data, 
+      ...(data.title !== undefined && data.title !== null && { title: data.title }),
+      ...(data.url !== undefined && { url: data.url }),
+      ...(data.price !== undefined && { price: data.price }),
+      ...(data.source !== undefined && { source: data.source }),
+      ...(data.checked !== undefined && data.checked !== null && { checked: data.checked }),
+      ...(data.variant !== undefined && data.variant !== null && { variant: data.variant }),
+      ...(data.position !== undefined && data.position !== null && { position: data.position }),
       updated_at: new Date().toISOString() 
     };
     demoLists[listIndex].items![itemIndex] = updatedItem;

@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDiaryApi } from './useDiaryApi'
 import { diaryApi } from './api'
-import { DiaryEntryCreate, DiaryEntryUpdate } from './types'
+import { DiaryEntryCreate, DiaryEntryUpdate, DiaryEntry } from './types'
 
 // Mock the diaryApi
 jest.mock('./api')
@@ -101,7 +101,7 @@ describe('useDiaryApi', () => {
     })
 
     it('should load entries with filters', async () => {
-      const mockEntries: any[] = []
+      const mockEntries: DiaryEntry[] = []
       const mockMeta = {
         total: 0,
         page: 1,
@@ -159,7 +159,7 @@ describe('useDiaryApi', () => {
 
       const { result } = renderHook(() => useDiaryApi())
 
-      let createdResult: any
+      let createdResult: DiaryEntry | undefined
       await act(async () => {
         createdResult = await result.current.createEntry(newEntry)
       })
@@ -228,7 +228,7 @@ describe('useDiaryApi', () => {
         result.current.entries = [existingEntry]
       })
 
-      let updatedResult: any
+      let updatedResult: DiaryEntry | undefined
       await act(async () => {
         updatedResult = await result.current.updateEntry('1', updateData)
       })
@@ -315,7 +315,7 @@ describe('useDiaryApi', () => {
 
       const { result } = renderHook(() => useDiaryApi())
 
-      let uploadResult: any
+      let uploadResult: string | undefined
       await act(async () => {
         uploadResult = await result.current.uploadImage(file)
       })

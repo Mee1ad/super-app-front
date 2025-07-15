@@ -30,7 +30,7 @@ interface UseChangelogApiReturn<T> extends UseChangelogApiState<T> {
 // Generic hook for API operations
 function useApiOperation<T>(
   operation: () => Promise<T>,
-  dependencies: any[] = []
+  dependencies: unknown[] = []
 ): UseChangelogApiReturn<T> {
   const [state, setState] = useState<UseChangelogApiState<T>>({
     data: null,
@@ -270,7 +270,7 @@ export function useChangelogMutations() {
 // Hook for optimistic updates
 export function useOptimisticUpdate<T>(
   currentData: T | null,
-  updateFn: (data: T, update: any) => T
+  updateFn: (data: T, update: unknown) => T
 ) {
   const [optimisticData, setOptimisticData] = useState<T | null>(currentData);
 
@@ -278,7 +278,7 @@ export function useOptimisticUpdate<T>(
     setOptimisticData(currentData);
   }, [currentData]);
 
-  const applyOptimisticUpdate = useCallback((update: any) => {
+  const applyOptimisticUpdate = useCallback((update: unknown) => {
     if (optimisticData) {
       setOptimisticData(updateFn(optimisticData, update));
     }

@@ -15,7 +15,7 @@ interface EditIdeaDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   idea: Idea
-  onUpdate: (id: string, updatedIdea: IdeaUpdate) => Promise<any>
+  onUpdate: (id: string, updatedIdea: IdeaUpdate) => Promise<Idea>
   categories?: Category[]
   isLoading?: boolean
 }

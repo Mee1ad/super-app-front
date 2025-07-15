@@ -4,7 +4,14 @@ import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
 
 // Mock the EditDiaryDialog component
 jest.mock('../organisms/EditDiaryDialog', () => ({
-  EditDiaryDialog: ({ open, onOpenChange, entry, moods, onUpdate, loading }: any) => (
+  EditDiaryDialog: ({ open, onOpenChange, entry, moods, onUpdate, loading }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    entry: DiaryEntry;
+    moods: Mood[];
+    onUpdate: (id: string, data: DiaryEntryUpdate) => Promise<DiaryEntry>;
+    loading?: boolean;
+  }) => (
     <div data-testid="edit-dialog" data-open={open}>
       <button onClick={() => onOpenChange(false)}>Close</button>
       <button onClick={() => onUpdate(entry.id, { title: 'Updated Title' })}>Update</button>

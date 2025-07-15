@@ -31,7 +31,7 @@ export function ChangelogFilters({
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleFilterChange = (key: keyof ChangelogFilters, value: any) => {
+  const handleFilterChange = <K extends keyof ChangelogFilters>(key: K, value: ChangelogFilters[K]) => {
     const newFilters = { ...filters };
     
     if (value === '' || value === null || value === undefined) {
@@ -205,7 +205,7 @@ export function ChangelogFilters({
             <Badge variant="outline" className="text-xs">
               Type: {CHANGE_TYPE_CONFIG[filters.change_type].label}
               <button
-                onClick={() => handleFilterChange('change_type', '')}
+                onClick={() => handleFilterChange('change_type', undefined)}
                 className="ml-1 hover:text-red-500"
               >
                 <X className="w-3 h-3" />

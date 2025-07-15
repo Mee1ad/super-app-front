@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button'
 import { getUserInfo, clearUserInfoCache } from '@/lib/user-info'
 
 export default function TestChangelogPage() {
-  const [userInfo, setUserInfo] = useState<any>(null)
-  const [statusResult, setStatusResult] = useState<any>(null)
-  const [latestResult, setLatestResult] = useState<any>(null)
+  const [userInfo, setUserInfo] = useState<{ ip_address: string; user_agent: string } | null>(null)
+  const [statusResult, setStatusResult] = useState<Record<string, unknown> | null>(null)
+  const [latestResult, setLatestResult] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(false)
 
   const testGetUserInfo = async () => {
