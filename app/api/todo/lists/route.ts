@@ -4,6 +4,9 @@ import { ListResponse, ListCreate } from '@/app/todo/atoms/types'
 
 // API base URL - adjust based on environment
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+console.log(process.env.NEXT_PUBLIC_API_URL)
+console.log(API_BASE_URL)
+console.log('------------------------------------')
 
 function authHeaders(request: NextRequest): HeadersInit {
   const { token } = getAuthStatus(request)
