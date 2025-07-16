@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const backendFormData = new FormData()
     backendFormData.append('file', file)
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/upload-image`, {
+    const response = await fetch(`${API_BASE_URL}/upload-image`, {
       method: 'POST',
       body: backendFormData,
       headers: {

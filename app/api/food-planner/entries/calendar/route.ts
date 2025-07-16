@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (startDate) queryParams.append('start_date', startDate)
     if (endDate) queryParams.append('end_date', endDate)
     
-    const url = `${API_BASE_URL}/api/v1/food-entries/calendar${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    const url = `${API_BASE_URL}/food-entries/calendar${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
     
     const response = await fetch(url, {
       headers: {

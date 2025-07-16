@@ -12,7 +12,7 @@ function authHeaders(): HeadersInit {
 export const authApi = {
   // Get Google OAuth URL
   async getGoogleAuthUrl(): Promise<GoogleAuthUrlResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/google/url`)
+    const response = await fetch(`${API_BASE_URL}/auth/google/url`)
     if (!response.ok) {
       throw new Error('Failed to get Google OAuth URL')
     }
@@ -21,7 +21,7 @@ export const authApi = {
 
   // Login with Google OAuth code
   async loginWithGoogle(code: string): Promise<GoogleLoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/google`, {
+    const response = await fetch(`${API_BASE_URL}/auth/google`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
