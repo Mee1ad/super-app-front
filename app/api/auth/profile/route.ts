@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Call the backend profile endpoint
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)

@@ -39,7 +39,7 @@ export async function refreshToken(): Promise<void> {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export async function refreshToken(): Promise<void> {
 // Handle OAuth callback and exchange code for tokens
 export async function handleAuthCallback(code: string): Promise<{ tokens: { access_token: string; refresh_token: string }; user: { id: string; email: string; username: string; is_active: boolean; is_superuser: boolean; role_name: string } }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/google`, {
+    const response = await fetch(`${API_BASE_URL}/auth/google`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export async function handleAuthCallback(code: string): Promise<{ tokens: { acce
 
 // Get Google OAuth URL
 export async function getGoogleAuthUrl(): Promise<string> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/auth/google/url`);
+  const response = await fetch(`${API_BASE_URL}/auth/google/url`);
   if (!response.ok) {
     throw new Error('Failed to get Google OAuth URL');
   }

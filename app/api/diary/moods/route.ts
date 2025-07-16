@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/api/v1/moods`, {
+    const response = await fetch(`${API_BASE_URL}/moods`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)

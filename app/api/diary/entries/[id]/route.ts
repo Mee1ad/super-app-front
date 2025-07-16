@@ -16,7 +16,7 @@ export async function GET(
   try {
     const { id } = await params
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)
@@ -51,7 +51,7 @@ export async function PUT(
     const data: DiaryEntryUpdate = await request.json()
     const { id } = await params
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export async function DELETE(
   try {
     const { id } = await params
     
-    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
