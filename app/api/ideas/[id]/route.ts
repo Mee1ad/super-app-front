@@ -4,7 +4,7 @@ import { mockIdeas } from '../mock-data'
 import { IdeaUpdate } from '@/app/ideas/atoms/types'
 
 // API base URL - adjust based on environment
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 function authHeaders(request: NextRequest): HeadersInit {
   const { token } = getAuthStatus(request)

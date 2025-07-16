@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // API base URL - adjust based on environment
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 function authHeaders(request: NextRequest): HeadersInit {
   const authHeader = request.headers.get('authorization')

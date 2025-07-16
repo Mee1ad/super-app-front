@@ -4,7 +4,7 @@ import { shouldUseMockData, getAuthStatus } from '@/lib/auth-utils'
 import { mockDiaryEntries, generateId } from '../mock-data'
 
 // API base URL - adjust based on environment
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 function authHeaders(request: NextRequest): HeadersInit {
   const { token } = getAuthStatus(request)
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     if (page) queryParams.append('page', page)
     if (limit) queryParams.append('limit', limit)
     
-          const url = `${API_BASE_URL}/api/v1/diary-entries${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+          const url = `${API_BASE_URL}/diary-entries${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
     
     const response = await fetch(url, {
       headers: {
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries`, {
+    const response = await fetch(`${API_BASE_URL}/diary-entries`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

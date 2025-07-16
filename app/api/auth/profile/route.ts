@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthStatus } from '@/lib/auth-utils'
 
 // API base URL - adjust based on environment
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 function authHeaders(request: NextRequest): HeadersInit {
   const { token } = getAuthStatus(request)
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Call the backend profile endpoint
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile`, {
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)

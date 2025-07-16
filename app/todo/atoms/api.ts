@@ -15,9 +15,7 @@ import { handleApiError } from '@/lib/error-handler';
 import { getAccessToken } from '@/lib/auth-token';
 
 // API base URL - change this for different environments
-const API_BASE_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:8000/api/v1' 
-  : '';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
