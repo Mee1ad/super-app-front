@@ -109,11 +109,11 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
       console.log('ChangelogProvider: Got user info, checking changelog status')
       
       // Log the API configuration
-      const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8000'
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       console.log('ChangelogProvider: API configuration:', {
-        NEXT_PUBLIC_BASE_API_URL: process.env.NEXT_PUBLIC_BASE_API_URL,
+        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
         API_BASE_URL,
-        isConfigured: !!process.env.NEXT_PUBLIC_BASE_API_URL
+        isConfigured: !!process.env.NEXT_PUBLIC_API_URL
       })
 
 
@@ -167,7 +167,7 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
         // Check if it's a network/connectivity error
         const isNetworkError = error instanceof TypeError && error.message.includes('fetch')
         if (isNetworkError) {
-          const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8000'
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
           console.error('ChangelogProvider: Network error detected - backend may not be running or accessible')
           console.error('ChangelogProvider: Please ensure your backend server is running at:', API_BASE_URL)
         }
@@ -194,7 +194,7 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('ChangelogProvider: Marking changelog as viewed')
       
-      const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL || 'http://localhost:8000'
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const viewedUrl = `${API_BASE_URL}/changelog/viewed`
       
       console.log('ChangelogProvider: Calling viewed API:', viewedUrl)
