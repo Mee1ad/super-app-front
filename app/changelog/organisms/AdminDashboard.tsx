@@ -60,7 +60,7 @@ export function AdminDashboard({ className = '' }: AdminDashboardProps) {
   // Auto-refresh data when component mounts
   useEffect(() => {
     refetchChangelog();
-  }, []); // Empty dependency array means this runs once when component mounts
+  }, [refetchChangelog]); // Include refetchChangelog in dependencies
 
   // Calculate statistics
   const stats = React.useMemo(() => {

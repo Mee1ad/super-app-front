@@ -278,7 +278,7 @@ describe('ChangelogApi', () => {
   describe('authentication', () => {
     it('should include auth token in requests when available', async () => {
       if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', 'test-token');
+        localStorage.setItem('access_token', 'test-token');
       }
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -300,7 +300,7 @@ describe('ChangelogApi', () => {
 
     it('should not include auth token when not available', async () => {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('access_token');
       }
 
       (fetch as jest.Mock).mockResolvedValueOnce({

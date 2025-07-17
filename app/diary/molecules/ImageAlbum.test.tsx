@@ -5,7 +5,7 @@ import { ImageAlbum } from './ImageAlbum'
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
-    <img src={src} alt={alt} {...props} />
+    <img src={src} alt={alt} {...props} data-testid="next-image" />
   )
 }))
 

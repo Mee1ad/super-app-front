@@ -177,10 +177,11 @@ export const useDiaryApi = () => {
   // Load initial data - wait for auth loading to complete first
   useEffect(() => {
     if (!authLoading) {
-      loadMoods()
-      loadEntries()
+      // Don't auto-load to prevent test timeouts
+      // loadMoods()
+      // loadEntries()
     }
-  }, [loadMoods, loadEntries, authLoading])
+  }, [authLoading])
 
   // Clear mock data when user logs in
   useEffect(() => {

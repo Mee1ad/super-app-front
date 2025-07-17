@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 /**
  * Capture and report errors to Sentry
  */
-export function captureError(error: Error, context?: Record<string, any>) {
+export function captureError(error: Error, context?: Record<string, unknown>) {
   if (context) {
     Sentry.setContext("error_context", context);
   }
@@ -34,7 +34,7 @@ export function clearUser() {
 /**
  * Set additional context for Sentry
  */
-export function setContext(name: string, context: Record<string, any>) {
+export function setContext(name: string, context: Record<string, unknown>) {
   Sentry.setContext(name, context);
 }
 
@@ -44,7 +44,7 @@ export function setContext(name: string, context: Record<string, any>) {
 export function addBreadcrumb(
   message: string,
   category?: string,
-  data?: Record<string, any>,
+  data?: Record<string, unknown>,
   level: Sentry.SeverityLevel = "info"
 ) {
   Sentry.addBreadcrumb({
@@ -58,7 +58,7 @@ export function addBreadcrumb(
 /**
  * Wrap a function with Sentry error tracking
  */
-export function withSentry<T extends (...args: any[]) => any>(
+export function withSentry<T extends (...args: unknown[]) => unknown>(
   fn: T,
   name?: string
 ): T {

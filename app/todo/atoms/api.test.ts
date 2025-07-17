@@ -58,7 +58,7 @@ describe('Todo API', () => {
 
       const result = await listsApi.getAll();
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists', {
         headers: { 'Content-Type': 'application/json' },
       });
       expect(result).toEqual(mockLists);
@@ -84,7 +84,7 @@ describe('Todo API', () => {
 
       const result = await listsApi.create(createData);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createData),
@@ -111,7 +111,7 @@ describe('Todo API', () => {
 
       const result = await listsApi.update('1', updateData);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/1', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/1', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
@@ -124,7 +124,7 @@ describe('Todo API', () => {
 
       const result = await listsApi.delete('1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/1', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/1', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -152,7 +152,7 @@ describe('Todo API', () => {
 
       const result = await tasksApi.getByList('list1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/tasks', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/tasks', {
         headers: { 'Content-Type': 'application/json' },
       });
       expect(result).toEqual(mockTasks);
@@ -183,7 +183,7 @@ describe('Todo API', () => {
 
       const result = await tasksApi.create('list1', createData);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/tasks', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createData),
@@ -217,7 +217,7 @@ describe('Todo API', () => {
 
       const result = await tasksApi.update('list1', '1', updateData);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/tasks/1', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/tasks/1', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
@@ -230,7 +230,7 @@ describe('Todo API', () => {
 
       const result = await tasksApi.delete('list1', '1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/tasks/1', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/tasks/1', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -254,7 +254,7 @@ describe('Todo API', () => {
 
       const result = await tasksApi.toggle('list1', '1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/tasks/1/toggle', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/tasks/1/toggle', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -268,7 +268,7 @@ describe('Todo API', () => {
 
       const result = await tasksApi.reorder('list1', itemIds);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/tasks/reorder', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/tasks/reorder', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_ids: itemIds }),
@@ -299,7 +299,7 @@ describe('Todo API', () => {
 
       const result = await itemsApi.getByList('list1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/items', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/items', {
         headers: { 'Content-Type': 'application/json' },
       });
       expect(result).toEqual(mockItems);
@@ -334,7 +334,7 @@ describe('Todo API', () => {
 
       const result = await itemsApi.create('list1', createData);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/items', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createData),
@@ -372,7 +372,7 @@ describe('Todo API', () => {
 
       const result = await itemsApi.update('list1', '1', updateData);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/items/1', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/items/1', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
@@ -385,7 +385,7 @@ describe('Todo API', () => {
 
       const result = await itemsApi.delete('list1', '1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/items/1', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/items/1', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -411,7 +411,7 @@ describe('Todo API', () => {
 
       const result = await itemsApi.toggle('list1', '1');
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/items/1/toggle', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/items/1/toggle', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -425,7 +425,7 @@ describe('Todo API', () => {
 
       const result = await itemsApi.reorder('list1', itemIds);
 
-      expect(mockFetch).toHaveBeenCalledWith('/lists/list1/items/reorder', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/lists/list1/items/reorder', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_ids: itemIds }),
@@ -481,7 +481,7 @@ describe('Todo API', () => {
 
       const result = await searchApi.search('test');
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/search?q=test', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/api/search?q=test', {
         headers: { 'Content-Type': 'application/json' },
       });
       expect(result).toEqual(mockSearchResponse);

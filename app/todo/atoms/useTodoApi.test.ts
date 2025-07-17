@@ -83,38 +83,46 @@ import { mockApi } from './mock-data';
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockMockApi = mockApi as jest.Mocked<typeof mockApi>;
 
+const mockAuthContext = {
+  isAuthenticated: true,
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  loading: false,
+  error: null,
+  getGoogleAuthUrl: jest.fn(),
+  loginWithGoogle: jest.fn(),
+  logout: jest.fn(),
+  handleOAuthCallback: jest.fn(),
+  hasPermission: jest.fn(() => true),
+  hasRole: jest.fn(() => true)
+}
+
+const mockUnauthenticatedContext = {
+  isAuthenticated: false,
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  loading: false,
+  error: null,
+  getGoogleAuthUrl: jest.fn(),
+  loginWithGoogle: jest.fn(),
+  logout: jest.fn(),
+  handleOAuthCallback: jest.fn(),
+  hasPermission: jest.fn(() => false),
+  hasRole: jest.fn(() => false)
+}
+
 describe('useTodoApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default to authenticated user
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: true,
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      loading: false,
-      error: null,
-      getGoogleAuthUrl: jest.fn(),
-      loginWithGoogle: jest.fn(),
-      logout: jest.fn(),
-      handleOAuthCallback: jest.fn(),
-    });
+    mockUseAuth.mockReturnValue(mockAuthContext);
   });
 
   describe('authentication scenarios', () => {
     it('should use real API when authenticated', async () => {
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: true,
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        loading: false,
-        error: null,
-        getGoogleAuthUrl: jest.fn(),
-        loginWithGoogle: jest.fn(),
-        logout: jest.fn(),
-        handleOAuthCallback: jest.fn(),
-      });
+      mockUseAuth.mockReturnValue(mockAuthContext);
 
       const mockLists = [
         {
@@ -142,18 +150,7 @@ describe('useTodoApi', () => {
     });
 
     it('should use mock API when not authenticated', async () => {
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: false,
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        loading: false,
-        error: null,
-        getGoogleAuthUrl: jest.fn(),
-        loginWithGoogle: jest.fn(),
-        logout: jest.fn(),
-        handleOAuthCallback: jest.fn(),
-      });
+      mockUseAuth.mockReturnValue(mockUnauthenticatedContext);
 
       const mockLists = [
         {
@@ -269,18 +266,7 @@ describe('useTodoApi', () => {
     });
 
     it('should create a new list when not authenticated', async () => {
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: false,
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        loading: false,
-        error: null,
-        getGoogleAuthUrl: jest.fn(),
-        loginWithGoogle: jest.fn(),
-        logout: jest.fn(),
-        handleOAuthCallback: jest.fn(),
-      });
+      mockUseAuth.mockReturnValue(mockUnauthenticatedContext);
 
       const mockList = {
         id: 'demo-list-3',

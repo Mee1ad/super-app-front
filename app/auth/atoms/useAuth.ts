@@ -6,9 +6,9 @@ import { hasPermission, hasRole, setupTokenExpiration, logout as logoutUser } fr
 
 // Storage keys matching backend documentation
 const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'access_token',
-  REFRESH_TOKEN: 'refresh_token',
-  USER: 'user'
+  ACCESS_TOKEN: 'auth_access_token',
+  REFRESH_TOKEN: 'auth_refresh_token',
+  USER: 'auth_user'
 }
 
 export function useAuth() {

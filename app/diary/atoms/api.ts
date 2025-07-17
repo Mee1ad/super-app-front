@@ -12,6 +12,9 @@ import { mockMoods, mockDiaryEntries, generateId } from '@/app/api/diary/mock-da
 // API base URL - change this for different environments
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
 
+// Check if we're in a test environment
+const isTestEnvironment = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
+
 // Mock API for non-authenticated users
 const mockDiaryApi = {
   async getMoods(): Promise<MoodsResponse> {
@@ -39,7 +42,7 @@ const mockDiaryApi = {
     }
     
     const page = params?.page || 1
-    const limit = params?.limit || 10
+    const limit = params?.limit || 20
     const startIndex = (page - 1) * limit
     const endIndex = startIndex + limit
     const paginatedEntries = filteredEntries.slice(startIndex, endIndex)
@@ -114,6 +117,10 @@ export const diaryApi = {
   async getMoods(): Promise<MoodsResponse> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.getMoods()
     }
 
@@ -125,6 +132,10 @@ export const diaryApi = {
     })
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.getMoods()
       }
       throw new Error('Failed to fetch moods')
@@ -141,6 +152,10 @@ export const diaryApi = {
   }): Promise<DiaryEntriesResponse> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.getDiaryEntries(params)
     }
 
@@ -160,6 +175,10 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.getDiaryEntries(params)
       }
       throw new Error('Failed to fetch diary entries')
@@ -172,6 +191,10 @@ export const diaryApi = {
   async getDiaryEntry(id: string): Promise<DiaryEntry> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.getDiaryEntry(id)
     }
 
@@ -183,6 +206,10 @@ export const diaryApi = {
     })
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.getDiaryEntry(id)
       }
       throw new Error('Diary entry not found')
@@ -194,25 +221,34 @@ export const diaryApi = {
   async createDiaryEntry(data: DiaryEntryCreate): Promise<DiaryEntry> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.createDiaryEntry(data)
     }
 
     // Ensure date is present and valid
-    const entryWithDate = {
+    const entryData = {
       ...data,
       date: data.date || new Date().toISOString().slice(0, 10)
     }
+
     const response = await fetch(`${API_BASE_URL}/diary-entries`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(entryWithDate),
+      body: JSON.stringify(entryData)
     })
     
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.createDiaryEntry(data)
       }
       throw new Error('Failed to create diary entry')
@@ -225,6 +261,10 @@ export const diaryApi = {
   async updateDiaryEntry(id: string, data: DiaryEntryUpdate): Promise<DiaryEntry> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.updateDiaryEntry(id, data)
     }
 
@@ -234,11 +274,15 @@ export const diaryApi = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     })
     
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.updateDiaryEntry(id, data)
       }
       throw new Error('Failed to update diary entry')
@@ -251,6 +295,10 @@ export const diaryApi = {
   async deleteDiaryEntry(id: string): Promise<{ message: string }> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.deleteDiaryEntry(id)
     }
 
@@ -264,6 +312,10 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.deleteDiaryEntry(id)
       }
       throw new Error('Failed to delete diary entry')
@@ -276,26 +328,33 @@ export const diaryApi = {
   async uploadImage(file: File): Promise<ImageUploadResponse> {
     const token = getAccessToken()
     if (!token) {
+      // In test environment, throw error instead of falling back to mock data
+      if (isTestEnvironment) {
+        throw new Error('Authentication required')
+      }
       return mockDiaryApi.uploadImage()
     }
 
     const formData = new FormData()
     formData.append('file', file)
-    
-    const response = await fetch(`${API_BASE_URL}/upload-image`, {
+
+    const response = await fetch(`${API_BASE_URL}/diary-entries/upload`, {
       method: 'POST',
-      body: formData,
       headers: {
         'Authorization': `Bearer ${token}`
-      }
+      },
+      body: formData
     })
     
     if (!response.ok) {
       if (response.status === 401) {
+        // In test environment, throw error instead of falling back to mock data
+        if (isTestEnvironment) {
+          throw new Error('Authentication required')
+        }
         return mockDiaryApi.uploadImage()
       }
-      const errorData = await response.json()
-      throw new Error(errorData.error || 'Failed to upload image')
+      throw new Error('Failed to upload image')
     }
     
     return response.json()

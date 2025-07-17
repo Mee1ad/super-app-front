@@ -57,7 +57,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
   useEffect(() => {
     console.log('Filters changed, refetching with:', filters);
     refetchChangelog();
-  }, [filters]);
+  }, [filters, refetchChangelog]);
 
   // Handlers
   const handlePageChange = (page: number) => {

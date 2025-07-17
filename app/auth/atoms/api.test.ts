@@ -59,7 +59,7 @@ describe('authApi', () => {
 
       await freshAuthApi.getGoogleAuthUrl()
 
-      expect(fetch).toHaveBeenCalledWith('https://api.example.com/api/v1/auth/google/url')
+      expect(fetch).toHaveBeenCalledWith('https://api.example.com/auth/google/url')
 
       // Restore original environment
       process.env.NEXT_PUBLIC_API_URL = originalEnv
