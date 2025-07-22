@@ -16,7 +16,11 @@ export async function getUserInfo(): Promise<UserInfo | null> {
 
   try {
     // Get IP address from external service
-    const ipResponse = await fetch('https://api.ipify.org?format=json');
+    const ipResponse = await fetch('https://api.ipify.org?format=json', {
+      // Add timeout to prevent hanging requests
+      signal: AbortSignal.timeout(5000)
+    });
+    
     if (!ipResponse.ok) {
       throw new Error('Failed to get IP address');
     }
@@ -30,19 +34,17 @@ export async function getUserInfo(): Promise<UserInfo | null> {
     // Cache the result
     cachedUserInfo = userInfo;
     
-    console.log('User info collected:', {
-      ip_address: userInfo.ip_address,
-      user_agent: userInfo.user_agent.substring(0, 50) + '...'
-    });
-
     return userInfo;
-  } catch (error) {
-    console.error('Failed to get user info:', error);
+  } catch {
+    // Silently handle network errors - external service may be unavailable
+    // Only log in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('getUserInfo: External service not available, skipping IP detection');
+    }
     return null;
   }
 }
 
-// Function to clear cache (useful for testing)
 export function clearUserInfoCache(): void {
   cachedUserInfo = null;
 } 

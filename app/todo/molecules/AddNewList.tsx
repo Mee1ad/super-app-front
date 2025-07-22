@@ -28,11 +28,11 @@ export function AddNewList({ onCreate }: AddNewListProps) {
   };
 
   return (
-    <div className="mb-6 flex justify-end">
-      <div className="min-w-[150px]">
+    <div className="flex justify-end">
+      <div className="relative w-full sm:w-auto sm:min-w-[150px]">
         <button
           type="button"
-          className="flex items-center gap-2 border rounded px-3 py-2 bg-white hover:bg-gray-50 w-full justify-between"
+          className="flex items-center gap-2 border rounded px-3 py-2 bg-white hover:bg-gray-50 w-full justify-between text-sm md:text-base"
           onClick={() => setOpen((v) => !v)}
         >
           <span className="text-gray-500">
@@ -41,7 +41,7 @@ export function AddNewList({ onCreate }: AddNewListProps) {
           <svg className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
         {open && (
-          <div className="absolute z-10 mt-1 w-[150px] right-0">
+          <div className="absolute z-10 mt-1 w-full sm:w-[150px] right-0">
             <Command shouldFilter={false} className="bg-white border rounded shadow-lg">
               <CommandInput placeholder="Search list type..." autoFocus />
               <CommandList>

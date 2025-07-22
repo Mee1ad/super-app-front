@@ -10,6 +10,8 @@ import {
   Utensils,
   Settings,
   GitCommit,
+  Menu,
+  X,
 } from "lucide-react";
 import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { GoogleLoginButton } from "@/app/auth/molecules/GoogleLoginButton";
@@ -37,12 +39,18 @@ export function Sidebar() {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, hasPermission, loading: authLoading } = useAuth();
 
   // Handle client-side hydration
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   // Filter navigation items based on permissions
   const filteredNavItems = navItems.filter(item => {
@@ -52,10 +60,16 @@ export function Sidebar() {
     return isAuthenticated && hasPermission(item.requiresPermission);
   });
 
-  return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-30 flex flex-col p-6 border-r border-gray-200">
-      <div className="flex items-center mb-8">
+  const SidebarContent = () => (
+    <>
+      <div className="flex items-center justify-between mb-8">
         <span className="font-bold text-xl">Super App</span>
+        <button
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
       <nav className="flex flex-col gap-4 flex-1">
         {filteredNavItems.map(({ label, icon: Icon, href }) => {
@@ -121,10 +135,41 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="fixed top-4 left-4 z-40 md:hidden p-2 bg-white shadow-md rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed left-0 top-0 h-full bg-white shadow-md z-50 flex flex-col p-6 border-r border-gray-200 transition-transform duration-300
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} 
+        md:translate-x-0 md:z-30
+        w-64
+      `}>
+        <SidebarContent />
+      </aside>
+
       <FeedbackDialog 
         isOpen={isFeedbackOpen} 
         onClose={() => setIsFeedbackOpen(false)} 
       />
-    </aside>
+    </>
   );
 } 

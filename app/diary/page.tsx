@@ -94,14 +94,14 @@ export default function DiaryPage() {
 
   return (
     <AppLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Diary</h1>
-          <p className="text-muted-foreground">Capture your thoughts and feelings</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Diary</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Capture your thoughts and feelings</p>
         </div>
         <Button 
           onClick={() => setIsAddDialogOpen(true)} 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
           disabled={loading}
         >
           {loading ? (
@@ -114,7 +114,7 @@ export default function DiaryPage() {
       </div>
 
       {/* Search and Filter */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -126,7 +126,7 @@ export default function DiaryPage() {
           />
         </div>
         <Select value={selectedMood} onValueChange={handleMoodChange} disabled={loading}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter by mood" />
           </SelectTrigger>
           <SelectContent>
@@ -144,7 +144,7 @@ export default function DiaryPage() {
       {error && (
         <Card className="mb-6 border-destructive">
           <CardContent className="pt-6">
-            <p className="text-destructive">{error}</p>
+            <p className="text-destructive text-sm md:text-base">{error}</p>
           </CardContent>
         </Card>
       )}
@@ -155,15 +155,15 @@ export default function DiaryPage() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">Loading entries...</p>
+              <p className="text-muted-foreground text-sm md:text-base">Loading entries...</p>
             </CardContent>
           </Card>
         ) : entries.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="text-muted-foreground text-center">
-                <p className="text-lg font-medium mb-2">No entries found</p>
-                <p className="text-sm">
+                <p className="text-base md:text-lg font-medium mb-2">No entries found</p>
+                <p className="text-xs md:text-sm">
                   {searchTerm || selectedMood !== 'all' 
                     ? 'Try adjusting your search or filters'
                     : 'Start by writing your first diary entry'
@@ -193,7 +193,7 @@ export default function DiaryPage() {
             
             {/* Pagination info */}
             {meta && (
-              <div className="text-center text-sm text-muted-foreground mt-4">
+              <div className="text-center text-xs md:text-sm text-muted-foreground mt-4">
                 Showing {entries.length} of {meta.total} entries
                 {meta.pages > 1 && ` (Page ${meta.page} of ${meta.pages})`}
               </div>

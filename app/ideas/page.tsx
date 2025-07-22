@@ -83,14 +83,14 @@ export default function IdeasPage() {
 
   return (
     <AppLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Daily Ideas</h1>
-          <p className="text-muted-foreground">Capture and organize your thoughts</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Daily Ideas</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Capture and organize your thoughts</p>
         </div>
         <Button 
           onClick={() => setIsAddDialogOpen(true)} 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
           disabled={isCreating}
         >
           {isCreating ? (
@@ -103,7 +103,7 @@ export default function IdeasPage() {
       </div>
 
       {/* Search and Filter */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -114,7 +114,7 @@ export default function IdeasPage() {
           />
         </div>
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
@@ -133,7 +133,7 @@ export default function IdeasPage() {
         <Card className="mb-6 border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <p className="text-destructive">{error}</p>
+              <p className="text-destructive text-sm md:text-base">{error}</p>
               <Button variant="ghost" size="sm" onClick={clearError}>
                 Dismiss
               </Button>
@@ -149,7 +149,7 @@ export default function IdeasPage() {
             <CardContent className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
                 <LoadingSpinner />
-                <span className="text-muted-foreground">Loading ideas...</span>
+                <span className="text-muted-foreground text-sm md:text-base">Loading ideas...</span>
               </div>
             </CardContent>
           </Card>
@@ -157,8 +157,8 @@ export default function IdeasPage() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <div className="text-muted-foreground text-center">
-                <p className="text-lg font-medium mb-2">No ideas found</p>
-                <p className="text-sm">
+                <p className="text-base md:text-lg font-medium mb-2">No ideas found</p>
+                <p className="text-xs md:text-sm">
                   {searchTerm || selectedCategory !== 'all' 
                     ? 'Try adjusting your search or filters'
                     : 'Start by adding your first idea'

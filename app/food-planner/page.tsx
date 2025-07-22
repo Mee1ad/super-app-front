@@ -110,7 +110,7 @@ export default function FoodPlannerPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p>Loading food planner...</p>
+            <p className="text-sm md:text-base">Loading food planner...</p>
           </div>
         </div>
       </AppLayout>
@@ -119,19 +119,19 @@ export default function FoodPlannerPage() {
 
   return (
     <AppLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Food Planner</h1>
-          <p className="text-muted-foreground">Plan meals and track what you eat</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Food Planner</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Plan meals and track what you eat</p>
         </div>
-        <Button onClick={() => setIsAddDialogOpen(true)} className="flex items-center gap-2">
+        <Button onClick={() => setIsAddDialogOpen(true)} className="flex items-center gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Add Food Entry
         </Button>
       </div>
 
       {/* Search and Filter */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -141,47 +141,49 @@ export default function FoodPlannerPage() {
             className="pl-10"
           />
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="planned">Planned</SelectItem>
-            <SelectItem value="eaten">Eaten</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={selectedMealType} onValueChange={setSelectedMealType}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Meal Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Meals</SelectItem>
-            {mealTypes?.map(mealType => (
-              <SelectItem key={mealType.id} value={mealType.id}>
-                {mealType?.emoji} {mealType?.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedDate} onValueChange={setSelectedDate}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Date" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Dates</SelectItem>
-            {getDateOptions().map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="planned">Planned</SelectItem>
+              <SelectItem value="eaten">Eaten</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={selectedMealType} onValueChange={setSelectedMealType}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Meal Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Meals</SelectItem>
+              {mealTypes?.map(mealType => (
+                <SelectItem key={mealType.id} value={mealType.id}>
+                  {mealType?.emoji} {mealType?.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedDate} onValueChange={setSelectedDate}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Date" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Dates</SelectItem>
+              {getDateOptions().map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Main Content */}
       <Tabs defaultValue="plan" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="plan">Meal Plan</TabsTrigger>
           <TabsTrigger value="history">Food History</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
@@ -211,61 +213,61 @@ export default function FoodPlannerPage() {
         </TabsContent>
 
         <TabsContent value="summary" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
                   Planned
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">
+                <p className="text-xl md:text-2xl font-bold">
                   {summary?.planned_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">meals planned</p>
+                <p className="text-xs md:text-sm text-muted-foreground">meals planned</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-blue-500" />
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />
                   Eaten
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">
+                <p className="text-xl md:text-2xl font-bold">
                   {summary?.eaten_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">meals eaten</p>
+                <p className="text-xs md:text-sm text-muted-foreground">meals eaten</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
                   Followed Plan
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">
+                <p className="text-xl md:text-2xl font-bold">
                   {summary?.followed_plan_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">meals on plan</p>
+                <p className="text-xs md:text-sm text-muted-foreground">meals on plan</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <XCircle className="h-5 w-5 text-red-500" />
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <XCircle className="h-4 w-4 md:h-5 md:w-5 text-red-500" />
                   Off Plan
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">
+                <p className="text-xl md:text-2xl font-bold">
                   {summary?.off_plan_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">meals off plan</p>
+                <p className="text-xs md:text-sm text-muted-foreground">meals off plan</p>
               </CardContent>
             </Card>
           </div>

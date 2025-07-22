@@ -194,11 +194,11 @@ export default function TodoPage() {
   return (
     <ErrorBoundary>
       <AppLayout>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <SearchBox onSearch={setSearchQuery} />
           <AddNewList onCreate={handleCreateList} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {filteredLists.map(list => (
             <div key={list.id}>
               {list.type === "task" ? (

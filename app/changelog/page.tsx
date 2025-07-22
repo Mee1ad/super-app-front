@@ -39,7 +39,7 @@ function ChangelogContent() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-sm md:text-base text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -49,13 +49,13 @@ function ChangelogContent() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-xl md:text-2xl font-bold mb-4">Authentication Required</h1>
+          <p className="text-sm md:text-base text-gray-600 mb-4">
             Please log in to access the changelog system.
           </p>
           <Link
             href="/"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block text-sm md:text-base"
           >
             Go to Home
           </Link>
@@ -69,13 +69,13 @@ function ChangelogContent() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-xl md:text-2xl font-bold mb-4">Access Denied</h1>
+          <p className="text-sm md:text-base text-gray-600 mb-4">
             You don&apos;t have permission to access the changelog system.
           </p>
           <Link
             href="/"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block text-sm md:text-base"
           >
             Go to Home
           </Link>
@@ -136,17 +136,17 @@ function ChangelogContent() {
   return (
     <AppLayout>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Changelog</h1>
-          <p className="text-gray-600 mt-1">Track and manage software changes</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Changelog</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Track and manage software changes</p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {hasPermission(PERMISSIONS.CHANGELOG_CREATE) && (
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
               onClick={handleProcessCommits}
               disabled={processCommitsLoading || processingCommits}
             >
@@ -161,7 +161,7 @@ function ChangelogContent() {
           {isAdmin && (
             <Dialog open={showSummary} onOpenChange={setShowSummary}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Summary
                 </Button>
@@ -178,9 +178,9 @@ function ChangelogContent() {
       </div>
 
       {/* Status Filters */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-6">
         <span className="text-sm font-medium text-gray-700">Status:</span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           <Button
             variant={statusFilter === 'all' ? 'default' : 'outline'}
             size="sm"
