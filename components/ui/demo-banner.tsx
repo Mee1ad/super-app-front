@@ -2,7 +2,6 @@
 
 import { X } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from './button'
 import { useAuth } from '@/app/auth/atoms/useAuth'
 
 interface DemoBannerProps {
@@ -29,44 +28,20 @@ export function DemoBanner({ className = '' }: DemoBannerProps) {
   }
 
   return (
-    <div className={`bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 relative ${className}`}>
-      <div className="flex items-center justify-between max-w-4xl mx-auto">
-        <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0">
-            <span className="text-lg">🎯</span>
+    <div className={`bg-gray-50 border-b border-gray-200 text-gray-600 px-4 py-2 relative ${className}`}>
+      <div className="ml-64">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center">
+              <span className="text-sm font-medium">Demo Mode</span>
+            </div>
+            <button
+              onClick={() => setIsVisible(false)}
+              className="text-gray-500 hover:text-gray-700 p-1"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <div>
-            <h3 className="font-semibold text-sm sm:text-base">
-              Welcome to the Demo!
-            </h3>
-            <p className="text-xs sm:text-sm opacity-90">
-              You&apos;re viewing sample data. Sign in to save your own entries and access all features.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-white border-white hover:bg-white hover:text-blue-600"
-            onClick={() => {
-              // This will trigger the login flow
-              const loginButton = document.querySelector('[data-login-button]') as HTMLButtonElement
-              if (loginButton) {
-                loginButton.click()
-              }
-            }}
-          >
-            Sign In
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white hover:text-blue-600 p-1"
-            onClick={() => setIsVisible(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>
