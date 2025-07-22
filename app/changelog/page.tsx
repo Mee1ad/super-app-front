@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useProcessCommits } from './atoms/useChangelogApi';
 import { useToast } from '@/hooks/use-toast';
 import { AppLayout } from '../shared/organisms/AppLayout';
+import Link from 'next/link'
 
 type StatusFilter = 'published' | 'drafts' | 'all';
 
@@ -52,12 +53,12 @@ function ChangelogContent() {
           <p className="text-gray-600 mb-4">
             Please log in to access the changelog system.
           </p>
-          <a
+          <Link
             href="/"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
           >
             Go to Home
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -70,14 +71,14 @@ function ChangelogContent() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
           <p className="text-gray-600 mb-4">
-            You don't have permission to access the changelog system.
+            You don&apos;t have permission to access the changelog system.
           </p>
-          <a
+          <Link
             href="/"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
           >
             Go to Home
-          </a>
+          </Link>
         </div>
       </div>
     );

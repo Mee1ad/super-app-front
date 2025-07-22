@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { DemoBanner } from './demo-banner'
 import { useAuth } from '@/app/auth/atoms/useAuth'
 import { usePersistentState } from '@/hooks/use-persistent-state'

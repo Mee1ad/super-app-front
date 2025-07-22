@@ -1,49 +1,7 @@
 import { diaryApi } from './api'
-import { Mood, DiaryEntry, DiaryEntryCreate, DiaryEntryUpdate } from './types'
 
 // Mock fetch globally
 global.fetch = jest.fn()
-
-// Mock data
-const mockMoods: Mood[] = [
-  {
-    id: "happy",
-    name: "Happy",
-    emoji: "😊",
-    color: "#4CAF50",
-    created_at: "2024-12-01T10:00:00Z"
-  },
-  {
-    id: "sad",
-    name: "Sad",
-    emoji: "😢",
-    color: "#2196F3",
-    created_at: "2024-12-01T10:00:00Z"
-  }
-]
-
-const mockEntries: DiaryEntry[] = [
-  {
-    id: "550e8400-e29b-41d4-a716-446655440000",
-    title: "My First Entry",
-    content: "Today was a great day...",
-    mood: "happy",
-    date: "2024-12-01",
-    images: [],
-    created_at: "2024-12-01T10:00:00Z",
-    updated_at: "2024-12-01T10:00:00Z"
-  },
-  {
-    id: "660e8400-e29b-41d4-a716-446655440001",
-    title: "Reflection Time",
-    content: "Feeling a bit down today...",
-    mood: "sad",
-    date: "2024-12-02",
-    images: ["/static/uploads/reflection.jpg"],
-    created_at: "2024-12-02T15:30:00Z",
-    updated_at: "2024-12-02T15:30:00Z"
-  }
-]
 
 describe('diaryApi', () => {
   beforeEach(() => {
@@ -91,89 +49,9 @@ describe('diaryApi', () => {
             content: 'Feeling a bit down today. Work was challenging and I didn\'t get as much done as I hoped. But I\'m trying to stay positive and focus on tomorrow.',
             mood: 'sad',
             date: '2024-12-02',
-            images: [],
+            images: ["/static/uploads/reflection.jpg"],
             created_at: '2024-12-02T15:30:00Z',
             updated_at: '2024-12-02T15:30:00Z'
-          },
-          {
-            id: 'demo-3',
-            title: 'Frustrated with Technology',
-            content: 'My computer crashed three times today while working on an important project. Lost some progress and feeling really frustrated with technology right now.',
-            mood: 'angry',
-            date: '2024-12-03',
-            images: [],
-            created_at: '2024-12-03T14:20:00Z',
-            updated_at: '2024-12-03T14:20:00Z'
-          },
-          {
-            id: 'demo-4',
-            title: 'Peaceful Evening',
-            content: 'Spent the evening reading a good book and listening to calming music. The sunset was beautiful and I feel really at peace right now.',
-            mood: 'calm',
-            date: '2024-12-04',
-            images: [],
-            created_at: '2024-12-04T19:45:00Z',
-            updated_at: '2024-12-04T19:45:00Z'
-          },
-          {
-            id: 'demo-5',
-            title: 'Big News!',
-            content: 'I got the job offer I\'ve been waiting for! This is exactly what I wanted and I\'m so excited to start this new chapter in my career.',
-            mood: 'excited',
-            date: '2024-12-05',
-            images: [],
-            created_at: '2024-12-05T11:15:00Z',
-            updated_at: '2024-12-05T11:15:00Z'
-          },
-          {
-            id: 'demo-6',
-            title: 'Weekend Plans',
-            content: 'Planning a fun weekend with friends. We\'re going hiking and then having a barbecue. I\'m really looking forward to spending time outdoors.',
-            mood: 'happy',
-            date: '2024-12-06',
-            images: [],
-            created_at: '2024-12-06T09:30:00Z',
-            updated_at: '2024-12-06T09:30:00Z'
-          },
-          {
-            id: 'demo-7',
-            title: 'Learning Something New',
-            content: 'Started learning a new programming language today. It\'s challenging but exciting. I love the feeling of expanding my skills.',
-            mood: 'excited',
-            date: '2024-12-07',
-            images: [],
-            created_at: '2024-12-07T16:00:00Z',
-            updated_at: '2024-12-07T16:00:00Z'
-          },
-          {
-            id: 'demo-8',
-            title: 'Missing Home',
-            content: 'Feeling homesick today. It\'s been a while since I\'ve seen my family. Planning to call them this weekend and maybe plan a visit soon.',
-            mood: 'sad',
-            date: '2024-12-08',
-            images: [],
-            created_at: '2024-12-08T20:10:00Z',
-            updated_at: '2024-12-08T20:10:00Z'
-          },
-          {
-            id: 'demo-9',
-            title: 'Meditation Session',
-            content: 'Had a great meditation session this morning. I\'m trying to make it a daily habit. It really helps me start the day with a clear mind.',
-            mood: 'calm',
-            date: '2024-12-09',
-            images: [],
-            created_at: '2024-12-09T07:00:00Z',
-            updated_at: '2024-12-09T07:00:00Z'
-          },
-          {
-            id: 'demo-10',
-            title: 'Traffic Rage',
-            content: 'Stuck in traffic for over an hour today. People were driving so recklessly and I was late for an important meeting. Completely ruined my mood.',
-            mood: 'angry',
-            date: '2024-12-10',
-            images: [],
-            created_at: '2024-12-10T08:45:00Z',
-            updated_at: '2024-12-10T08:45:00Z'
           }
         ],
         meta: {

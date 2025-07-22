@@ -11,13 +11,6 @@ Sentry.init({
   // Enable debug mode in development
   debug: process.env.NODE_ENV === "development",
   
-  // Set sampling rate for profiling - this is relative to tracesSampleRate
-  profilesSampleRate: parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE || "1.0"),
-  
-  // Enable auto-instrumentation
-  autoInstrumentServerFunctions: true,
-  autoInstrumentMiddleware: true,
-  
   // Send default PII
   sendDefaultPii: true,
   
