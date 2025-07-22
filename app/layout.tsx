@@ -36,7 +36,7 @@ export default function RootLayout({
           <ChangelogProvider>
             <DemoBanner />
             <Sidebar />
-            <main className="pt-20 md:pt-0 md:ml-64 transition-all duration-300">
+            <main className="md:pt-0 md:ml-64 transition-all duration-300">
               {children}
             </main>
           </ChangelogProvider>
