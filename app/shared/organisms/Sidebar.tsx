@@ -140,13 +140,17 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(true)}
-        className="fixed top-4 left-4 z-40 md:hidden p-2 bg-white shadow-md rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+      {/* Mobile menu button - only render after client-side hydration */}
+      {isClient && (
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="fixed top-6 left-4 z-40 md:hidden p-2 bg-white shadow-md rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+          aria-label="Open menu"
+          type="button"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      )}
 
       {/* Mobile overlay */}
       {isMobileMenuOpen && (

@@ -31,8 +31,8 @@ export function DemoBanner({ className = '' }: DemoBannerProps) {
 
   return (
     <div className={`bg-gray-50 border-b border-gray-200 text-gray-600 px-4 py-2 relative ${className}`}>
-      <div className="ml-64">
-        <div className="container mx-auto px-6">
+      <div className="md:ml-64">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between">
             <div className="flex-1 text-center">
               <span className="text-sm font-medium">Demo Mode</span>
