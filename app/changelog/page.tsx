@@ -52,10 +52,10 @@ function ChangelogContent() {
             Please log in to access the changelog system.
           </p>
           <a
-            href="/login"
+            href="/"
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
           >
-            Login
+            Go to Home
           </a>
         </div>
       </div>

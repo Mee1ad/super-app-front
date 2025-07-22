@@ -119,7 +119,7 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
 
 
       // First, check if user should see changelog
-      const statusUrl = `${API_BASE_URL}/changelog/latest?ip_address=${encodeURIComponent(info.ip_address)}&userAgent=${encodeURIComponent(info.user_agent)}`
+      const statusUrl = `${API_BASE_URL}/api/v1/changelog/latest?ip_address=${encodeURIComponent(info.ip_address)}&userAgent=${encodeURIComponent(info.user_agent)}`
       
       console.log('ChangelogProvider: Calling status API:', statusUrl)
       
@@ -154,7 +154,7 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
         console.error('ChangelogProvider: Failed to fetch changelog:', statusResponse.status)
         setChangelogData(null)
       }
-          } catch (error) {
+    } catch (error) {
         console.error('ChangelogProvider: Failed to check anonymous changelog:', error)
         console.error('ChangelogProvider: Error details:', {
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -195,7 +195,7 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
       console.log('ChangelogProvider: Marking changelog as viewed')
       
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const viewedUrl = `${API_BASE_URL}/changelog/viewed`
+      const viewedUrl = `${API_BASE_URL}/api/v1/changelog/viewed`
       
       console.log('ChangelogProvider: Calling viewed API:', viewedUrl)
       

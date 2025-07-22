@@ -12,6 +12,9 @@ export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // Debug logging
+  console.log('UserMenu render:', { isAuthenticated, user })
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

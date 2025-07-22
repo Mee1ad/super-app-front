@@ -2,3 +2,8 @@
 alwaysApply: false
 ---
 please always make short less than 10 words commit messages
+
+**Make small commits with clear messages**
+* Each commit should represent a single logical change
+* Break large changes into multiple smaller commits
+* Use descriptive commit messages that explain the "why" not just the "what"

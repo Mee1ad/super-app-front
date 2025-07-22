@@ -65,7 +65,7 @@ export interface User {
 export function getCurrentUser(): User | null {
   if (typeof window === 'undefined') return null;
   
-  const userStr = localStorage.getItem('user');
+  const userStr = localStorage.getItem('auth_user');
   if (!userStr) return null;
   
   try {
@@ -144,7 +144,7 @@ export function isTokenValid(token: string): boolean {
 export function setupTokenExpiration(): void {
   if (typeof window === 'undefined') return;
   
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('auth_access_token');
   if (!token) return;
   
   try {
@@ -168,10 +168,10 @@ export function setupTokenExpiration(): void {
 export function logout(): void {
   if (typeof window === 'undefined') return;
   
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
-  localStorage.removeItem('user');
-  window.location.href = '/login';
+  localStorage.removeItem('auth_access_token');
+  localStorage.removeItem('auth_refresh_token');
+  localStorage.removeItem('auth_user');
+  window.location.href = '/';
 }
 
 // Debug user permissions

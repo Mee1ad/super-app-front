@@ -33,6 +33,7 @@ export function useAuth() {
         if (accessToken && refreshToken && userStr) {
           const user = JSON.parse(userStr)
           console.log('Loaded user from storage:', user) // Debug log
+          console.log('Setting auth state with user:', user) // Debug log
           setAuthState({
             isAuthenticated: true,
             user,

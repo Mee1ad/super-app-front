@@ -3,7 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Make authenticated request with automatic token refresh
 export async function makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('auth_access_token');
   
   if (!token) {
     throw new Error('No access token found');
@@ -30,12 +30,14 @@ export async function makeAuthenticatedRequest(url: string, options: RequestInit
 
 // Refresh expired tokens
 export async function refreshToken(): Promise<void> {
-  const refreshToken = localStorage.getItem('refresh_token');
+      const refreshToken = localStorage.getItem('auth_refresh_token');
   
   if (!refreshToken) {
-    // Redirect to login
-    window.location.href = '/login';
-    return;
+    // Clear tokens and throw error
+    localStorage.removeItem('auth_access_token');
+    localStorage.removeItem('auth_refresh_token');
+    localStorage.removeItem('auth_user');
+    throw new Error('No refresh token found');
   }
 
   try {
@@ -54,16 +56,16 @@ export async function refreshToken(): Promise<void> {
     const data = await response.json();
     
     // Update stored tokens
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('refresh_token', data.refresh_token);
+          localStorage.setItem('auth_access_token', data.access_token);
+      localStorage.setItem('auth_refresh_token', data.refresh_token);
     
   } catch (error) {
     console.error('Token refresh failed:', error);
-    // Clear tokens and redirect to login
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    // Clear tokens and throw error
+    localStorage.removeItem('auth_access_token');
+    localStorage.removeItem('auth_refresh_token');
+    localStorage.removeItem('auth_user');
+    throw new Error('Token refresh failed');
   }
 }
 
@@ -85,11 +87,11 @@ export async function handleAuthCallback(code: string): Promise<{ tokens: { acce
     const authData = await response.json();
     
     // Store tokens securely
-    localStorage.setItem('access_token', authData.tokens.access_token);
-    localStorage.setItem('refresh_token', authData.tokens.refresh_token);
+          localStorage.setItem('auth_access_token', authData.tokens.access_token);
+      localStorage.setItem('auth_refresh_token', authData.tokens.refresh_token);
     
     // Store user info
-    localStorage.setItem('user', JSON.stringify(authData.user));
+          localStorage.setItem('auth_user', JSON.stringify(authData.user));
     
     return authData;
   } catch (error) {
