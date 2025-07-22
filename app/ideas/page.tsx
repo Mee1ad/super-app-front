@@ -11,6 +11,7 @@ import { IdeaCard } from './molecules/IdeaCard'
 import { LoadingSpinner } from './atoms/LoadingSpinner'
 import { useIdeasApi } from './atoms/useIdeasApi'
 import { IdeaCreate, IdeaUpdate, Idea } from './atoms/types'
+import { AppLayout } from '../shared/organisms/AppLayout'
 
 export default function IdeasPage() {
   const {
@@ -72,7 +73,7 @@ export default function IdeasPage() {
   })
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <AppLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Daily Ideas</h1>
@@ -183,6 +184,6 @@ export default function IdeasPage() {
         categories={categories}
         isLoading={isCreating}
       />
-    </div>
+    </AppLayout>
   )
 } 

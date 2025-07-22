@@ -15,20 +15,34 @@ import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { GoogleLoginButton } from "@/app/auth/molecules/GoogleLoginButton";
 import { UserMenu } from "@/app/auth/organisms/UserMenu";
 import { useAuth } from "@/app/auth/atoms/useAuth";
+import { PERMISSIONS } from "@/lib/permissions";
 
-const navItems = [
+interface NavItem {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+  requiresPermission?: string;
+}
+
+const navItems: NavItem[] = [
   { label: "Todo", icon: ListTodo, href: "/todo" },
   { label: "Food Planner", icon: Utensils, href: "/food-planner" },
   { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Diary", icon: Notebook, href: "/diary" },
   { label: "Habit", icon: CheckSquare, href: "/habit" },
-  { label: "Changelog", icon: GitCommit, href: "/changelog" },
+  { label: "Changelog", icon: GitCommit, href: "/changelog", requiresPermission: PERMISSIONS.CHANGELOG_VIEW },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hasPermission } = useAuth();
+
+  // Filter navigation items based on permissions
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.requiresPermission) return true;
+    return isAuthenticated && hasPermission(item.requiresPermission);
+  });
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-30 flex flex-col p-6 border-r border-gray-200">
@@ -36,7 +50,7 @@ export function Sidebar() {
         <span className="font-bold text-xl">Super App</span>
       </div>
       <nav className="flex flex-col gap-4 flex-1">
-        {navItems.map(({ label, icon: Icon, href }) => {
+        {filteredNavItems.map(({ label, icon: Icon, href }) => {
           const isActive = pathname === href;
           return (
             <a

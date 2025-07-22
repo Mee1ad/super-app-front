@@ -1,6 +1,3 @@
----
-alwaysApply: false
----
 
 use "shadcn" components only
 
@@ -67,149 +64,64 @@ use "shadcn" components only
   * lg: 1024px
   * xl: 1280px
 
-### Theming & Tokens
+### App Layout Standards
 
-* Use CSS variables
+* **Consistent App Layout**: All app pages must use the `AppLayout` component from `@/app/shared/organisms/AppLayout` for consistent spacing and width.
+* **Standard Padding**: 
+  * Horizontal padding: `px-6` (24px)
+  * Vertical padding: `py-8` (32px)
+  * Max width: `max-w-6xl` (1152px)
+* **Container Structure**: Use `container mx-auto` for proper centering and responsive behavior.
+* **Page Structure**: Every app page should follow this structure:
+  ```tsx
+  export default function AppPage() {
+    return (
+      <AppLayout>
+        {/* Page content */}
+      </AppLayout>
+    )
+  }
+  ```
 
-* Tailwind config uses `@tailwindcss/forms`, `tailwind-variants`, and custom plugin for themes.
+### Component Lifecycle Management
 
-### Accessibility
+* **Persistent State**: Use the `usePersistentState` hook from `@/hooks/use-persistent-state` for state that should survive page navigation.
+* **State Persistence Guidelines**:
+  * **DO persist**: User preferences, dismissed notifications, theme settings, sidebar collapse state
+  * **DON'T persist**: Search terms, form inputs, temporary UI states, pagination state
+* **Layout Components**: Components in the root layout (like `DemoBanner`, `Sidebar`) should persist their state across navigation.
+* **Page Components**: Page-specific state should typically reset on navigation for better UX.
+* **Client-Side Hydration**: Always handle client-side hydration properly to prevent hydration mismatches:
+  ```tsx
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  if (!isClient) return null // or loading state
+  ```
 
-* WCAG 2.1 AA compliance
-* All interactive elements:
+### Permission-Based Navigation
 
-  * Keyboard focusable
-  * ARIA roles
-  * Proper contrast ratio (> 4.5:1)
-* Use `@axe-core/react` during development
-
-## Development Practices
-
-* Mobile-first
-* Semantic HTML
-* Lazy loading and code splitting
-* PWA support (offline, splash, install prompt)
-* SEO ready (meta, OpenGraph, robots.txt, sitemap.xml)
-* ESLint, Prettier, Stylelint configured
-* Tailwind Variants (CVA) for styling
-* Snapshot + unit tests (Jest + React Testing Library)
-* Global Error Boundaries
-* Logger utility (e.g., pino or console wrapper)
-* Config folder:
-
-  * `config/theme.ts`, `config/env.ts`, `config/meta.ts`
-* Atomic Design: Atoms / Molecules / Organisms / Templates / Pages
-* **App-specific components should be placed inside their respective app folders for better modularity and organization.**
-
-
-## Tools & Structure
-
-* **Framer Motion** for animation
-* **Tailwind CSS** for styling
-* **shadcn/ui** for component library
-
-## File Organization
-
-* Follow a **feature-based directory structure**.
-* Inside each feature (e.g. `todo`, `diary`, `idea`), organize UI components using **Atomic Design** principles (`atoms`, `molecules`, `organisms`, `templates`).
-* Shared components should go in a `shared/` folder, and app-specific ones in their respective feature folders.
-
-Example structure:
-
-```
-app/
-├── layout.tsx
-├── page.tsx
-components/
-├── diary/
-│   ├── molecules/
-│   ├── organisms/
-│   └── templates/
-├── idea/
-│   ├── molecules/
-│   ├── organisms/
-├── shared/
-│   ├── atoms/
-│   ├── organisms/
-│   └── templates/
-styles/
-├── globals.css
-├── theme.css
-config/
-├── env.ts
-├── theme.ts
-├── meta.ts
-```
-
-## Error Handling
-
-* Always implement error handling in all async actions and API calls, and always notify the client (user) via a toast or visible UI feedback. Never allow silent failures or unhandled errors.
-
-# Rule: Always Write and Run Required Tests
-Whenever you add or change code, you must always write and run all types of required tests (unit, integration, E2E as appropriate) to ensure correctness and prevent regressions. This is mandatory for all code changes.use "shadcn" components only
-
-# UI Design Guidelines
-
-## Design System
-
-### Typography
-
-* English Font: Inter, sans-serif
-* Persian Font: Vazir, sans-serif
-* Sizes:
-
-  * H1: 2rem (32px)
-  * H2: 1.5rem (24px)
-  * Body: 1rem (16px)
-  * Small: 0.875rem (14px)
-* Line Height: 1.5
-
-### Spacing
-
-* Base unit: 8px
-* Scale: 4, 8, 16, 24, 32, 40, 48, 64px
-
-### Border Radius
-
-### Component Standards
-
-* Use **Lucide Icons** for all UI icons to ensure consistency with shadcn/ui design components.
-
-
-* **Cards/Containers**
-
-  * Padding: 24px
-  * Elevation: subtle shadow
-
-* **Skeleton Loaders**
-
-  * Animated shimmer using Tailwind or framer-motion
-
-* **Icons**
-
-  * Icons should be standalone clickable elements (e.g., plain `<svg>` inside a `<div>` or `<span>` with `cursor-pointer`).
-  * Do **not** use `<button>` if it adds unwanted default styles.
-  * Do **not** wrap icons with Button components.
-  * Do **not** apply background, border-radius, or padding that makes them appear like black rounded buttons.
-  * Icons should have minimal styling and appear inline with surrounding elements unless otherwise specified.
-  * Do **not** wrap icons with Button components.
-  * Do **not** apply background, border-radius, or padding that makes them appear like black rounded buttons.
-  * Icons should have minimal styling and appear inline with surrounding elements unless otherwise specified.
-
-### Layout Principles
-
-* Mobile-first, 12-column grid
-* Margins:
-
-  * Mobile: 16px
-  * Tablet: 24px
-  * Desktop: 48px
-* Breakpoints:
-
-  * sm: 640px
-  * md: 768px
-  * lg: 1024px
-  * xl: 1280px
+* **Navigation Filtering**: Use permission-based filtering for navigation items that require specific access levels.
+* **Permission Structure**: Each navigation item can have an optional `requiresPermission` field.
+* **Implementation Pattern**:
+  ```tsx
+  interface NavItem {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    href: string;
+    requiresPermission?: string;
+  }
+  
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.requiresPermission) return true;
+    return isAuthenticated && hasPermission(item.requiresPermission);
+  });
+  ```
+* **Permission Checks**: Always check both authentication status and specific permissions.
+* **Role-Based Access**: Use the centralized permission system from `@/lib/permissions`.
 
 ### Theming & Tokens
 

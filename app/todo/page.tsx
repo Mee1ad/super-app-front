@@ -15,6 +15,7 @@ import { ErrorBoundary } from "./atoms/ErrorBoundary";
 import { LoadingSpinner } from "./atoms/LoadingSpinner";
 import { TaskItemProps } from "./atoms/TaskItem";
 import { ShoppingItemProps } from "./atoms/ShoppingItem";
+import { AppLayout } from "../shared/organisms/AppLayout";
 
 export default function TodoPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -192,7 +193,7 @@ export default function TodoPage() {
 
   return (
     <ErrorBoundary>
-      <div className="p-8">
+      <AppLayout>
         <div className="flex justify-between items-center mb-6">
           <SearchBox onSearch={setSearchQuery} />
           <AddNewList onCreate={handleCreateList} />
@@ -229,7 +230,7 @@ export default function TodoPage() {
             </div>
           ))}
         </div>
-      </div>
+      </AppLayout>
     </ErrorBoundary>
   );
 } 

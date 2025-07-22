@@ -11,6 +11,7 @@ import { RefreshCw, BarChart3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useProcessCommits } from './atoms/useChangelogApi';
 import { useToast } from '@/hooks/use-toast';
+import { AppLayout } from '../shared/organisms/AppLayout';
 
 type StatusFilter = 'published' | 'drafts' | 'all';
 
@@ -50,6 +51,26 @@ function ChangelogContent() {
           <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
           <p className="text-gray-600 mb-4">
             Please log in to access the changelog system.
+          </p>
+          <a
+            href="/"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
+          >
+            Go to Home
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user has permission to view changelog
+  if (!hasPermission(PERMISSIONS.CHANGELOG_VIEW)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access the changelog system.
           </p>
           <a
             href="/"
@@ -112,7 +133,7 @@ function ChangelogContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <AppLayout>
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -187,7 +208,7 @@ function ChangelogContent() {
 
       {/* Changelog List */}
       <ChangelogList statusFilter={statusFilter} />
-    </div>
+    </AppLayout>
   );
 }
 

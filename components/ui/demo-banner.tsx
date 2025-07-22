@@ -1,15 +1,17 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useState } from 'react'
 import { useAuth } from '@/app/auth/atoms/useAuth'
+import { usePersistentState } from '@/hooks/use-persistent-state'
 
 interface DemoBannerProps {
   className?: string
 }
 
+const DEMO_BANNER_DISMISSED_KEY = 'demo-banner-dismissed'
+
 export function DemoBanner({ className = '' }: DemoBannerProps) {
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = usePersistentState(DEMO_BANNER_DISMISSED_KEY, true)
   const { isAuthenticated, loading: authLoading } = useAuth()
 
   // Don't render anything while auth is loading to prevent flash

@@ -13,6 +13,7 @@ import { FoodHistoryView } from './organisms/FoodHistoryView'
 import { CalendarView } from './organisms/CalendarView'
 import { useFoodPlannerApi } from './atoms/useFoodPlannerApi'
 import { FoodEntry } from './atoms/types'
+import { AppLayout } from '../shared/organisms/AppLayout'
 
 export default function FoodPlannerPage() {
   const {
@@ -105,19 +106,19 @@ export default function FoodPlannerPage() {
 
   if (loading && foodEntries.length === 0) {
     return (
-      <div className="container mx-auto p-6 max-w-6xl">
+      <AppLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
             <p>Loading food planner...</p>
           </div>
         </div>
-      </div>
+      </AppLayout>
     )
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <AppLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Food Planner</h1>
@@ -277,6 +278,6 @@ export default function FoodPlannerPage() {
         mealTypes={mealTypes}
         onSubmit={handleAddEntry}
       />
-    </div>
+    </AppLayout>
   )
 } 

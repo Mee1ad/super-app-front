@@ -10,6 +10,7 @@ import { AddDiaryDialog } from './organisms/AddDiaryDialog'
 import { DiaryCard } from './molecules/DiaryCard'
 import { useDiaryApi } from './atoms/useDiaryApi'
 import { DiaryEntryCreate, DiaryEntryUpdate } from './atoms/types'
+import { AppLayout } from '../shared/organisms/AppLayout'
 
 export default function DiaryPage() {
   const {
@@ -83,7 +84,7 @@ export default function DiaryPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <AppLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Diary</h1>
@@ -199,6 +200,6 @@ export default function DiaryPage() {
         moods={moods}
         loading={loading}
       />
-    </div>
+    </AppLayout>
   )
 } 
