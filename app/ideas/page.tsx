@@ -14,6 +14,13 @@ import { IdeaCreate, IdeaUpdate, Idea } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
 
 export default function IdeasPage() {
+  const [isClient, setIsClient] = useState(false)
+  
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   const {
     ideas,
     categories,
@@ -31,8 +38,10 @@ export default function IdeasPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  // Debounced search effect
+  // Debounced search effect - only run after client-side hydration
   useEffect(() => {
+    if (!isClient) return
+    
     const timeoutId = setTimeout(() => {
       loadIdeas({
         search: searchTerm || undefined,
@@ -41,7 +50,7 @@ export default function IdeasPage() {
     }, 300)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm, selectedCategory, loadIdeas])
+  }, [searchTerm, selectedCategory, loadIdeas, isClient])
 
   const handleAddIdea = async (newIdea: IdeaCreate): Promise<Idea> => {
     const result = await createIdea(newIdea)

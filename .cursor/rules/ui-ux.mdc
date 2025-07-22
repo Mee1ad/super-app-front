@@ -101,6 +101,45 @@ use "shadcn" components only
   
   if (!isClient) return null // or loading state
   ```
+* **Permission-Based Hydration**: For components that filter content based on permissions, ensure consistent rendering between server and client:
+  ```tsx
+  const filteredItems = items.filter(item => {
+    if (!item.requiresPermission) return true;
+    // Only apply permission filtering after client-side hydration and auth loading is complete
+    if (!isClient || authLoading) return false;
+    return isAuthenticated && hasPermission(item.requiresPermission);
+  });
+  ```
+* **Auth State Hydration**: Always check both client-side hydration and auth loading state:
+  ```tsx
+  // In useAuth hook
+  const checkPermission = useCallback((permission: string) => {
+    // Don't check permissions during SSR or while loading
+    if (typeof window === 'undefined' || authState.loading) {
+      return false;
+    }
+    return hasPermission(permission)
+  }, [authState.loading])
+  ```
+* **API Hooks Hydration**: For hooks that make API calls based on authentication state, ensure consistent behavior:
+  ```tsx
+  export function useApiHook() {
+    const [isClient, setIsClient] = useState(false)
+    const { isAuthenticated, loading: authLoading } = useAuth()
+    
+    // Handle client-side hydration
+    useEffect(() => {
+      setIsClient(true)
+    }, [])
+    
+    // Only make API calls after client-side hydration
+    useEffect(() => {
+      if (!authLoading && isClient) {
+        // Make API calls here
+      }
+    }, [authLoading, isClient])
+  }
+  ```
 
 ### Permission-Based Navigation
 

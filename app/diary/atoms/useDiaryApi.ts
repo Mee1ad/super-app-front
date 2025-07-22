@@ -20,9 +20,15 @@ export const useDiaryApi = () => {
     limit: number
     pages: number
   } | null>(null)
+  const [isClient, setIsClient] = useState(false)
   
   const { toast } = useToast()
   const { isAuthenticated, loading: authLoading } = useAuth()
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Load moods
   const loadMoods = useCallback(async () => {
@@ -176,16 +182,16 @@ export const useDiaryApi = () => {
 
   // Load initial data - wait for auth loading to complete first
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && isClient) {
       // Don't auto-load to prevent test timeouts
       // loadMoods()
       // loadEntries()
     }
-  }, [authLoading])
+  }, [authLoading, isClient])
 
   // Clear mock data when user logs in
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (isAuthenticated && !authLoading && isClient) {
       setEntries([])
       setMeta(null)
       setError(null)
@@ -193,7 +199,7 @@ export const useDiaryApi = () => {
       loadMoods()
       loadEntries()
     }
-  }, [isAuthenticated, authLoading, loadMoods, loadEntries])
+  }, [isAuthenticated, authLoading, loadMoods, loadEntries, isClient])
 
   return {
     moods,

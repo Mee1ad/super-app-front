@@ -152,12 +152,20 @@ export function useAuth() {
 
   // Add permission checking methods
   const checkPermission = useCallback((permission: string) => {
+    // Don't check permissions during SSR or while loading
+    if (typeof window === 'undefined' || authState.loading) {
+      return false;
+    }
     return hasPermission(permission)
-  }, [])
+  }, [authState.loading])
 
   const checkRole = useCallback((roleName: string) => {
+    // Don't check roles during SSR or while loading
+    if (typeof window === 'undefined' || authState.loading) {
+      return false;
+    }
     return hasRole(roleName)
-  }, [])
+  }, [authState.loading])
 
   return {
     ...authState,

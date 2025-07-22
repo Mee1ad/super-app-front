@@ -13,6 +13,13 @@ import { DiaryEntryCreate, DiaryEntryUpdate } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
 
 export default function DiaryPage() {
+  const [isClient, setIsClient] = useState(false)
+  
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   const {
     moods,
     entries,
@@ -30,11 +37,13 @@ export default function DiaryPage() {
   const [selectedMood, setSelectedMood] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  // Load initial data
+  // Load initial data - only after client-side hydration
   useEffect(() => {
-    loadMoods()
-    loadEntries()
-  }, [loadMoods, loadEntries])
+    if (isClient) {
+      loadMoods()
+      loadEntries()
+    }
+  }, [loadMoods, loadEntries, isClient])
 
   // Handle search and filter changes
   const handleSearchChange = (value: string) => {

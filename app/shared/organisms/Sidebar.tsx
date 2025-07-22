@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   ListTodo,
@@ -36,11 +36,19 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const { isAuthenticated, hasPermission } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+  const { isAuthenticated, hasPermission, loading: authLoading } = useAuth();
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Filter navigation items based on permissions
   const filteredNavItems = navItems.filter(item => {
     if (!item.requiresPermission) return true;
+    // Only apply permission filtering after client-side hydration and auth loading is complete
+    if (!isClient || authLoading) return false;
     return isAuthenticated && hasPermission(item.requiresPermission);
   });
 
