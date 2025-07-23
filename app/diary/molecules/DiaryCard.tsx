@@ -22,12 +22,24 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    }).format(date)
+    return {
+      day: date.getDate(),
+      month: date.toLocaleString('en-US', { month: 'short' }),
+      year: date.getFullYear(),
+      time: date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
+    }
   }
+
+  const { day, month, year, time } = formatDate(entry.date)
+
+  // Generate a random time for demo
+  function getRandomTime() {
+    const hour = Math.floor(Math.random() * 12) + 1;
+    const minute = Math.floor(Math.random() * 60);
+    const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+    return `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+  }
+  const demoTime = getRandomTime();
 
   const truncateContent = (content: string, maxLength: number = 150) => {
     if (content.length <= maxLength) return content
@@ -40,74 +52,50 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
 
   return (
     <>
-      <Card 
-        className="hover:shadow-md transition-shadow cursor-pointer" 
+      <div
+        className="flex flex-row w-full bg-transparent dark:bg-transparent px-0 py-4 border-b border-border cursor-pointer"
         onClick={handleCardClick}
       >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3 flex-1">
-              <span className="text-2xl" style={{ color: mood.color }}>{mood.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg mb-1">{entry.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <Calendar className="h-3 w-3" />
-                  {formatDate(entry.date)}
-                  <span className="text-xs">•</span>
-                  <span style={{ color: mood.color }}>{mood.name}</span>
-                </div>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-3">
-                  {truncateContent(entry.content)}
-                </p>
-                
-                {/* Image Preview */}
-                {entry.images && entry.images.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <ImageIcon className="h-3 w-3" />
-                      {entry.images.length} image{entry.images.length !== 1 ? 's' : ''}
-                    </div>
-                    <div className="flex gap-2 overflow-x-auto">
-                      {entry.images.slice(0, 3).map((image, index) => (
-                        <div key={index} className="flex-shrink-0">
-                          <Image
-                            src={image}
-                            alt="Diary image"
-                            width={80}
-                            height={80}
-                            className="w-20 h-20 object-cover rounded-lg"
-                          />
-                        </div>
-                      ))}
-                      {entry.images.length > 3 && (
-                        <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-muted-foreground">
-                          +{entry.images.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 ml-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete(entry.id)
-                }}
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                disabled={loading}
-                aria-label="Delete entry"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+        {/* Date Sidebar (left) */}
+        <div className="flex flex-col items-center justify-center min-w-[64px] max-w-[64px] mr-1">
+          <span className="text-4xl leading-none">{day}</span>
+          <span className="text-base font-semibold text-muted-foreground mt-1">{month}</span>
+          <span className="text-xs text-muted-foreground mt-0.5">{year}</span>
+        </div>
+        {/* Vertical Divider */}
+        <div className="w-1 bg-border mx-1 rounded-full" />
+        {/* Entry Content (right) */}
+        <div className="flex-1 flex flex-col items-start text-left pl-2">
+          <span className="text-xs text-muted-foreground mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>{demoTime}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-base">{entry.title}</h3>
+            <span className="text-2xl" style={{ color: mood.color }}>{mood.emoji}</span>
           </div>
-        </CardHeader>
-      </Card>
-
+          <p className="text-sm leading-relaxed mb-1">
+            {truncateContent(entry.content)}
+          </p>
+          {/* Images, if any */}
+          {entry.images && entry.images.length > 0 && (
+            <div className="flex gap-2 mt-2">
+              {entry.images.slice(0, 3).map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  alt="Diary image"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 object-cover rounded-md"
+                />
+              ))}
+              {entry.images.length > 3 && (
+                <div className="flex-shrink-0 w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-xs text-muted-foreground">
+                  +{entry.images.length - 3}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
       <EditDiaryDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
