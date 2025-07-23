@@ -93,7 +93,7 @@ export default function DiaryPage() {
   }
 
   return (
-    <AppLayout className="!px-0 !max-w-none w-full sm:container sm:mx-auto sm:px-6 sm:max-w-6xl">
+    <AppLayout>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Diary</h1>

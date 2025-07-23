@@ -52,8 +52,9 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
 
   return (
     <>
+      {/* Mobile: Native app look */}
       <div
-        className="flex flex-row w-full bg-transparent dark:bg-transparent px-0 py-4 border-b border-border cursor-pointer"
+        className="flex flex-row w-full bg-transparent dark:bg-transparent px-3 py-4 border-b border-border cursor-pointer md:hidden"
         onClick={handleCardClick}
       >
         {/* Date Sidebar (left) */}
@@ -95,6 +96,73 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
             </div>
           )}
         </div>
+      </div>
+
+      {/* Tablet/Desktop: Card UI */}
+      <div
+        className="hidden md:flex w-full"
+        onClick={handleCardClick}
+      >
+        <Card className="flex flex-row w-full hover:shadow-md transition-shadow cursor-pointer rounded-lg p-6 gap-6">
+          {/* Date badge */}
+          <div className="flex flex-col items-center justify-center min-w-[56px] max-w-[56px]">
+            <span className="text-3xl leading-none">{day}</span>
+            <span className="text-sm font-semibold text-muted-foreground mt-1">{month}</span>
+            <span className="text-xs text-muted-foreground mt-0.5">{year}</span>
+          </div>
+          {/* Entry Content */}
+          <div className="flex-1 flex flex-col items-start text-left">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>{demoTime}</span>
+              <h3 className="font-semibold text-lg">{entry.title}</h3>
+              <span className="text-2xl" style={{ color: mood.color }}>{mood.emoji}</span>
+            </div>
+            <p className="text-base leading-relaxed mb-2">
+              {truncateContent(entry.content, 220)}
+            </p>
+            {/* Images, if any */}
+            {entry.images && entry.images.length > 0 && (
+              <div className="flex gap-2 mt-2">
+                {entry.images.slice(0, 3).map((image, index) => (
+                  <Image
+                    key={index}
+                    src={image}
+                    alt="Diary image"
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                ))}
+                {entry.images.length > 3 && (
+                  <div className="flex-shrink-0 w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center text-xs text-muted-foreground">
+                    +{entry.images.length - 3}
+                  </div>
+                )}
+              </div>
+            )}
+            {/* Edit/Delete actions */}
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={e => { e.stopPropagation(); setIsEditDialogOpen(true); }}
+                className="h-8 w-8 p-0"
+                aria-label="Edit entry"
+              >
+                <Calendar className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={e => { e.stopPropagation(); onDelete(entry.id); }}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                aria-label="Delete entry"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
       </div>
       <EditDiaryDialog
         open={isEditDialogOpen}
