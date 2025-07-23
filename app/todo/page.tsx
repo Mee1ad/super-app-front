@@ -4,6 +4,7 @@ import { AddNewList } from "./molecules/AddNewList";
 import { SearchBox } from "./molecules/SearchBox";
 import { TaskList } from "./organisms/TaskList";
 import { ShoppingList } from "./organisms/ShoppingList";
+import { MobileListView } from "./organisms/MobileListView";
 import { useTodoApi } from "./atoms/useTodoApi";
 import { 
   taskResponseToTaskItemProps, 
@@ -198,7 +199,22 @@ export default function TodoPage() {
           <SearchBox onSearch={setSearchQuery} />
           <AddNewList onCreate={handleCreateList} />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+        
+        {/* Mobile View */}
+        <div className="block md:hidden">
+          <MobileListView
+            lists={filteredLists}
+            onUpdateTitle={handleUpdateListTitle}
+            onDelete={handleDeleteList}
+            onListClick={(listId) => {
+              // Navigate to the detail page
+              window.location.href = `/todo/${listId}`;
+            }}
+          />
+        </div>
+
+        {/* Desktop View */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {filteredLists.map(list => (
             <div key={list.id}>
               {list.type === "task" ? (
