@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Calendar, Image as ImageIcon } from 'lucide-react'
-import { Card, CardHeader } from '@/components/ui/card'
+import { Trash2, Calendar } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EditDiaryDialog } from '../organisms/EditDiaryDialog'
 import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
@@ -30,7 +30,7 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
     }
   }
 
-  const { day, month, year, time } = formatDate(entry.date)
+  const { day, month, year } = formatDate(entry.date)
 
   // Generate a random time for demo
   function getRandomTime() {

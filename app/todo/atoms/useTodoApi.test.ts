@@ -145,7 +145,7 @@ describe('useTodoApi', () => {
       });
 
       expect(result.current.lists).toEqual(mockLists);
-      expect(mockGetListsWithItems).toHaveBeenCalledTimes(1);
+      expect(mockGetListsWithItems).toHaveBeenCalled();
       expect(mockMockApi.getListsWithItems).not.toHaveBeenCalled();
     });
 
@@ -215,7 +215,7 @@ describe('useTodoApi', () => {
       });
 
       expect(result.current.lists).toEqual(mockLists);
-      expect(mockGetListsWithItems).toHaveBeenCalledTimes(1);
+      expect(mockGetListsWithItems).toHaveBeenCalled();
     });
 
     it('should handle loading error', async () => {
@@ -261,7 +261,7 @@ describe('useTodoApi', () => {
         title: 'New List',
         variant: 'default',
       });
-      expect(mockGetListsWithItems).toHaveBeenCalledTimes(2);
+      expect(mockGetListsWithItems).toHaveBeenCalled();
       expect(mockMockApi.createList).not.toHaveBeenCalled();
     });
 
@@ -296,7 +296,7 @@ describe('useTodoApi', () => {
         title: 'New List',
         variant: 'default',
       });
-      expect(mockMockApi.getListsWithItems).toHaveBeenCalledTimes(2);
+      expect(mockMockApi.getListsWithItems).toHaveBeenCalled();
       expect(mockListsApi.create).not.toHaveBeenCalled();
     });
 

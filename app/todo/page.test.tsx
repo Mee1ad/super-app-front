@@ -52,8 +52,8 @@ jest.mock('./atoms/useTodoApi', () => ({
 }));
 
 jest.mock('./atoms/adapters', () => ({
-  taskResponseToTaskItemProps: (task: any) => task,
-  shoppingItemResponseToShoppingItemProps: (item: any) => item,
+  taskResponseToTaskItemProps: (task: unknown) => task,
+  shoppingItemResponseToShoppingItemProps: (item: unknown) => item,
   taskItemPropsToTaskCreate: jest.fn(),
   shoppingItemPropsToShoppingItemCreate: jest.fn(),
 }));

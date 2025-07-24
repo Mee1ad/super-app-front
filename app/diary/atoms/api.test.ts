@@ -18,7 +18,7 @@ describe('diaryApi', () => {
           { id: 'calm', name: 'Calm', emoji: '😌', color: '#9C27B0', created_at: '2024-12-01T10:00:00Z' },
           { id: 'excited', name: 'Excited', emoji: '🤩', color: '#FF9800', created_at: '2024-12-01T10:00:00Z' }
         ]
-      }
+      };
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
@@ -60,7 +60,7 @@ describe('diaryApi', () => {
           pages: 1,
           total: 10
         }
-      }
+      };
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
@@ -100,7 +100,7 @@ describe('diaryApi', () => {
           pages: 1,
           total: 2
         }
-      }
+      };
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse
@@ -140,7 +140,7 @@ describe('diaryApi', () => {
           pages: 1,
           total: 2
         }
-      }
+      };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,

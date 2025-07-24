@@ -33,11 +33,9 @@ export default function TodoListDetailPage() {
     updateTask,
     deleteTask,
     toggleTask,
-    reorderTasks,
     createItem,
     updateItem,
     deleteItem,
-    reorderItems,
   } = useTodoApi();
 
   React.useEffect(() => {
@@ -128,6 +126,27 @@ export default function TodoListDetailPage() {
   }
 
   if (!currentList) {
+    return <div>List not found</div>;
+  }
+
+  // Unified handler for both task and shopping items
+  const handleItemUpdate = async (item: TaskItemProps | ShoppingItemProps) => {
+    if (currentList.type === "task") {
+      await handleTaskUpdate(item as TaskItemProps);
+    } else {
+      await handleShoppingUpdate(item as ShoppingItemProps);
+    }
+  };
+
+  const handleItemDelete = async (itemId: string) => {
+    if (currentList.type === "task") {
+      await handleTaskDelete(itemId);
+    } else {
+      await handleShoppingDelete(itemId);
+    }
+  };
+
+  if (!currentList) {
     return (
       <ErrorBoundary>
         <AppLayout>
@@ -176,8 +195,8 @@ export default function TodoListDetailPage() {
                 key={item.id}
                 item={item}
                 type={currentList.type}
-                onUpdate={currentList.type === "task" ? handleTaskUpdate : handleShoppingUpdate}
-                onDelete={currentList.type === "task" ? handleTaskDelete : handleShoppingDelete}
+                onUpdate={handleItemUpdate}
+                onDelete={handleItemDelete}
                 onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
                 isLast={index === items.length - 1}
               />

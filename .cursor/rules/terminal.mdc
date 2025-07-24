@@ -1,6 +1,0 @@
----
-alwaysApply: true
----
-dont do "run dev" and "run build" in terminal
-
-use pnpm

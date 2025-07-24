@@ -109,8 +109,8 @@ describe('MobileItemRow', () => {
     });
 
     it('toggles shopping item when checkbox is clicked', () => {
-      const { onToggle, ...propsWithoutToggle } = mockProps;
-      render(<MobileItemRow item={mockShoppingItem} type="shopping" {...propsWithoutToggle} />);
+      const { onUpdate, onDelete } = mockProps;
+      render(<MobileItemRow item={mockShoppingItem} type="shopping" onUpdate={onUpdate} onDelete={onDelete} />);
       
       const checkbox = screen.getByRole('button');
       fireEvent.click(checkbox);

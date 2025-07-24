@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import TodoListDetailPage from './page';
 
 // Mock the dependencies
@@ -52,8 +52,8 @@ jest.mock('../atoms/useTodoApi', () => ({
 }));
 
 jest.mock('../atoms/adapters', () => ({
-  taskResponseToTaskItemProps: (task: any) => task,
-  shoppingItemResponseToShoppingItemProps: (item: any) => item,
+  taskResponseToTaskItemProps: (task: unknown) => task,
+  shoppingItemResponseToShoppingItemProps: (item: unknown) => item,
   taskItemPropsToTaskCreate: jest.fn(),
   shoppingItemPropsToShoppingItemCreate: jest.fn(),
 }));

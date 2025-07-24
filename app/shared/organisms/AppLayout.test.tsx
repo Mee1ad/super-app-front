@@ -14,7 +14,7 @@ describe('AppLayout', () => {
     
     // Check that the layout container has the correct classes
     const container = content.parentElement
-    expect(container).toHaveClass('container', 'mx-auto', 'px-4', 'pt-16', 'pb-6', 'md:px-6', 'md:py-8', 'max-w-6xl')
+    expect(container).toHaveClass('container', 'mx-auto', 'px-4', 'pt-20', 'pb-6', 'md:px-6', 'md:py-8', 'max-w-6xl')
   })
 
   it('applies custom className when provided', () => {
@@ -36,6 +36,6 @@ describe('AppLayout', () => {
     )
 
     const container = screen.getByTestId('test-content').parentElement
-    expect(container).toHaveClass('container', 'mx-auto', 'px-4', 'pt-16', 'pb-6', 'md:px-6', 'md:py-8', 'max-w-6xl')
+    expect(container).toHaveClass('container', 'mx-auto', 'px-4', 'pt-20', 'pb-6', 'md:px-6', 'md:py-8', 'max-w-6xl')
   })
 }) 

@@ -5,8 +5,8 @@ interface List {
   id: string;
   title: string;
   type: "task" | "shopping";
-  tasks?: any[];
-  items?: any[];
+  tasks?: unknown[];
+  items?: unknown[];
 }
 
 interface MobileListViewProps {
