@@ -54,7 +54,7 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
     <>
       {/* Mobile: Native app look */}
       <div
-        className="flex flex-row w-full bg-transparent dark:bg-transparent px-3 py-4 border-b border-border cursor-pointer md:hidden"
+        className="flex flex-row w-full bg-transparent dark:bg-transparent px-3 py-4 border-b border-border cursor-pointer md:hidden overflow-hidden"
         onClick={handleCardClick}
       >
         {/* Date Sidebar (left) */}
@@ -66,18 +66,18 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
         {/* Vertical Divider */}
         <div className="w-1 bg-border mx-1 rounded-full" />
         {/* Entry Content (right) */}
-        <div className="flex-1 flex flex-col items-start text-left pl-2">
+        <div className="flex-1 flex flex-col items-start text-left pl-2 min-w-0">
           <span className="text-xs text-muted-foreground mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>{demoTime}</span>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-base">{entry.title}</h3>
-            <span className="text-2xl" style={{ color: mood.color }}>{mood.emoji}</span>
+          <div className="flex items-center gap-2 mb-1 w-full">
+            <h3 className="font-semibold text-base truncate flex-1">{entry.title}</h3>
+            <span className="text-2xl flex-shrink-0" style={{ color: mood.color }}>{mood.emoji}</span>
           </div>
-          <p className="text-sm leading-relaxed mb-1">
+          <p className="text-sm leading-relaxed mb-1 break-words">
             {truncateContent(entry.content)}
           </p>
           {/* Images, if any */}
           {entry.images && entry.images.length > 0 && (
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-2 overflow-hidden">
               {entry.images.slice(0, 3).map((image, index) => (
                 <Image
                   key={index}
@@ -100,10 +100,10 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
 
       {/* Tablet/Desktop: Card UI */}
       <div
-        className="hidden md:flex w-full"
+        className="hidden md:flex w-full overflow-hidden"
         onClick={handleCardClick}
       >
-        <Card className="flex flex-row w-full hover:shadow-md transition-shadow cursor-pointer rounded-lg p-6 gap-6">
+        <Card className="flex flex-row w-full hover:shadow-md transition-shadow cursor-pointer rounded-lg p-6 gap-6 overflow-hidden">
           {/* Date badge */}
           <div className="flex flex-col items-center justify-center min-w-[56px] max-w-[56px]">
             <span className="text-3xl leading-none">{day}</span>
@@ -111,18 +111,18 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
             <span className="text-xs text-muted-foreground mt-0.5">{year}</span>
           </div>
           {/* Entry Content */}
-          <div className="flex-1 flex flex-col items-start text-left">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>{demoTime}</span>
-              <h3 className="font-semibold text-lg">{entry.title}</h3>
-              <span className="text-2xl" style={{ color: mood.color }}>{mood.emoji}</span>
+          <div className="flex-1 flex flex-col items-start text-left min-w-0">
+            <div className="flex items-center gap-2 mb-1 w-full">
+              <span className="text-xs text-muted-foreground flex-shrink-0" style={{ fontFamily: 'Inter, sans-serif' }}>{demoTime}</span>
+              <h3 className="font-semibold text-lg truncate flex-1">{entry.title}</h3>
+              <span className="text-2xl flex-shrink-0" style={{ color: mood.color }}>{mood.emoji}</span>
             </div>
-            <p className="text-base leading-relaxed mb-2">
+            <p className="text-base leading-relaxed mb-2 break-words">
               {truncateContent(entry.content, 220)}
             </p>
             {/* Images, if any */}
             {entry.images && entry.images.length > 0 && (
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2 overflow-hidden">
                 {entry.images.slice(0, 3).map((image, index) => (
                   <Image
                     key={index}
