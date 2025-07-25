@@ -1,14 +1,18 @@
+'use client'
+
 import Link from "next/link";
 import { Lightbulb, CheckSquare, BookOpen, Heart, Utensils } from "lucide-react";
+import { Header } from "./shared/organisms/Header";
+import { useSidebar } from "./shared/organisms/SidebarContext";
 
 export default function Home() {
+  const { toggleMobileMenu } = useSidebar();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <Header title="Super App" onMenuClick={toggleMobileMenu} />
       <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
         <main className="text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Super App</h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 md:mb-12">Your productivity toolkit</p>
-          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             <Link href="/todo">
               <div className="group p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700">

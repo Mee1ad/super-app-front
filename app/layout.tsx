@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "./shared/organisms/Sidebar";
+import { SidebarProvider } from "./shared/organisms/SidebarContext";
 import { ChangelogProvider } from "@/app/shared/organisms/ChangelogProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./auth/organisms/AuthProvider";
@@ -34,11 +35,13 @@ export default function RootLayout({
       >
         <AuthProvider>
           <ChangelogProvider>
-            <DemoBanner />
-            <Sidebar />
-            <main className="md:pt-0 md:ml-64 transition-all duration-300">
-              {children}
-            </main>
+            <SidebarProvider>
+              <DemoBanner />
+              <Sidebar />
+              <main className="md:pt-0 md:ml-64 transition-all duration-300">
+                {children}
+              </main>
+            </SidebarProvider>
           </ChangelogProvider>
         </AuthProvider>
         <Toaster />

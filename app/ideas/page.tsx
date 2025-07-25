@@ -82,10 +82,9 @@ export default function IdeasPage() {
   })
 
   return (
-    <AppLayout>
+    <AppLayout title="Daily Ideas">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Daily Ideas</h1>
           <p className="text-sm md:text-base text-muted-foreground">Capture and organize your thoughts</p>
         </div>
         <Button 

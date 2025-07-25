@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Loader2 } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
+
 import { AddDiaryDialog } from './organisms/AddDiaryDialog'
 import { DiaryCard } from './molecules/DiaryCard'
 import { useDiaryApi } from './atoms/useDiaryApi'
@@ -35,8 +34,7 @@ export default function DiaryPage() {
     deleteEntry
   } = useDiaryApi()
 
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedMood, setSelectedMood] = useState<string>('all')
+  const [selectedMood] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   // Load initial data - only after client-side hydration
@@ -47,22 +45,7 @@ export default function DiaryPage() {
     }
   }, [loadMoods, loadEntries, isClient])
 
-  // Handle search and filter changes
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    loadEntries({
-      search: value || undefined,
-      mood: selectedMood !== 'all' ? selectedMood : undefined
-    })
-  }
 
-  const handleMoodChange = (value: string) => {
-    setSelectedMood(value)
-    loadEntries({
-      search: searchTerm || undefined,
-      mood: value !== 'all' ? value : undefined
-    })
-  }
 
   const handleAddEntry = async (newEntry: DiaryEntryCreate) => {
     try {
@@ -70,7 +53,6 @@ export default function DiaryPage() {
       setIsAddDialogOpen(false)
       // Reload entries to get updated list
       loadEntries({
-        search: searchTerm || undefined,
         mood: selectedMood !== 'all' ? selectedMood : undefined
       })
     } catch {
@@ -98,49 +80,9 @@ export default function DiaryPage() {
     <div className="w-full overflow-x-hidden">
       {/* Mobile Native Layout */}
       <div className="min-h-screen bg-background md:hidden overflow-x-hidden">
-        {/* Mobile Header - Sticky */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-semibold">Diary</h1>
-                <p className="text-xs text-muted-foreground">Capture your thoughts and feelings</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Search and Filter - Sticky below header */}
-        <div className="sticky top-[72px] z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-          <div className="px-4 py-3 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search entries..."
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10 h-10"
-                disabled={loading}
-              />
-            </div>
-            <Select value={selectedMood} onValueChange={handleMoodChange} disabled={loading}>
-              <SelectTrigger className="h-10">
-                <SelectValue placeholder="Filter by mood" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Moods</SelectItem>
-                {moods.map(mood => (
-                  <SelectItem key={mood.id} value={mood.id}>
-                    {mood.emoji} {mood.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Mobile Content */}
-        <div className="px-4 py-4 overflow-x-hidden">
+                        <AppLayout title="Diary">
+          {/* Mobile Content */}
+          <div className="flex flex-col gap-4 px-4 py-4 overflow-x-hidden">
           {/* Error Display */}
           {error && (
             <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -160,8 +102,8 @@ export default function DiaryPage() {
                 <div className="text-muted-foreground text-center">
                   <p className="text-base font-medium mb-2">No entries found</p>
                   <p className="text-xs">
-                    {searchTerm || selectedMood !== 'all' 
-                      ? 'Try adjusting your search or filters'
+                    {selectedMood !== 'all' 
+                      ? 'Try adjusting your filters'
                       : 'Start by writing your first diary entry'
                     }
                   </p>
@@ -213,44 +155,19 @@ export default function DiaryPage() {
             )}
           </Button>
         </div>
+        </AppLayout>
       </div>
 
-      {/* Desktop Layout */}
+            {/* Desktop Layout */}
       <div className="hidden md:block overflow-x-hidden">
-        <AppLayout>
+        <div className="container mx-auto px-4 pb-6 md:px-6 md:py-8 max-w-6xl">
           <div className="mb-6 md:mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Diary</h1>
               <p className="text-sm md:text-base text-muted-foreground">Capture your thoughts and feelings</p>
             </div>
           </div>
 
-          {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search entries..."
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10"
-                disabled={loading}
-              />
-            </div>
-            <Select value={selectedMood} onValueChange={handleMoodChange} disabled={loading}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by mood" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Moods</SelectItem>
-                {moods.map(mood => (
-                  <SelectItem key={mood.id} value={mood.id}>
-                    {mood.emoji} {mood.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {/* Error Display */}
           {error && (
@@ -276,8 +193,8 @@ export default function DiaryPage() {
                   <div className="text-muted-foreground text-center">
                     <p className="text-base md:text-lg font-medium mb-2">No entries found</p>
                     <p className="text-xs md:text-sm">
-                      {searchTerm || selectedMood !== 'all' 
-                        ? 'Try adjusting your search or filters'
+                      {selectedMood !== 'all' 
+                        ? 'Try adjusting your filters'
                         : 'Start by writing your first diary entry'
                       }
                     </p>
@@ -313,7 +230,7 @@ export default function DiaryPage() {
               </>
             )}
           </div>
-        </AppLayout>
+        </div>
       </div>
 
       <AddDiaryDialog

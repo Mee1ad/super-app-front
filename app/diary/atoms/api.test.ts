@@ -172,7 +172,7 @@ describe('diaryApi', () => {
           pages: 10,
           total: 10
         }
-      }
+      } as const
 
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,

@@ -106,7 +106,7 @@ export default function FoodPlannerPage() {
 
   if (loading && foodEntries.length === 0) {
     return (
-      <AppLayout>
+      <AppLayout title="Food Planner">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
@@ -118,10 +118,9 @@ export default function FoodPlannerPage() {
   }
 
   return (
-    <AppLayout>
+    <AppLayout title="Food Planner">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Food Planner</h1>
           <p className="text-sm md:text-base text-muted-foreground">Plan meals and track what you eat</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)} className="flex items-center gap-2 w-full sm:w-auto">

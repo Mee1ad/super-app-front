@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Trash2, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { EditDiaryDialog } from '../organisms/EditDiaryDialog'
 import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
 import Image from 'next/image'
 
@@ -17,8 +16,8 @@ interface DiaryCardProps {
   loading?: boolean
 }
 
-export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = false }: DiaryCardProps) {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+export function DiaryCard({ entry, mood, onDelete }: DiaryCardProps) {
+  const router = useRouter()
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -47,7 +46,12 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
   }
 
   const handleCardClick = () => {
-    setIsEditDialogOpen(true)
+    router.push(`/diary/${entry.id}/edit`)
+  }
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    router.push(`/diary/${entry.id}/edit`)
   }
 
   return (
@@ -69,7 +73,7 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
         <div className="flex-1 flex flex-col items-start text-left pl-2 min-w-0">
           <span className="text-xs text-muted-foreground mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>{demoTime}</span>
           <div className="flex items-center gap-2 mb-1 w-full">
-            <h3 className="font-semibold text-base truncate flex-1">{entry.title}</h3>
+            <h3 className="font-semibold text-base truncate">{entry.title}</h3>
             <span className="text-2xl flex-shrink-0" style={{ color: mood.color }}>{mood.emoji}</span>
           </div>
           <p className="text-sm leading-relaxed mb-1 break-words">
@@ -145,7 +149,7 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={e => { e.stopPropagation(); setIsEditDialogOpen(true); }}
+                onClick={handleEditClick}
                 className="h-8 w-8 p-0"
                 aria-label="Edit entry"
               >
@@ -164,14 +168,6 @@ export function DiaryCard({ entry, mood, moods, onDelete, onUpdate, loading = fa
           </div>
         </Card>
       </div>
-      <EditDiaryDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        entry={entry}
-        moods={moods}
-        onUpdate={onUpdate}
-        loading={loading}
-      />
     </>
   )
 } 

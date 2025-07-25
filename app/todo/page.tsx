@@ -1,11 +1,11 @@
 'use client';
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { AddNewList } from "./molecules/AddNewList";
-import { SearchBox } from "./molecules/SearchBox";
 import { TaskList } from "./organisms/TaskList";
 import { ShoppingList } from "./organisms/ShoppingList";
 import { MobileListView } from "./organisms/MobileListView";
 import { useTodoApi } from "./atoms/useTodoApi";
+import { ListWithItems } from "./atoms/types";
 import { 
   taskResponseToTaskItemProps, 
   shoppingItemResponseToShoppingItemProps,
@@ -19,7 +19,6 @@ import { ShoppingItemProps } from "./atoms/ShoppingItem";
 import { AppLayout } from "../shared/organisms/AppLayout";
 
 export default function TodoPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isClient, setIsClient] = useState(false);
   
   const {
@@ -43,10 +42,10 @@ export default function TodoPage() {
     setIsClient(true);
   }, []);
 
-  const handleCreateList = async (type: "task" | "shopping") => {
+  const handleCreateList = async (type: "task" | "shopping", title?: string) => {
     try {
-      const title = type === "task" ? "New Task List" : "New Shopping List";
-      await createList(type, title, "default");
+      const listTitle = title || (type === "task" ? "New Task List" : "New Shopping List");
+      await createList(type, listTitle, "default");
     } catch (err) {
       console.error('Failed to create list:', err);
     }
@@ -154,39 +153,7 @@ export default function TodoPage() {
     }
   };
 
-  // Filter lists based on search query
-  const filteredLists = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return lists;
-    }
 
-    const query = searchQuery.toLowerCase();
-    
-    return lists.map(list => {
-      if (list.type === "task") {
-        const filteredTasks = (list.tasks || []).filter((task) =>
-          task.title.toLowerCase().includes(query) ||
-          (task.description && task.description.toLowerCase().includes(query))
-        );
-        return { ...list, tasks: filteredTasks };
-      } else {
-        const filteredItems = (list.items || []).filter((item) =>
-          item.title.toLowerCase().includes(query) ||
-          (item.url && item.url.toLowerCase().includes(query)) ||
-          (item.price && item.price.toLowerCase().includes(query)) ||
-          (item.source && item.source.toLowerCase().includes(query))
-        );
-        return { ...list, items: filteredItems };
-      }
-    }).filter(list => {
-      // Only show lists that have matching items
-      if (list.type === "task") {
-        return (list.tasks || []).length > 0;
-      } else {
-        return (list.items || []).length > 0;
-      }
-    });
-  }, [lists, searchQuery]);
 
   if (!isClient || loading) {
     return <LoadingSpinner />;
@@ -194,16 +161,13 @@ export default function TodoPage() {
 
   return (
     <ErrorBoundary>
-      <AppLayout>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-          <SearchBox onSearch={setSearchQuery} />
-          <AddNewList onCreate={handleCreateList} />
-        </div>
+      <AppLayout title="Todo">
+        <AddNewList onCreate={handleCreateList} />
         
         {/* Mobile View */}
         <div className="block md:hidden">
           <MobileListView
-            lists={filteredLists}
+            lists={lists}
             onUpdateTitle={handleUpdateListTitle}
             onDelete={handleDeleteList}
             onListClick={(listId) => {
@@ -215,7 +179,7 @@ export default function TodoPage() {
 
         {/* Desktop View */}
         <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-          {filteredLists.map(list => (
+          {lists.map((list: ListWithItems) => (
             <div key={list.id}>
               {list.type === "task" ? (
                 <TaskList

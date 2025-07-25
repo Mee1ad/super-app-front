@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodoApi } from "../atoms/useTodoApi";
 import { 
@@ -16,15 +16,21 @@ import { TaskItemProps } from "../atoms/TaskItem";
 import { ShoppingItemProps } from "../atoms/ShoppingItem";
 import { AppLayout } from "../../shared/organisms/AppLayout";
 import { MobileItemRow } from "../molecules/MobileItemRow";
-import { NewTask } from "../molecules/NewTask";
-import { NewShopping } from "../molecules/NewShopping";
+import { AddNewItem } from "../molecules/AddNewItem";
 
 export default function TodoListDetailPage() {
   const params = useParams();
   const router = useRouter();
   const listId = params.listId as string;
-  const [showAdd, setShowAdd] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [editItem, setEditItem] = useState<{
+    id: string;
+    title: string;
+    description?: string;
+    url?: string;
+    price?: string;
+    source?: string;
+  } | null>(null);
   
   const {
     lists,
@@ -66,7 +72,6 @@ export default function TodoListDetailPage() {
         // Create new task
         const taskCreate = taskItemPropsToTaskCreate(task);
         await createTask(listId, taskCreate);
-        setShowAdd(false);
       }
     } catch (err) {
       console.error('Failed to update task:', err);
@@ -106,7 +111,6 @@ export default function TodoListDetailPage() {
         // Create new item
         const itemCreate = shoppingItemPropsToShoppingItemCreate(item);
         await createItem(listId, itemCreate);
-        setShowAdd(false);
       }
     } catch (err) {
       console.error('Failed to update item:', err);
@@ -144,6 +148,49 @@ export default function TodoListDetailPage() {
     } else {
       await handleShoppingDelete(itemId);
     }
+  };
+
+  const handleAddItem = (title: string, description?: string, url?: string, price?: string, source?: string) => {
+    if (currentList.type === "task") {
+      handleTaskUpdate({ 
+        id: '', 
+        title, 
+        description: description || '', 
+        checked: false, 
+        variant: currentList.variant || 'default' 
+      });
+    } else {
+      handleShoppingUpdate({ 
+        id: '', 
+        title, 
+        url: url || '', 
+        price: price || '', 
+        source: source || '', 
+        variant: currentList.variant || 'default' 
+      });
+    }
+  };
+
+  const handleUpdateItem = (id: string, title: string, description?: string, url?: string, price?: string, source?: string) => {
+    if (currentList.type === "task") {
+      handleTaskUpdate({ 
+        id, 
+        title, 
+        description: description || '', 
+        checked: false, 
+        variant: currentList.variant || 'default' 
+      });
+    } else {
+      handleShoppingUpdate({ 
+        id, 
+        title, 
+        url: url || '', 
+        price: price || '', 
+        source: source || '', 
+        variant: currentList.variant || 'default' 
+      });
+    }
+    setEditItem(null);
   };
 
   if (!currentList) {
@@ -198,53 +245,22 @@ export default function TodoListDetailPage() {
                 onUpdate={handleItemUpdate}
                 onDelete={handleItemDelete}
                 onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
+                onEdit={(item) => {
+                  setEditItem({
+                    id: item.id,
+                    title: item.title,
+                    description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
+                    url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
+                    price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
+                    source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
+                  });
+                }}
                 isLast={index === items.length - 1}
               />
             ))}
           </div>
           
-          {/* Add Item Button */}
-          <div className="mt-6 text-center">
-            {!showAdd ? (
-              <Button 
-                variant="ghost" 
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
-                onClick={() => setShowAdd(true)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add {currentList.type === "task" ? "Task" : "Item"}
-              </Button>
-            ) : (
-              <div className="p-4 border rounded-lg bg-gray-50">
-                {currentList.type === "task" ? (
-                  <NewTask
-                    onCreate={(title, description) => {
-                      handleTaskUpdate({ 
-                        id: '', 
-                        title, 
-                        description, 
-                        checked: false, 
-                        variant: currentList.variant || 'default' 
-                      });
-                    }}
-                  />
-                ) : (
-                  <NewShopping
-                    onCreate={(title, url, price, source) => {
-                      handleShoppingUpdate({ 
-                        id: '', 
-                        title, 
-                        url, 
-                        price, 
-                        source, 
-                        variant: currentList.variant || 'default' 
-                      });
-                    }}
-                  />
-                )}
-              </div>
-            )}
-          </div>
+
         </div>
 
         {/* Desktop View - Keep existing card layout */}
@@ -253,6 +269,14 @@ export default function TodoListDetailPage() {
             <p className="text-gray-500">Desktop view not implemented for detail page</p>
           </div>
         </div>
+
+        {/* Floating Action Button for adding items */}
+        <AddNewItem 
+          type={currentList.type} 
+          onCreate={handleAddItem}
+          onUpdate={handleUpdateItem}
+          editItem={editItem}
+        />
       </AppLayout>
     </ErrorBoundary>
   );

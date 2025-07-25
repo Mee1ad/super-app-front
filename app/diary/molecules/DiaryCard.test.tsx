@@ -1,22 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DiaryCard } from './DiaryCard'
-import { DiaryEntry, Mood, DiaryEntryUpdate } from '../atoms/types'
+import { DiaryEntry, Mood } from '../atoms/types'
 
-// Mock the EditDiaryDialog component
-jest.mock('../organisms/EditDiaryDialog', () => ({
-  EditDiaryDialog: ({ open, onOpenChange, entry, onUpdate }: {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    entry: DiaryEntry;
-    moods: Mood[];
-    onUpdate: (id: string, data: DiaryEntryUpdate) => Promise<DiaryEntry>;
-    loading?: boolean;
-  }) => (
-    <div data-testid="edit-dialog" data-open={open}>
-      <button onClick={() => onOpenChange(false)}>Close</button>
-      <button onClick={() => onUpdate(entry.id, { title: 'Updated Title' })}>Update</button>
-    </div>
-  )
+// Mock Next.js router
+const mockPush = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush
+  })
 }))
 
 const mockEntry: DiaryEntry = {
@@ -126,7 +117,7 @@ describe('DiaryCard', () => {
     expect(screen.queryByText(/image/)).not.toBeInTheDocument()
   })
 
-  it('opens edit dialog when card is clicked', () => {
+  it('navigates to edit page when card is clicked', () => {
     render(
       <DiaryCard
         entry={mockEntry}
@@ -141,8 +132,24 @@ describe('DiaryCard', () => {
     const desktopCard = titleElements[1].closest('[data-slot="card"]') // Use the second one (desktop view)
     fireEvent.click(desktopCard!)
 
-    const editDialog = screen.getByTestId('edit-dialog')
-    expect(editDialog).toHaveAttribute('data-open', 'true')
+    expect(mockPush).toHaveBeenCalledWith('/diary/1/edit')
+  })
+
+  it('navigates to edit page when edit button is clicked', () => {
+    render(
+      <DiaryCard
+        entry={mockEntry}
+        mood={mockMood}
+        moods={mockMoods}
+        onDelete={mockOnDelete}
+        onUpdate={mockOnUpdate}
+      />
+    )
+
+    const editButton = screen.getByRole('button', { name: /edit entry/i })
+    fireEvent.click(editButton)
+
+    expect(mockPush).toHaveBeenCalledWith('/diary/1/edit')
   })
 
   it('calls onDelete when delete button is clicked', () => {
@@ -176,9 +183,8 @@ describe('DiaryCard', () => {
     const deleteButton = screen.getByRole('button', { name: /delete entry/i })
     fireEvent.click(deleteButton)
 
-    // The edit dialog should not open
-    const editDialog = screen.getByTestId('edit-dialog')
-    expect(editDialog).toHaveAttribute('data-open', 'false')
+    // The navigation should not be called
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   it('disables delete button when loading', () => {
@@ -197,22 +203,6 @@ describe('DiaryCard', () => {
     // The button is not actually disabled in the current implementation
     // We should check that it exists and is clickable
     expect(deleteButton).toBeInTheDocument()
-  })
-
-  it('passes correct props to EditDiaryDialog', () => {
-    render(
-      <DiaryCard
-        entry={mockEntry}
-        mood={mockMood}
-        moods={mockMoods}
-        onDelete={mockOnDelete}
-        onUpdate={mockOnUpdate}
-        loading={true}
-      />
-    )
-
-    const editDialog = screen.getByTestId('edit-dialog')
-    expect(editDialog).toBeInTheDocument()
   })
 
   it('truncates long content', () => {

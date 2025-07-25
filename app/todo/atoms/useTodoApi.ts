@@ -15,7 +15,7 @@ import {
   searchApi, 
   getListsWithItems 
 } from './api';
-import { showSuccessToast, showErrorToast } from '@/lib/error-handler';
+import { showErrorToast } from '@/lib/error-handler';
 import { TaskResponse, ShoppingItemResponse } from './types';
 import { useAuth } from '@/app/auth/atoms/useAuth';
 import { mockApi } from './mock-data';
@@ -63,7 +63,6 @@ export const useTodoApi = () => {
         ? await listsApi.create({ type, title, variant })
         : await mockApi.createList({ type, title, variant });
       await loadLists(); // Reload to get the new list with items
-      showSuccessToast('List Created', `${type === 'task' ? 'Task' : 'Shopping'} list "${title}" created successfully`);
       return newList;
     } catch {
       showErrorToast('Failed to create list');
@@ -79,7 +78,6 @@ export const useTodoApi = () => {
       setLists(prev => prev.map(list => 
         list.id === id ? { ...list, ...updatedList } : list
       ));
-      showSuccessToast('List Updated', 'List updated successfully');
       return updatedList;
     } catch {
       showErrorToast('Failed to update list');
@@ -95,7 +93,6 @@ export const useTodoApi = () => {
         await mockApi.deleteList(id);
       }
       setLists(prev => prev.filter(list => list.id !== id));
-      showSuccessToast('List Deleted', 'List deleted successfully');
     } catch {
       showErrorToast('Failed to delete list');
       throw new Error('Failed to delete list');
@@ -113,7 +110,6 @@ export const useTodoApi = () => {
           ? { ...list, tasks: [...(list.tasks || []), newTask] }
           : list
       ));
-      showSuccessToast('Task Created', `Task "${data.title}" created successfully`);
       return newTask;
     } catch {
       showErrorToast('Failed to create task');
@@ -133,7 +129,6 @@ export const useTodoApi = () => {
             )}
           : list
       ));
-      showSuccessToast('Task Updated', 'Task updated successfully');
       return updatedTask;
     } catch {
       showErrorToast('Failed to update task');
@@ -153,7 +148,6 @@ export const useTodoApi = () => {
           ? { ...list, tasks: (list.tasks || []).filter(task => task.id !== taskId) }
           : list
       ));
-      showSuccessToast('Task Deleted', 'Task deleted successfully');
     } catch {
       showErrorToast('Failed to delete task');
       throw new Error('Failed to delete task');
@@ -172,8 +166,6 @@ export const useTodoApi = () => {
             )}
           : list
       ));
-      const status = updatedTask.checked ? 'completed' : 'incomplete';
-      showSuccessToast('Task Updated', `Task marked as ${status}`);
       return updatedTask;
     } catch {
       showErrorToast('Failed to toggle task');
@@ -196,7 +188,6 @@ export const useTodoApi = () => {
             ).filter(Boolean) as TaskResponse[] }
           : list
       ));
-      showSuccessToast('Tasks Reordered', 'Tasks reordered successfully');
     } catch {
       showErrorToast('Failed to reorder tasks');
       throw new Error('Failed to reorder tasks');
@@ -214,7 +205,6 @@ export const useTodoApi = () => {
           ? { ...list, items: [...(list.items || []), newItem] }
           : list
       ));
-      showSuccessToast('Item Added', `Shopping item "${data.title}" added successfully`);
       return newItem;
     } catch {
       showErrorToast('Failed to create item');
@@ -234,7 +224,6 @@ export const useTodoApi = () => {
             )}
           : list
       ));
-      showSuccessToast('Item Updated', 'Shopping item updated successfully');
       return updatedItem;
     } catch {
       showErrorToast('Failed to update item');
@@ -254,7 +243,6 @@ export const useTodoApi = () => {
           ? { ...list, items: (list.items || []).filter(item => item.id !== itemId) }
           : list
       ));
-      showSuccessToast('Item Deleted', 'Shopping item deleted successfully');
     } catch {
       showErrorToast('Failed to delete item');
       throw new Error('Failed to delete item');
@@ -273,8 +261,6 @@ export const useTodoApi = () => {
             )}
           : list
       ));
-      const status = updatedItem.checked ? 'purchased' : 'not purchased';
-      showSuccessToast('Item Updated', `Item marked as ${status}`);
       return updatedItem;
     } catch {
       showErrorToast('Failed to toggle item');
@@ -297,7 +283,6 @@ export const useTodoApi = () => {
             ).filter(Boolean) as ShoppingItemResponse[] }
           : list
       ));
-      showSuccessToast('Items Reordered', 'Shopping items reordered successfully');
     } catch {
       showErrorToast('Failed to reorder items');
       throw new Error('Failed to reorder items');

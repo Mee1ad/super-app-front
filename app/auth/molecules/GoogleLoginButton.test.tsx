@@ -22,7 +22,9 @@ describe('GoogleLoginButton', () => {
       error: null,
       loginWithGoogle: jest.fn(),
       logout: jest.fn(),
-      handleOAuthCallback: jest.fn()
+      handleOAuthCallback: jest.fn(),
+      hasPermission: jest.fn(),
+      hasRole: jest.fn()
     })
   })
 

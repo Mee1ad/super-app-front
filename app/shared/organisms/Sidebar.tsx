@@ -10,7 +10,6 @@ import {
   Utensils,
   Settings,
   GitCommit,
-  Menu,
   X,
 } from "lucide-react";
 import { FeedbackDialog } from "@/components/ui/feedback-dialog";
@@ -18,6 +17,7 @@ import { GoogleLoginButton } from "@/app/auth/molecules/GoogleLoginButton";
 import { UserMenu } from "@/app/auth/organisms/UserMenu";
 import { useAuth } from "@/app/auth/atoms/useAuth";
 import { PERMISSIONS } from "@/lib/permissions";
+import { useSidebar } from "./SidebarContext";
 
 interface NavItem {
   label: string;
@@ -39,7 +39,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isMobileMenuOpen, setIsMobileMenuOpen } = useSidebar();
   const { isAuthenticated, hasPermission, loading: authLoading } = useAuth();
 
   // Handle client-side hydration
@@ -50,7 +50,7 @@ export function Sidebar() {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [pathname]);
+  }, [pathname, setIsMobileMenuOpen]);
 
   // Filter navigation items based on permissions
   const filteredNavItems = navItems.filter(item => {
@@ -63,7 +63,6 @@ export function Sidebar() {
   const SidebarContent = () => (
     <>
       <div className="flex items-center justify-between mb-8">
-        <span className="font-bold text-xl">Super App</span>
         <button
           onClick={() => setIsMobileMenuOpen(false)}
           className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -140,25 +139,7 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button - only render after client-side hydration */}
-      {isClient && (
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="fixed top-6 left-4 z-40 md:hidden p-2 bg-white shadow-md rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-          aria-label="Open menu"
-          type="button"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-      )}
 
-      {/* Mobile overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
 
       {/* Sidebar */}
       <aside className={`
