@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMobileKeyboardFocusWithBackGesture } from "@/hooks/use-mobile-keyboard-focus";

@@ -1,5 +1,5 @@
 'use client';
-import { Edit, Trash2, Check, ExternalLink, Move } from "lucide-react";
+import { Edit, Trash2, Check, Move } from "lucide-react";
 import { TaskItemProps } from "../atoms/TaskItem";
 import { ShoppingItemProps } from "../atoms/ShoppingItem";
 import { cn } from "@/lib/utils";
@@ -66,9 +66,7 @@ export function MobileItemRow({
     }
   };
 
-  const getItemIcon = () => {
-    return type === "task" ? "📝" : "🛍️";
-  };
+
 
   const isChecked = type === "task" 
     ? (item as TaskItemProps).checked 

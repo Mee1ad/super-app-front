@@ -2,17 +2,10 @@
 import { useState } from "react";
 import { ShoppingItem, ShoppingItemProps } from "../atoms/ShoppingItem";
 import { NewShopping } from "../molecules/NewShopping";
-import { Edit, Trash2, Plus, MoreHorizontal, Move } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { motion } from "framer-motion";
+
 import { EditList } from "../molecules/EditList";
 import {
   DndContext,
@@ -88,13 +81,9 @@ export type ShoppingListProps = {
   onItemReorder?: (listId: string, newItems: ShoppingItemProps[]) => void;
 };
 
-export function ShoppingList({ id, title, items, variant = "default", onUpdateTitle, onDelete, onItemUpdate, onItemDelete, onItemReorder }: ShoppingListProps) {
+export function ShoppingList({ id, title, items, variant = "default", onUpdateTitle, onItemUpdate, onItemDelete, onItemReorder }: ShoppingListProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
 
   const handleSaveTitle = (newTitle: string) => {
     onUpdateTitle?.(id, newTitle);
@@ -105,14 +94,7 @@ export function ShoppingList({ id, title, items, variant = "default", onUpdateTi
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    onDelete?.(id);
-  };
 
-  const handleReorder = () => {
-    // TODO: Implement reorder functionality
-    console.log('Reorder list:', id);
-  };
 
   const handleToggle = (itemId: string, checked: boolean) => {
     const item = items.find(i => i.id === itemId);

@@ -12,8 +12,7 @@ import { mockMoods, mockDiaryEntries, generateId } from '@/app/api/diary/mock-da
 // API base URL - use frontend API routes for proper fallback handling
 const API_BASE_URL = '/api/diary'
 
-// Check if we're in a test environment
-const isTestEnvironment = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
+
 
 // Mock API for non-authenticated users
 const mockDiaryApi = {
@@ -117,10 +116,7 @@ export const diaryApi = {
   async getMoods(): Promise<MoodsResponse> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.getMoods()
     }
 
@@ -132,10 +128,7 @@ export const diaryApi = {
     })
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.getMoods()
       }
       throw new Error('Failed to fetch moods')
@@ -152,10 +145,7 @@ export const diaryApi = {
   }): Promise<DiaryEntriesResponse> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.getDiaryEntries(params)
     }
 
@@ -175,10 +165,7 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.getDiaryEntries(params)
       }
       throw new Error('Failed to fetch diary entries')
@@ -191,10 +178,7 @@ export const diaryApi = {
   async getDiaryEntry(id: string): Promise<DiaryEntry> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.getDiaryEntry(id)
     }
 
@@ -206,10 +190,7 @@ export const diaryApi = {
     })
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.getDiaryEntry(id)
       }
       throw new Error('Diary entry not found')
@@ -221,10 +202,7 @@ export const diaryApi = {
   async createDiaryEntry(data: DiaryEntryCreate): Promise<DiaryEntry> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.createDiaryEntry(data)
     }
 
@@ -245,10 +223,7 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.createDiaryEntry(data)
       }
       throw new Error('Failed to create diary entry')
@@ -261,10 +236,7 @@ export const diaryApi = {
   async updateDiaryEntry(id: string, data: DiaryEntryUpdate): Promise<DiaryEntry> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.updateDiaryEntry(id, data)
     }
 
@@ -279,10 +251,7 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.updateDiaryEntry(id, data)
       }
       throw new Error('Failed to update diary entry')
@@ -295,10 +264,7 @@ export const diaryApi = {
   async deleteDiaryEntry(id: string): Promise<{ message: string }> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.deleteDiaryEntry(id)
     }
 
@@ -312,10 +278,7 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.deleteDiaryEntry(id)
       }
       throw new Error('Failed to delete diary entry')
@@ -328,10 +291,7 @@ export const diaryApi = {
   async uploadImage(file: File): Promise<ImageUploadResponse> {
     const token = getAccessToken()
     if (!token) {
-      // In test environment, throw error instead of falling back to mock data
-      if (isTestEnvironment) {
-        throw new Error('Authentication required')
-      }
+      // Always fall back to mock data for non-authenticated users
       return mockDiaryApi.uploadImage()
     }
 
@@ -348,10 +308,7 @@ export const diaryApi = {
     
     if (!response.ok) {
       if (response.status === 401) {
-        // In test environment, throw error instead of falling back to mock data
-        if (isTestEnvironment) {
-          throw new Error('Authentication required')
-        }
+        // Fall back to mock data on authentication failure
         return mockDiaryApi.uploadImage()
       }
       throw new Error('Failed to upload image')

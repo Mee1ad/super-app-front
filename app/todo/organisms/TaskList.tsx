@@ -2,17 +2,10 @@
 import { useState } from "react";
 import { TaskItem, TaskItemProps } from "../atoms/TaskItem";
 import { NewTask } from "../molecules/NewTask";
-import { Edit, Trash2, Plus, MoreHorizontal, Move } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { motion } from "framer-motion";
+
 import { EditList } from "../molecules/EditList";
 import {
   DndContext,
@@ -87,13 +80,9 @@ export type TaskListProps = {
   onTaskReorder?: (listId: string, newTasks: TaskItemProps[]) => void;
 };
 
-export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle, onDelete, onTaskUpdate, onTaskDelete, onTaskToggle, onTaskReorder }: TaskListProps) {
+export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle, onTaskUpdate, onTaskDelete, onTaskToggle, onTaskReorder }: TaskListProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
 
   const handleSaveTitle = (newTitle: string) => {
     onUpdateTitle?.(id, newTitle);
@@ -104,14 +93,7 @@ export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle,
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    onDelete?.(id);
-  };
 
-  const handleReorder = () => {
-    // TODO: Implement reorder functionality
-    console.log('Reorder list:', id);
-  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),

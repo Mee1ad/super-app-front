@@ -39,11 +39,9 @@ export default function TodoListDetailPage() {
     updateTask,
     deleteTask,
     toggleTask,
-    reorderTasks,
     createItem,
     updateItem,
     deleteItem,
-    reorderItems,
   } = useTodoApi();
 
   React.useEffect(() => {

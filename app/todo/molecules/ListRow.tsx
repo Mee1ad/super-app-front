@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Edit, Trash2, MoreHorizontal, Move } from 'lucide-react';
+import { Edit, Trash2, Move } from 'lucide-react';
 import { 
   ContextMenu,
   ContextMenuContent,
@@ -8,7 +8,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { motion } from 'framer-motion';
+
 import { ClickableListItem } from '@/components/ui/clickable-item';
 import { EditList } from './EditList';
 
@@ -31,7 +31,7 @@ export function ListRow({
   onUpdateTitle, 
   onDelete, 
   onClick,
-  isLast = false 
+ 
 }: ListRowProps) {
   const [isEditing, setIsEditing] = useState(false);
 
