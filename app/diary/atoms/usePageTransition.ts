@@ -5,10 +5,8 @@ export function usePageTransition() {
   const router = useRouter()
 
   const navigateWithAnimation = useCallback((url: string) => {
-    // Add a small delay to allow the tap animation to complete
-    setTimeout(() => {
-      router.push(url)
-    }, 150)
+    // Navigate immediately without delay to prevent loading issues
+    router.push(url)
   }, [router])
 
   return { navigateWithAnimation }

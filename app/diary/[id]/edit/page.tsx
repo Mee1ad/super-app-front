@@ -19,16 +19,25 @@ export default function EditDiaryPage() {
   const [entry, setEntry] = useState<DiaryEntry | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Load moods and entry data on component mount
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true)
+        setError(null)
+        
         const [moodsResponse, entryData] = await Promise.all([
           diaryApi.getMoods(),
           diaryApi.getDiaryEntry(entryId)
         ])
+        
         setMoods(moodsResponse.moods)
         setEntry(entryData)
       } catch (error) {
@@ -39,10 +48,10 @@ export default function EditDiaryPage() {
       }
     }
     
-    if (entryId) {
+    if (entryId && isClient) {
       loadData()
     }
-  }, [entryId])
+  }, [entryId, isClient])
 
   const handleUpdate = async (id: string, updatedEntry: DiaryEntryUpdate) => {
     try {
@@ -139,7 +148,18 @@ export default function EditDiaryPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-background scrollbar-hide">
+    <motion.div 
+      className="w-full min-h-screen bg-background scrollbar-hide"
+      initial={{ x: '100%', opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: '100%', opacity: 0 }}
+      transition={{ 
+        duration: 0.4,
+        type: "spring",
+        damping: 25,
+        stiffness: 300
+      }}
+    >
       <DiaryEntryForm
         mode="edit"
         entry={entry}
@@ -147,6 +167,6 @@ export default function EditDiaryPage() {
         onUpdate={handleUpdate}
         onCancel={handleCancel}
       />
-    </div>
+    </motion.div>
   )
 } 

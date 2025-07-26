@@ -1,21 +1,18 @@
 'use client'
 
 import { Calendar } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ClickableListItem, ClickableCard } from '@/components/ui/clickable-item'
-import { Idea, Category, IdeaUpdate } from '../atoms/types'
+import { Idea } from '../atoms/types'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 
 interface IdeaCardProps {
   idea: Idea
-  category: Category
-  onUpdate: (id: string, updatedIdea: IdeaUpdate) => Promise<Idea>
-  categories: Category[]
 }
 
-export function IdeaCard({ idea, category, onUpdate, categories }: IdeaCardProps) {
+export function IdeaCard({ idea }: IdeaCardProps) {
   const router = useRouter()
 
   const formatDate = (dateString: string) => {

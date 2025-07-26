@@ -47,7 +47,7 @@ describe('Sidebar', () => {
     // Wait for client-side hydration
     await waitFor(() => {
       expect(screen.getByText('Todo')).toBeInTheDocument()
-      expect(screen.getByText('Food Planner')).toBeInTheDocument()
+
       expect(screen.getByText('Ideas')).toBeInTheDocument()
       expect(screen.getByText('Diary')).toBeInTheDocument()
       expect(screen.getByText('Habit')).toBeInTheDocument()

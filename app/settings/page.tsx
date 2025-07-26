@@ -11,7 +11,6 @@ import { ErrorDemo } from '@/components/ui/error-demo';
 import { 
   Settings, 
   CheckSquare, 
-  Utensils, 
   Lightbulb, 
   Heart, 
   Target,
@@ -172,50 +171,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Food Planner Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className="h-5 w-5 text-orange-500" />
-                  Food Planner
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">Default Meal Times</span>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium">Breakfast</span>
-                      <Input type="time" defaultValue="08:00" />
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Lunch</span>
-                      <Input type="time" defaultValue="12:00" />
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Dinner</span>
-                      <Input type="time" defaultValue="18:00" />
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium">Snack</span>
-                      <Input type="time" defaultValue="15:00" />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="text-base font-medium">Meal Reminders</span>
-                    <p className="text-sm text-muted-foreground">
-                      Get notified about planned meals
-                    </p>
-                  </div>
-                  <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600 transition-colors">
-                    <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6 transition-transform" />
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Ideas Settings */}
             <Card>

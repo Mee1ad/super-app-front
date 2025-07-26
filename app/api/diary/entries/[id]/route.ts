@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DiaryEntryUpdate } from '@/app/diary/atoms/types'
+import { shouldUseMockData, getAuthStatus } from '@/lib/auth-utils'
+import { mockDiaryEntries } from '../../mock-data'
 
 // API base URL - adjust based on environment
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 function authHeaders(request: NextRequest): HeadersInit {
-  const authHeader = request.headers.get('authorization')
-  return authHeader ? { Authorization: authHeader } : {}
+  const { token } = getAuthStatus(request)
+  return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 export async function GET(
@@ -16,6 +18,20 @@ export async function GET(
   try {
     const { id } = await params
     
+    // Check if user is authenticated
+    if (shouldUseMockData(request)) {
+      // Return mock data for non-authenticated users
+      const entry = mockDiaryEntries.find(e => e.id === id)
+      if (!entry) {
+        return NextResponse.json(
+          { error: 'Diary entry not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(entry)
+    }
+
+    // Use real API for authenticated users
     const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -51,6 +67,27 @@ export async function PUT(
     const data: DiaryEntryUpdate = await request.json()
     const { id } = await params
     
+    // Check if user is authenticated
+    if (shouldUseMockData(request)) {
+      // Return mock data for non-authenticated users
+      const entryIndex = mockDiaryEntries.findIndex(e => e.id === id)
+      if (entryIndex === -1) {
+        return NextResponse.json(
+          { error: 'Diary entry not found' },
+          { status: 404 }
+        )
+      }
+      
+      const updatedEntry = {
+        ...mockDiaryEntries[entryIndex],
+        ...data,
+        updated_at: new Date().toISOString()
+      }
+      mockDiaryEntries[entryIndex] = updatedEntry
+      return NextResponse.json(updatedEntry)
+    }
+
+    // Use real API for authenticated users
     const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
       method: 'PUT',
       headers: {
@@ -87,6 +124,22 @@ export async function DELETE(
   try {
     const { id } = await params
     
+    // Check if user is authenticated
+    if (shouldUseMockData(request)) {
+      // Return mock data for non-authenticated users
+      const entryIndex = mockDiaryEntries.findIndex(e => e.id === id)
+      if (entryIndex === -1) {
+        return NextResponse.json(
+          { error: 'Diary entry not found' },
+          { status: 404 }
+        )
+      }
+      
+      mockDiaryEntries.splice(entryIndex, 1)
+      return NextResponse.json({ message: 'Diary entry deleted successfully' })
+    }
+
+    // Use real API for authenticated users
     const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
       method: 'DELETE',
       headers: {

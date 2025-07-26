@@ -85,13 +85,75 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
       const visualViewport = window.visualViewport
       if (visualViewport) {
         const keyboardHeight = window.innerHeight - visualViewport.height
+        // Consider keyboard open if it takes up more than 150px of screen height
+        setIsKeyboardOpen(keyboardHeight > 150)
+      } else {
+        // Fallback for browsers without visualViewport support
+        const screenHeight = window.screen.height
+        const windowHeight = window.innerHeight
+        const keyboardHeight = screenHeight - windowHeight
         setIsKeyboardOpen(keyboardHeight > 150)
       }
     }
 
+    const handleFocus = () => {
+      // When any input is focused, assume keyboard might open
+      setTimeout(() => {
+        const visualViewport = window.visualViewport
+        if (visualViewport) {
+          const keyboardHeight = window.innerHeight - visualViewport.height
+          setIsKeyboardOpen(keyboardHeight > 150)
+        } else {
+          // Fallback
+          const screenHeight = window.screen.height
+          const windowHeight = window.innerHeight
+          const keyboardHeight = screenHeight - windowHeight
+          setIsKeyboardOpen(keyboardHeight > 150)
+        }
+      }, 300) // Small delay to allow keyboard to open
+    }
+
+    const handleBlur = () => {
+      // Small delay to allow for other focus events
+      setTimeout(() => {
+        const activeElement = document.activeElement
+        if (!activeElement || !actionBarRef.current?.contains(activeElement)) {
+          const visualViewport = window.visualViewport
+          if (visualViewport) {
+            const keyboardHeight = window.innerHeight - visualViewport.height
+            setIsKeyboardOpen(keyboardHeight > 150)
+          } else {
+            // Fallback
+            const screenHeight = window.screen.height
+            const windowHeight = window.innerHeight
+            const keyboardHeight = screenHeight - windowHeight
+            setIsKeyboardOpen(keyboardHeight > 150)
+          }
+        }
+      }, 100)
+    }
+
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleResize)
-      return () => window.visualViewport?.removeEventListener('resize', handleResize)
+      window.addEventListener('focus', handleFocus, true)
+      window.addEventListener('blur', handleBlur, true)
+      
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleResize)
+        window.removeEventListener('focus', handleFocus, true)
+        window.removeEventListener('blur', handleBlur, true)
+      }
+    } else {
+      // Fallback for browsers without visualViewport
+      window.addEventListener('resize', handleResize)
+      window.addEventListener('focus', handleFocus, true)
+      window.addEventListener('blur', handleBlur, true)
+      
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        window.removeEventListener('focus', handleFocus, true)
+        window.removeEventListener('blur', handleBlur, true)
+      }
     }
   }, [])
 
@@ -192,6 +254,13 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
     }
   }
 
+  const handleFormKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   const selectedCategory = categories.find(c => c.id === category)
   const isEditMode = mode === 'edit'
 
@@ -267,6 +336,7 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
             disabled={loading}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onKeyDown={handleFormKeyDown}
             style={{ 
               direction: 'ltr', 
               textAlign: 'left', 
@@ -341,6 +411,7 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
             disabled={loading}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onKeyDown={handleFormKeyDown}
             style={{ 
               direction: 'ltr', 
               textAlign: 'left', 
@@ -451,7 +522,7 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
       {/* Bottom Action Bar - Fixed at bottom */}
       <motion.div 
         ref={actionBarRef}
-        className="fixed left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border px-6 py-3 keyboard-aware"
+        className="fixed left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border px-6 py-3"
         style={{ 
           bottom: isKeyboardOpen ? 'env(keyboard-inset-height, 0px)' : '0px',
           transition: 'bottom 0.3s ease',
@@ -477,34 +548,35 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
             </div>
           )}
           
-          {/* Category Button */}
-          <Button
-            variant={validationErrors.category ? "destructive" : selectedCategory ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowCategoryPicker(true)}
-            className={`w-full h-10 ${
-              validationErrors.category ? 'animate-pulse' : ''
-            }`}
-            disabled={loading}
-          >
-            {selectedCategory ? (
-              <span className="flex items-center gap-2">
-                <span className="text-lg">{selectedCategory.emoji}</span>
-                <span>{selectedCategory.name}</span>
-              </span>
-            ) : (
-              <span>
-                Select Category {!selectedCategory && <span className="text-destructive">*</span>}
-              </span>
-            )}
-          </Button>
+          {/* Category and Save buttons in one row */}
+          <div className="flex items-center gap-3">
+            {/* Category Button */}
+            <Button
+              variant={validationErrors.category ? "destructive" : selectedCategory ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowCategoryPicker(true)}
+              className={`flex-1 h-12 ${
+                validationErrors.category ? 'animate-pulse' : ''
+              }`}
+              disabled={loading}
+            >
+              {selectedCategory ? (
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">{selectedCategory.emoji}</span>
+                  <span>{selectedCategory.name}</span>
+                </span>
+              ) : (
+                <span>
+                  Select Category {!selectedCategory && <span className="text-destructive">*</span>}
+                </span>
+              )}
+            </Button>
 
-          {/* Full Width Save Button */}
-          <div className="w-full">
+            {/* Save Button */}
             <Button
               onClick={handleSubmit}
               disabled={!title.trim() || !description.trim() || !category || loading}
-              className="w-full h-12"
+              className="flex-1 h-12"
               size="lg"
             >
               {loading ? (

@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { IdeaCard } from './molecules/IdeaCard'
 import { LoadingSpinner } from './atoms/LoadingSpinner'
 import { useIdeasApi } from './atoms/useIdeasApi'
-import { IdeaCreate, IdeaUpdate, Idea } from './atoms/types'
+
 import { AppLayout } from '../shared/organisms/AppLayout'
 import { ListPageLayout } from '../shared/organisms/ListPageLayout'
 import { motion } from 'framer-motion'
@@ -24,31 +24,14 @@ export default function IdeasPage() {
 
   const {
     ideas,
-    categories,
     isLoading,
     isCreating,
     error,
-    loadIdeas,
-    createIdea,
-    updateIdea,
-    deleteIdea,
     clearError,
   } = useIdeasApi()
 
   const handleAddIdea = () => {
     router.push('/ideas/new')
-  }
-
-  const handleUpdateIdea = async (id: string, updatedIdea: IdeaUpdate): Promise<Idea> => {
-    const result = await updateIdea(id, updatedIdea)
-    if (result) {
-      return result
-    }
-    throw new Error('Failed to update idea')
-  }
-
-  const handleDeleteIdea = async (id: string) => {
-    return await deleteIdea(id)
   }
 
   if (!isClient || isLoading) {
@@ -102,45 +85,10 @@ export default function IdeasPage() {
                           <motion.div className="block md:hidden scrollbar-hide overflow-hidden">
               {/* Mobile: Full width list without cards */}
               <div className="space-y-0 scrollbar-hide overflow-hidden">
-                  {ideas.map((idea, index) => {
-                    const category = categories.find(c => c.id === idea.category_id)
-                    if (!category) return null
-                    
-                    return (
-                      <motion.div 
-                        key={idea.id} 
-                        className="border-b border-border last:border-b-0"
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          duration: 0.4,
-                          delay: 0.6 + (index * 0.1),
-                          type: "spring",
-                          damping: 25,
-                          stiffness: 300
-                        }}
-                      >
-                        <IdeaCard
-                          idea={idea}
-                          category={category}
-                          onUpdate={handleUpdateIdea}
-                          categories={categories}
-                        />
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              </motion.div>
-              
-                              <motion.div className="hidden md:block scrollbar-hide overflow-hidden">
-                  {/* Desktop: Card view */}
-                {ideas.map((idea, index) => {
-                  const category = categories.find(c => c.id === idea.category_id)
-                  if (!category) return null
-                  
-                  return (
-                    <motion.div
-                      key={idea.id}
+                  {ideas.map((idea, index) => (
+                    <motion.div 
+                      key={idea.id} 
+                      className="border-b border-border last:border-b-0"
                       initial={{ opacity: 0, y: 50 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
@@ -153,13 +101,32 @@ export default function IdeasPage() {
                     >
                       <IdeaCard
                         idea={idea}
-                        category={category}
-                        onUpdate={handleUpdateIdea}
-                        categories={categories}
                       />
                     </motion.div>
-                  )
-                })}
+                  ))}
+                </div>
+              </motion.div>
+              
+                              <motion.div className="hidden md:block scrollbar-hide overflow-hidden">
+                  {/* Desktop: Card view */}
+                {ideas.map((idea, index) => (
+                  <motion.div
+                    key={idea.id}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: 0.6 + (index * 0.1),
+                      type: "spring",
+                      damping: 25,
+                      stiffness: 300
+                    }}
+                  >
+                    <IdeaCard
+                      idea={idea}
+                    />
+                  </motion.div>
+                ))}
               </motion.div>
             </>
           )}
@@ -167,15 +134,14 @@ export default function IdeasPage() {
 
         {/* Floating Action Button */}
         <motion.button
-          initial={{ scale: 0, opacity: 0, y: 50 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           transition={{ 
-            type: "spring", 
-            damping: 25, 
-            stiffness: 300,
-            delay: 1.2
+            duration: 0.4, 
+            ease: "easeOut",
+            delay: 0.2
           }}
           onClick={handleAddIdea}
           disabled={isCreating}

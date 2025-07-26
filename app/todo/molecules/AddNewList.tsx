@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ListTodo, ShoppingCart, Plus, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMobileKeyboardFocusWithBackGesture } from "@/hooks/use-mobile-keyboard-focus";
+import { motion } from "framer-motion";
 
 export type AddNewListProps = {
   onCreate: (type: "task" | "shopping", title?: string) => void;
@@ -111,7 +112,7 @@ export function AddNewList({ onCreate }: AddNewListProps) {
           {/* Keyboard-attached form */}
           <div className="fixed inset-0 z-[9999] flex items-end" onClick={handleCancel}>
             <div 
-              className="w-full bg-white rounded-t-xl animate-in slide-in-from-bottom-2 duration-300 shadow-lg" 
+              className="w-full bg-white rounded-t-xl animate-in fade-in-0 duration-300 shadow-lg" 
               onClick={(e) => e.stopPropagation()}
               style={{
                 transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : 'none',
@@ -177,8 +178,8 @@ export function AddNewList({ onCreate }: AddNewListProps) {
                   key={option.value}
                   className={cn(
                     "flex items-center gap-4 bg-white border rounded-lg shadow-lg px-6 py-4 cursor-pointer hover:bg-gray-50 transition-all duration-300 transform",
-                    "animate-in slide-in-from-bottom-2 fade-in-0",
-                    isOpen ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+                    "animate-in fade-in-0",
+                    isOpen ? "opacity-100" : "opacity-0"
                   )}
                   style={{
                     animationDelay: `${index * 100}ms`,
@@ -198,25 +199,35 @@ export function AddNewList({ onCreate }: AddNewListProps) {
       )}
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className={cn(
-            "w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
-            "flex items-center justify-center transition-all duration-300 transform",
-            "hover:scale-110 active:scale-95",
-            isOpen && "rotate-45"
-          )}
-          aria-label="Add new list"
-        >
-          {isOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Plus className="w-6 h-6" />
-          )}
-        </button>
-      </div>
+      <motion.button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "fixed bottom-6 right-6 z-[9999] w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
+          "flex items-center justify-center",
+          isOpen && "rotate-45"
+        )}
+        style={{ position: 'fixed' }}
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ 
+          duration: 0.4, 
+          ease: "easeOut",
+          delay: 0.2,
+          type: "spring", 
+          damping: 25, 
+          stiffness: 300
+        }}
+        aria-label="Add new list"
+      >
+        {isOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <Plus className="w-6 h-6" />
+        )}
+      </motion.button>
     </>
   );
 } 

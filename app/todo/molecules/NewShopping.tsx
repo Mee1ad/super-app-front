@@ -79,6 +79,29 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (title.trim()) {
+        const finalUrl = showUrl ? url : "";
+        const finalPrice = showPrice ? price : "";
+        onCreate(title.trim(), finalUrl, finalPrice, source);
+        // Keep form open for adding another item
+        setTitle("");
+        setUrl("");
+        setPrice("");
+        setSource("");
+        setShowUrl(false);
+        setShowPrice(false);
+        setShowSource(false);
+        // Re-focus the title input for quick entry
+        setTimeout(() => {
+          titleInputRef.current?.focus();
+        }, 100);
+      }
+    }
+  };
+
   const handleClose = () => {
     setTitle("");
     setUrl("");
@@ -111,6 +134,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Enter item title..."
                 className="w-full text-base border-none outline-none bg-transparent"
                 autoFocus
@@ -125,6 +149,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
                   type="text"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Enter URL (optional)..."
                   className="w-full text-base border-none outline-none bg-transparent"
                 />
@@ -140,6 +165,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
                       type="text"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       placeholder="Price (optional)..."
                       className="w-full text-base border-none outline-none bg-transparent"
                     />
@@ -151,6 +177,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
                       type="text"
                       value={source}
                       onChange={(e) => setSource(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       placeholder="Source (optional)..."
                       className="w-full text-base border-none outline-none bg-transparent"
                     />

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 // import { useRouter } from 'next/navigation' // Using navigateWithAnimation instead
 import { Plus, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -270,37 +269,42 @@ export default function DiaryPage() {
           </motion.div>
 
           {/* Floating Action Button */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 260, 
-              damping: 20,
-              delay: 1.2
-            }}
+          <motion.button
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="fixed bottom-6 right-6 z-50"
+            transition={{ 
+              duration: 0.4, 
+              ease: "easeOut",
+              delay: 0.2,
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300
+            }}
+            onClick={() => {
+              console.log('Diary FAB clicked - animation should be working');
+              navigateWithAnimation('/diary/new');
+            }}
+            disabled={loading}
+            className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-50"
+            style={{ 
+              position: 'fixed',
+              zIndex: 50,
+              transform: 'translateZ(0)' // Force hardware acceleration
+            }}
           >
-            <Button
-              onClick={() => navigateWithAnimation('/diary/new')}
-              size="icon"
-              className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl"
-              disabled={loading}
-            >
-              {loading ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                >
-                  <Loader2 className="h-6 w-6" />
-                </motion.div>
-              ) : (
-                <Plus className="h-6 w-6" />
-              )}
-            </Button>
-          </motion.div>
+            {loading ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <Loader2 className="h-6 w-6" />
+              </motion.div>
+            ) : (
+              <Plus className="h-6 w-6" />
+            )}
+          </motion.button>
         </AppLayout>
       </div>
 

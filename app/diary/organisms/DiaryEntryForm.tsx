@@ -119,7 +119,7 @@ export function DiaryEntryForm({
             actionBarRef.current.style.bottom = `${keyboardHeight}px`
             actionBarRef.current.classList.add('keyboard-open')
             // Force reflow to ensure the change is applied
-            actionBarRef.current.offsetHeight
+            void actionBarRef.current.offsetHeight
           }
         } else {
           // Keyboard is likely closed
@@ -131,7 +131,7 @@ export function DiaryEntryForm({
             actionBarRef.current.style.bottom = '0px'
             actionBarRef.current.classList.remove('keyboard-open')
             // Force reflow to ensure the change is applied
-            actionBarRef.current.offsetHeight
+            void actionBarRef.current.offsetHeight
           }
         }
       } else {
@@ -149,7 +149,7 @@ export function DiaryEntryForm({
             actionBarRef.current.style.bottom = `${heightDifference}px`
             actionBarRef.current.classList.add('keyboard-open')
             // Force reflow to ensure the change is applied
-            actionBarRef.current.offsetHeight
+            void actionBarRef.current.offsetHeight
           }
         } else {
           // Keyboard is likely closed
@@ -161,7 +161,7 @@ export function DiaryEntryForm({
             actionBarRef.current.style.bottom = '0px'
             actionBarRef.current.classList.remove('keyboard-open')
             // Force reflow to ensure the change is applied
-            actionBarRef.current.offsetHeight
+            void actionBarRef.current.offsetHeight
           }
         }
       }
@@ -311,16 +311,18 @@ export function DiaryEntryForm({
 
   const handleCancel = () => {
     if (onCancel) {
-      onCancel()
+      onCancel();
     } else {
-      // Try to go back, if no history, go to diary page
-      if (window.history.length > 1) {
-        router.back()
-      } else {
-        navigateWithAnimation('/diary')
-      }
+      router.push('/diary');
     }
-  }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
@@ -370,7 +372,15 @@ export function DiaryEntryForm({
   const isEditMode = mode === 'edit'
 
   return (
-    <div className="w-full min-h-screen bg-background flex flex-col overflow-x-hidden diary-entry-page scrollbar-hide">
+    <motion.div 
+      className="w-full min-h-screen bg-background flex flex-col overflow-x-hidden diary-entry-page scrollbar-hide"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ 
+        duration: 0.3,
+        delay: 0.1
+      }}
+    >
       {/* Mobile Header */}
       <motion.div 
         className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border overflow-x-hidden"
@@ -486,6 +496,7 @@ export function DiaryEntryForm({
               fontWeight: '600',
               fontFamily: 'inherit'
             }}
+            onKeyDown={handleKeyDown}
           />
           
           {/* Visible Title Placeholder */}
@@ -558,6 +569,7 @@ export function DiaryEntryForm({
               fontWeight: '400',
               fontFamily: 'inherit'
             }}
+            onKeyDown={handleKeyDown}
           />
 
           {/* Visible Content Placeholder */}
@@ -607,8 +619,8 @@ export function DiaryEntryForm({
           opacity: 1
         }}
         transition={{ 
-          duration: 0.2,
-          delay: 0,
+          duration: 0.3,
+          delay: 0.2, // Delay to match page animation
           ease: "easeOut"
         }}
       >
@@ -857,6 +869,6 @@ export function DiaryEntryForm({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 } 

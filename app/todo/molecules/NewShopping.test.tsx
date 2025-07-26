@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { NewShopping } from './NewShopping';
 
@@ -121,5 +121,50 @@ describe('NewShopping', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close form' }));
     
     expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('calls onCreate when Enter is pressed in title input', async () => {
+    render(<NewShopping onCreate={mockOnCreate} onClose={mockOnClose} />);
+    const titleInput = screen.getByPlaceholderText(/item title/i);
+    
+    fireEvent.change(titleInput, { target: { value: 'New Item' } });
+    fireEvent.keyDown(titleInput, { key: 'Enter' });
+    
+    await waitFor(() => {
+      expect(mockOnCreate).toHaveBeenCalledWith('New Item', '', '', '');
+    });
+  });
+
+  it('calls onCreate when Enter is pressed in URL input', async () => {
+    render(<NewShopping onCreate={mockOnCreate} onClose={mockOnClose} />);
+    const titleInput = screen.getByPlaceholderText(/item title/i);
+    const urlInput = screen.getByPlaceholderText(/URL/i);
+    
+    fireEvent.change(titleInput, { target: { value: 'New Item' } });
+    fireEvent.change(urlInput, { target: { value: 'https://example.com' } });
+    fireEvent.keyDown(urlInput, { key: 'Enter' });
+    
+    await waitFor(() => {
+      expect(mockOnCreate).toHaveBeenCalledWith('New Item', 'https://example.com', '', '');
+    });
+  });
+
+  it('does not call onCreate for empty title', () => {
+    render(<NewShopping onCreate={mockOnCreate} onClose={mockOnClose} />);
+    const titleInput = screen.getByPlaceholderText(/item title/i);
+    
+    fireEvent.keyDown(titleInput, { key: 'Enter' });
+    
+    expect(mockOnCreate).not.toHaveBeenCalled();
+  });
+
+  it('allows Shift+Enter for new line', () => {
+    render(<NewShopping onCreate={mockOnCreate} onClose={mockOnClose} />);
+    const titleInput = screen.getByPlaceholderText(/item title/i);
+    
+    fireEvent.change(titleInput, { target: { value: 'New Item' } });
+    fireEvent.keyDown(titleInput, { key: 'Enter', shiftKey: true });
+    
+    expect(mockOnCreate).not.toHaveBeenCalled();
   });
 }); 

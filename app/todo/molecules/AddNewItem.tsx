@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Plus, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMobileKeyboardFocusWithBackGesture } from "@/hooks/use-mobile-keyboard-focus";
+import { motion } from "framer-motion";
 
 export type AddNewItemProps = {
   type: "task" | "shopping";
@@ -110,31 +111,14 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
 
   const handleCreateItem = () => {
     if (title.trim()) {
-      if (editItem && onUpdate) {
+      if (editItem) {
         // Update existing item
-        onUpdate(editItem.id, title.trim(), description.trim(), url.trim(), price.trim(), source.trim());
-        handleCancel();
+        onUpdate?.(editItem.id, title, description, url, price, source);
       } else {
         // Create new item
-        if (type === "task") {
-          onCreate(title.trim(), description.trim());
-        } else {
-          onCreate(title.trim(), undefined, url.trim(), price.trim(), source.trim());
-        }
-        // Keep form open for adding another item
-        setTitle("");
-        setDescription("");
-        setUrl("");
-        setPrice("");
-        setSource("");
-        setShowUrlInput(false);
-        setShowPriceInput(false);
-        setShowSourceInput(false);
-        // Re-focus the title input for quick entry
-        setTimeout(() => {
-          titleInputRef.current?.focus();
-        }, 100);
+        onCreate(title, description, url, price, source);
       }
+      handleCancel();
     }
   };
 
@@ -144,56 +128,20 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
     setUrl("");
     setPrice("");
     setSource("");
-    setShowInput(false);
     setShowUrlInput(false);
     setShowPriceInput(false);
     setShowSourceInput(false);
+    setShowInput(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      handleCreateItem();
+    } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      
-      // For shopping items, check if there are active input fields to navigate through
-      if (type === "shopping") {
-        const currentTarget = e.target as HTMLInputElement;
-        const isTitleInput = currentTarget.placeholder?.includes('title');
-        const isUrlInput = currentTarget.placeholder?.includes('URL');
-        const isPriceInput = currentTarget.placeholder?.includes('Price');
-        const isSourceInput = currentTarget.placeholder?.includes('Source');
-        
-        // Navigate to next visible input field
-        if (isTitleInput && showUrlInput) {
-          // Move to URL input
-          const urlInput = document.querySelector('input[placeholder*="URL"]') as HTMLInputElement;
-          if (urlInput) urlInput.focus();
-        } else if (isUrlInput && showPriceInput) {
-          // Move to Price input
-          const priceInput = document.querySelector('input[placeholder*="Price"]') as HTMLInputElement;
-          if (priceInput) priceInput.focus();
-        } else if (isPriceInput && showSourceInput) {
-          // Move to Source input
-          const sourceInput = document.querySelector('input[placeholder*="Source"]') as HTMLInputElement;
-          if (sourceInput) sourceInput.focus();
-        } else if (isSourceInput) {
-          // Last input field, submit the form
-          handleCreateItem();
-        } else if (isTitleInput && !showUrlInput && showPriceInput) {
-          // Skip URL, go to Price
-          const priceInput = document.querySelector('input[placeholder*="Price"]') as HTMLInputElement;
-          if (priceInput) priceInput.focus();
-        } else if (isTitleInput && !showUrlInput && !showPriceInput && showSourceInput) {
-          // Skip URL and Price, go to Source
-          const sourceInput = document.querySelector('input[placeholder*="Source"]') as HTMLInputElement;
-          if (sourceInput) sourceInput.focus();
-        } else {
-          // No more visible inputs, submit the form
-          handleCreateItem();
-        }
-      } else {
-        // For tasks, just submit the form
-        handleCreateItem();
-      }
+      handleCreateItem();
+    } else if (e.key === 'Escape') {
+      handleCancel();
     }
   };
 
@@ -219,7 +167,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
           
           <div className="fixed inset-0 z-[9999] flex items-end" onClick={handleCancel}>
             <div 
-              className="w-full bg-white rounded-t-xl animate-in slide-in-from-bottom-2 duration-300 shadow-lg" 
+              className="w-full bg-white rounded-t-xl animate-in fade-in-0 duration-300 shadow-lg" 
               onClick={(e) => e.stopPropagation()}
               onMouseDown={handleFormClick}
               onTouchStart={handleFormTouch}
@@ -414,21 +362,30 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
 
       {/* Floating Action Button - Only show when not editing */}
       {!isEditing && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            type="button"
-            onClick={() => setShowInput(true)}
-            className={cn(
-              "w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
-              "flex items-center justify-center",
-              "hover:scale-110 active:scale-95"
-            )}
-            aria-label={`Add ${type === 'task' ? 'task' : 'shopping item'}`}
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-        </div>
+        <motion.button
+          type="button"
+          onClick={() => setShowInput(true)}
+          className={cn(
+            "fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
+            "flex items-center justify-center"
+          )}
+          aria-label={`Add ${type === 'task' ? 'task' : 'shopping item'}`}
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ 
+            duration: 0.4, 
+            ease: "easeOut",
+            delay: 0.2,
+            type: "spring", 
+            damping: 25, 
+            stiffness: 300
+          }}
+        >
+          <Plus className="w-6 h-6" />
+        </motion.button>
       )}
     </>
   );
-} 
+}

@@ -9,8 +9,8 @@ import {
 import { getAccessToken } from '@/lib/auth-token'
 import { mockMoods, mockDiaryEntries, generateId } from '@/app/api/diary/mock-data'
 
-// API base URL - change this for different environments
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+// API base URL - use frontend API routes for proper fallback handling
+const API_BASE_URL = '/api/diary'
 
 // Check if we're in a test environment
 const isTestEnvironment = process.env.NODE_ENV === 'test' || typeof jest !== 'undefined';
@@ -165,7 +165,7 @@ export const diaryApi = {
     if (params?.page) searchParams.append('page', params.page.toString())
     if (params?.limit) searchParams.append('limit', params.limit.toString())
     
-    const url = `${API_BASE_URL}/diary-entries${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+    const url = `${API_BASE_URL}/entries${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ export const diaryApi = {
       return mockDiaryApi.getDiaryEntry(id)
     }
 
-    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/entries/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -234,7 +234,7 @@ export const diaryApi = {
       date: data.date || new Date().toISOString().slice(0, 10)
     }
 
-    const response = await fetch(`${API_BASE_URL}/diary-entries`, {
+    const response = await fetch(`${API_BASE_URL}/entries`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -268,7 +268,7 @@ export const diaryApi = {
       return mockDiaryApi.updateDiaryEntry(id, data)
     }
 
-    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/entries/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -302,7 +302,7 @@ export const diaryApi = {
       return mockDiaryApi.deleteDiaryEntry(id)
     }
 
-    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/entries/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

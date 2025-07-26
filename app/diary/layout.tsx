@@ -14,6 +14,7 @@ export default function DiaryLayout({
   // Don't apply slide animations to the main diary page and new diary page
   const isMainDiaryPage = pathname === '/diary'
   const isNewDiaryPage = pathname === '/diary/new'
+  const isEditPage = pathname.includes('/diary/') && pathname.includes('/edit')
 
   // Always scroll to top when diary layout loads
   useEffect(() => {
@@ -22,8 +23,8 @@ export default function DiaryLayout({
 
   return (
     <div className="w-full scrollbar-hide">
-      {isNewDiaryPage ? (
-        // No animation for new diary page
+      {isNewDiaryPage || isEditPage ? (
+        // No animation for new diary page and edit pages to prevent loading issues
         <div className="w-full">
           {children}
         </div>

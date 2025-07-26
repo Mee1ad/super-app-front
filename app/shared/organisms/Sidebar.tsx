@@ -28,7 +28,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Todo", icon: ListTodo, href: "/todo" },
-  { label: "Food Planner", icon: Utensils, href: "/food-planner" },
+  { label: "Food Tracker", icon: Utensils, href: "/food-tracker" },
   { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Diary", icon: Notebook, href: "/diary" },
   { label: "Habit", icon: CheckSquare, href: "/habit" },
@@ -37,7 +37,7 @@ const navItems: NavItem[] = [
 
 // Animation variants for sidebar
 const sidebarVariants = {
-  hidden: { x: -300, opacity: 0 },
+  hidden: { x: -320, opacity: 0 }, // Adjusted for wider mobile sidebar (w-72 = 288px + buffer)
   visible: { 
     x: 0, 
     opacity: 1,
@@ -49,7 +49,7 @@ const sidebarVariants = {
     }
   },
   exit: { 
-    x: -300, 
+    x: -320, 
     opacity: 0,
     transition: {
       type: "spring" as const,
@@ -96,7 +96,7 @@ export function Sidebar() {
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
-  const maxSidebarWidth = 256; // w-64 = 256px
+  const maxSidebarWidth = 288; // w-72 = 288px for mobile, w-64 = 256px for desktop
 
   const onTouchStart = (e: React.TouchEvent) => {
     if (!isMobileMenuOpen) return;
@@ -162,21 +162,21 @@ export function Sidebar() {
   const SidebarContent = () => (
     <>
       <div className="mb-8" />
-      <nav className="flex flex-col gap-4 flex-1">
+      <nav className="flex flex-col gap-4 flex-1 sidebar-nav">
         {filteredNavItems.map(({ label, icon: Icon, href }) => {
           const isActive = pathname === href;
           return (
             <a
               key={label}
               href={href}
-              className={`flex items-center gap-3 transition-colors ${
+              className={`flex items-center gap-3 transition-colors w-full ${
                 isActive 
                   ? "text-blue-600 bg-blue-50 rounded-lg px-3 py-2" 
                   : "text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg px-3 py-2"
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-base">{label}</span>
+              <Icon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-base flex-1">{label}</span>
             </a>
           );
         })}
@@ -250,7 +250,7 @@ export function Sidebar() {
         {isMobileMenuOpen && (
           <motion.aside
             ref={sidebarRef}
-            className="fixed left-0 top-0 h-full bg-white shadow-md z-50 flex flex-col p-6 border-r border-gray-200 w-64 md:translate-x-0 md:z-30"
+            className="fixed left-0 top-0 h-full bg-white shadow-md z-50 flex flex-col p-4 md:p-6 border-r border-gray-200 w-72 md:w-64 md:translate-x-0 md:z-30"
             variants={sidebarVariants}
             initial="hidden"
             animate="visible"
@@ -259,7 +259,7 @@ export function Sidebar() {
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
             drag="x"
-            dragConstraints={{ left: -256, right: 0 }}
+            dragConstraints={{ left: -288, right: 0 }}
             dragElastic={0.1}
             onDragEnd={(event, info: { offset: { x: number } }) => {
               if (info.offset.x < -50) {

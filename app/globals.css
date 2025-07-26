@@ -261,14 +261,71 @@
       unicode-bidi: isolate !important;
     }
     
-    /* Specific fix for diary entry page */
-    .diary-entry-page * {
-      direction: ltr !important;
-      text-align: left !important;
-      unicode-bidi: isolate !important;
-      writing-mode: horizontal-tb !important;
-      text-orientation: mixed !important;
+      /* Specific fix for diary entry page */
+  .diary-entry-page * {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: isolate !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+  }
+  
+  /* Ensure diary entry page is hidden during transitions */
+  .diary-entry-page {
+    overflow: hidden !important;
+  }
+  
+  /* Hide action bar during page transitions */
+  .diary-entry-page[style*="opacity: 0"] .keyboard-aware {
+    opacity: 0 !important;
+    transform: translateY(100px) !important;
+    pointer-events: none !important;
+  }
+  
+  /* Mobile sidebar navigation improvements */
+  @media (max-width: 768px) {
+    /* Full width navigation items for better accessibility */
+    .sidebar-nav a {
+      min-height: 48px !important;
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+      padding: 12px 16px !important;
+      border-radius: 8px !important;
+      transition: all 0.2s ease !important;
     }
+    
+    /* Ensure proper touch targets */
+    .sidebar-nav a:active {
+      transform: scale(0.98) !important;
+      background-color: rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    /* Icon spacing and sizing */
+    .sidebar-nav a svg {
+      width: 20px !important;
+      height: 20px !important;
+      flex-shrink: 0 !important;
+    }
+    
+    /* Text styling */
+    .sidebar-nav a span {
+      font-size: 16px !important;
+      font-weight: 500 !important;
+      flex: 1 !important;
+      text-align: left !important;
+    }
+    
+    /* Keep bottom section items (roadmap, feedback, settings, sign in) with their current layout */
+    .sidebar-nav + div {
+      /* Bottom section styling remains unchanged */
+    }
+    
+    /* Ensure proper spacing between navigation and bottom section */
+    .sidebar-nav {
+      margin-bottom: 16px !important;
+    }
+  }
     
       /* Mobile-specific action bar positioning */
   .diary-entry-page .keyboard-aware {
@@ -283,6 +340,16 @@
     padding: 12px 24px !important;
     transition: bottom 0.3s ease !important;
     will-change: bottom !important;
+    /* Ensure action bar is hidden initially during page transitions */
+    opacity: 0 !important;
+    transform: translateY(100px) !important;
+  }
+  
+  /* Show action bar after page animation completes */
+  .diary-entry-page .keyboard-aware[style*="opacity: 1"],
+  .diary-entry-page .keyboard-aware.animate-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
   }
   
   /* Ensure action bar stays above keyboard on mobile */
@@ -321,5 +388,30 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Safari and Chrome */
+  }
+  
+  /* Todo page specific scrollbar hiding */
+  .todo-page {
+    overflow: hidden !important;
+  }
+  
+  .todo-page * {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE and Edge */
+  }
+  
+  .todo-page *::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari, Opera */
+  }
+  
+  /* Ensure body and html don't scroll on todo page */
+  .todo-page-active {
+    overflow: hidden !important;
+  }
+  
+  .todo-page-active body,
+  .todo-page-active html {
+    overflow: hidden !important;
+    height: 100vh !important;
   }
 }

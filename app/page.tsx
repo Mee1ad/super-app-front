@@ -26,13 +26,13 @@ export default function Home() {
               </div>
             </Link>
 
-            <Link href="/food-planner">
+            <Link href="/food-tracker">
               <div className="group p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col items-center text-center">
                   <Utensils className="h-8 w-8 md:h-12 md:w-12 text-orange-500 mb-3 md:mb-4 group-hover:scale-110 transition-transform" />
-                  <h3 className="text-base md:text-lg font-semibold mb-2">Food Planner</h3>
+                  <h3 className="text-base md:text-lg font-semibold mb-2">Food Tracker</h3>
                   <p className="text-xs md:text-sm text-muted-foreground">
-                    Plan meals and track nutrition
+                    Track food expenses and meals
                   </p>
                 </div>
               </div>
