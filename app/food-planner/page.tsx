@@ -12,7 +12,7 @@ import { MealPlanView } from './organisms/MealPlanView'
 import { FoodHistoryView } from './organisms/FoodHistoryView'
 import { CalendarView } from './organisms/CalendarView'
 import { useFoodPlannerApi } from './atoms/useFoodPlannerApi'
-import { FoodEntry } from './atoms/types'
+import { FoodEntry, FoodEntryCreate } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
 
 export default function FoodPlannerPage() {
@@ -51,7 +51,7 @@ export default function FoodPlannerPage() {
     return matchesSearch && matchesCategory && matchesMealType && matchesDate
   })
 
-  const handleAddEntry = async (newEntry: Omit<FoodEntry, 'id' | 'created_at' | 'updated_at' | 'meal_type'>) => {
+  const handleAddEntry = async (newEntry: FoodEntryCreate) => {
     try {
       await createFoodEntry({
         name: newEntry.name,
@@ -62,7 +62,7 @@ export default function FoodPlannerPage() {
         comment: newEntry.comment,
         image: newEntry.image,
         followed_plan: newEntry.followed_plan,
-        symptoms: newEntry.symptoms
+        symptoms: newEntry.symptoms || []
       })
       setIsAddDialogOpen(false)
     } catch {

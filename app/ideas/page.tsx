@@ -52,13 +52,13 @@ export default function IdeasPage() {
     return () => clearTimeout(timeoutId)
   }, [searchTerm, selectedCategory, loadIdeas, isClient])
 
-  const handleAddIdea = async (newIdea: IdeaCreate): Promise<Idea> => {
+  const handleAddIdea = async (newIdea: IdeaCreate): Promise<boolean> => {
     const result = await createIdea(newIdea)
     if (result) {
       setIsAddDialogOpen(false)
-      return result
+      return true
     }
-    throw new Error('Failed to create idea')
+    return false
   }
 
   const handleUpdateIdea = async (id: string, updatedIdea: IdeaUpdate): Promise<Idea> => {
