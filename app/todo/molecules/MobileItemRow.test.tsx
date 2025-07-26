@@ -24,6 +24,7 @@ const mockProps = {
   onUpdate: jest.fn(),
   onDelete: jest.fn(),
   onToggle: jest.fn(),
+  onReorder: jest.fn(),
 };
 
 describe('MobileItemRow', () => {
@@ -55,6 +56,18 @@ describe('MobileItemRow', () => {
       fireEvent.click(checkbox);
       
       expect(mockProps.onToggle).toHaveBeenCalledWith('task-1');
+    });
+
+    it('does not trigger edit mode when checkbox is clicked', () => {
+      const mockOnEdit = jest.fn();
+      render(<MobileItemRow item={mockTaskItem} type="task" {...mockProps} onEdit={mockOnEdit} />);
+      
+      const checkbox = screen.getByRole('button');
+      fireEvent.click(checkbox);
+      
+      // Should call onToggle but not onEdit
+      expect(mockProps.onToggle).toHaveBeenCalledWith('task-1');
+      expect(mockOnEdit).not.toHaveBeenCalled();
     });
 
     it('enters edit mode when edit icon is clicked', () => {
@@ -129,6 +142,21 @@ describe('MobileItemRow', () => {
       fireEvent.click(checkbox);
       
       expect(mockOnToggle).toHaveBeenCalledWith('item-1');
+    });
+
+    it('does not trigger edit mode when checkbox is clicked for shopping items', () => {
+      const mockOnEdit = jest.fn();
+      render(<MobileItemRow item={mockShoppingItem} type="shopping" {...mockProps} onEdit={mockOnEdit} />);
+      
+      const checkbox = screen.getByRole('button');
+      fireEvent.click(checkbox);
+      
+      // Should call onUpdate but not onEdit
+      expect(mockProps.onUpdate).toHaveBeenCalledWith({
+        ...mockShoppingItem,
+        checked: true,
+      });
+      expect(mockOnEdit).not.toHaveBeenCalled();
     });
 
     it('enters edit mode for shopping items', () => {
@@ -216,6 +244,55 @@ describe('MobileItemRow', () => {
       // Should show original title
       expect(screen.getByText('Test Task')).toBeInTheDocument();
       expect(mockProps.onUpdate).not.toHaveBeenCalled();
+    });
+
+    it('shows context menu on right click', () => {
+      render(<MobileItemRow item={mockTaskItem} type="task" {...mockProps} />);
+      
+      const row = screen.getByRole('button');
+      fireEvent.contextMenu(row);
+      
+      // Context menu should be visible
+      expect(screen.getByText('Edit')).toBeInTheDocument();
+      expect(screen.getByText('Reorder')).toBeInTheDocument();
+      expect(screen.getByText('Delete')).toBeInTheDocument();
+    });
+
+    it('calls onEdit when Edit is clicked in context menu', () => {
+      const mockOnEdit = jest.fn();
+      render(<MobileItemRow item={mockTaskItem} type="task" {...mockProps} onEdit={mockOnEdit} />);
+      
+      const row = screen.getByRole('button');
+      fireEvent.contextMenu(row);
+      
+      const editMenuItem = screen.getByText('Edit');
+      fireEvent.click(editMenuItem);
+      
+      expect(mockOnEdit).toHaveBeenCalledWith(mockTaskItem);
+    });
+
+    it('calls onReorder when Reorder is clicked in context menu', () => {
+      render(<MobileItemRow item={mockTaskItem} type="task" {...mockProps} />);
+      
+      const row = screen.getByRole('button');
+      fireEvent.contextMenu(row);
+      
+      const reorderMenuItem = screen.getByText('Reorder');
+      fireEvent.click(reorderMenuItem);
+      
+      expect(mockProps.onReorder).toHaveBeenCalled();
+    });
+
+    it('calls onDelete when Delete is clicked in context menu', () => {
+      render(<MobileItemRow item={mockTaskItem} type="task" {...mockProps} />);
+      
+      const row = screen.getByRole('button');
+      fireEvent.contextMenu(row);
+      
+      const deleteMenuItem = screen.getByText('Delete');
+      fireEvent.click(deleteMenuItem);
+      
+      expect(mockProps.onDelete).toHaveBeenCalledWith('task-1');
     });
   });
 }); 

@@ -22,9 +22,11 @@ export default function NewDiaryPage() {
   }, [])
 
   return (
-    <DiaryEntryForm
-      mode="create"
-      moods={moods}
-    />
+    <div className="w-full min-h-screen bg-background scrollbar-hide">
+      <DiaryEntryForm
+        mode="create"
+        moods={moods}
+      />
+    </div>
   )
 } 

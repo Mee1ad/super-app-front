@@ -10,6 +10,14 @@ jest.mock('next/navigation', () => ({
   })
 }))
 
+// Mock usePageTransition hook
+const mockNavigateWithAnimation = jest.fn()
+jest.mock('../atoms/usePageTransition', () => ({
+  usePageTransition: () => ({
+    navigateWithAnimation: mockNavigateWithAnimation
+  })
+}))
+
 const mockEntry: DiaryEntry = {
   id: '1',
   title: 'Test Entry',
@@ -132,7 +140,7 @@ describe('DiaryCard', () => {
     const desktopCard = titleElements[1].closest('div') // Use the second one (desktop view)
     fireEvent.click(desktopCard!)
 
-    expect(mockPush).toHaveBeenCalledWith('/diary/1/edit')
+    expect(mockNavigateWithAnimation).toHaveBeenCalledWith('/diary/1/edit')
   })
 
   it('navigates to edit page when edit button is clicked', () => {
@@ -149,7 +157,7 @@ describe('DiaryCard', () => {
     const editButton = screen.getByRole('button', { name: /edit entry/i })
     fireEvent.click(editButton)
 
-    expect(mockPush).toHaveBeenCalledWith('/diary/1/edit')
+    expect(mockNavigateWithAnimation).toHaveBeenCalledWith('/diary/1/edit')
   })
 
   it('calls onDelete when delete button is clicked', () => {
@@ -184,7 +192,7 @@ describe('DiaryCard', () => {
     fireEvent.click(deleteButton)
 
     // The navigation should not be called
-    expect(mockPush).not.toHaveBeenCalled()
+    expect(mockNavigateWithAnimation).not.toHaveBeenCalled()
   })
 
   it('disables delete button when loading', () => {

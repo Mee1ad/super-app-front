@@ -1,8 +1,16 @@
 'use client';
-import { Edit, Trash2, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState } from 'react';
+import { Edit, Trash2, MoreHorizontal, Move } from 'lucide-react';
+import { 
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import { motion } from 'framer-motion';
+import { ClickableListItem } from '@/components/ui/clickable-item';
+import { EditList } from './EditList';
 
 interface ListRowProps {
   id: string;
@@ -26,20 +34,27 @@ export function ListRow({
   isLast = false 
 }: ListRowProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(title);
 
-  const handleSaveTitle = () => {
-    setIsEditing(false);
-    onUpdateTitle?.(id, editTitle);
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveTitle();
-    } else if (e.key === 'Escape') {
-      setIsEditing(false);
-      setEditTitle(title);
-    }
+  const handleSaveTitle = (newTitle: string) => {
+    onUpdateTitle?.(id, newTitle);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    onDelete?.(id);
+  };
+
+  const handleReorder = () => {
+    // TODO: Implement reorder functionality
+    console.log('Reorder list:', id);
   };
 
   const getTypeIcon = () => {
@@ -52,79 +67,44 @@ export function ListRow({
 
   return (
     <>
-      <div 
-        className="flex items-center justify-between py-4 px-0 cursor-pointer hover:bg-gray-50 active:bg-muted/30 active:scale-[0.98] transition-all duration-150 ease-out"
-        onClick={() => onClick?.(id)}
-      >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className="text-lg">{getTypeIcon()}</span>
-          <div className="flex-1 min-w-0">
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Input 
-                  className="text-base font-medium border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent" 
-                  value={editTitle} 
-                  onChange={e => setEditTitle(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  autoFocus
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-6 px-2" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSaveTitle();
-                  }}
-                >
-                  Save
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-gray-500 hover:text-gray-700 h-6 px-2" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditing(false);
-                    setEditTitle(title);
-                  }}
-                >
-                  Cancel
-                </Button>
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <ClickableListItem onClick={() => onClick?.(id)}>
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="flex-shrink-0 text-2xl">{getTypeIcon()}</div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-gray-900 truncate">{title}</h3>
+                <p className="text-sm text-gray-500 mt-0.5">{itemCount} {getTypeLabel()}</p>
               </div>
-            ) : (
-              <div className="flex flex-col">
-                <h3 className="text-base font-medium text-gray-900 truncate">{title}</h3>
-                <p className="text-sm text-gray-500">{itemCount} {getTypeLabel()}</p>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </ClickableListItem>
+        </ContextMenuTrigger>
         
-        {!isEditing && (
-          <div className="flex items-center gap-2">
-            <Edit 
-              data-testid="edit-icon"
-              className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(true);
-              }} 
-            />
-            <Trash2 
-              data-testid="delete-icon"
-              className="w-4 h-4 text-gray-400 cursor-pointer hover:text-red-600 transition-colors" 
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.(id);
-              }} 
-            />
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-          </div>
-        )}
-      </div>
-      {!isLast && <div className="border-b border-gray-200" />}
+        <ContextMenuContent>
+          <ContextMenuItem onClick={handleEdit}>
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleReorder}>
+            <Move className="w-4 h-4 mr-2" />
+            Reorder
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleDelete} variant="destructive">
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+
+      {/* Edit List Keyboard Form */}
+      <EditList
+        currentTitle={title}
+        onSave={handleSaveTitle}
+        onCancel={handleCancelEdit}
+        isOpen={isEditing}
+      />
     </>
   );
 } 

@@ -20,7 +20,7 @@ export function AppLayout({ children, className = '', title }: AppLayoutProps) {
   return (
     <>
       {title && <Header title={title} onMenuClick={toggleMobileMenu} />}
-      <div className={base}>
+      <div className={`${base} scrollbar-hide`}>
         {children}
       </div>
     </>

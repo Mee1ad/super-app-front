@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -10,6 +11,7 @@ import { format } from 'date-fns'
 
 import { DiaryEntryCreate, DiaryEntryUpdate, Mood, DiaryEntry } from '../atoms/types'
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { usePageTransition } from '../atoms/usePageTransition'
 
 import { diaryApi } from '../atoms/api'
 
@@ -29,6 +31,7 @@ export function DiaryEntryForm({
   onCancel 
 }: DiaryEntryFormProps) {
   const router = useRouter()
+  const { navigateWithAnimation } = usePageTransition()
   const titleInputRef = useRef<HTMLInputElement>(null)
   const contentInputRef = useRef<HTMLTextAreaElement>(null)
   const actionBarRef = useRef<HTMLDivElement>(null)
@@ -46,6 +49,7 @@ export function DiaryEntryForm({
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showImagePicker, setShowImagePicker] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const [validationErrors, setValidationErrors] = useState<{
     title?: string
     content?: string
@@ -84,7 +88,7 @@ export function DiaryEntryForm({
     const isCreateMode = mode === 'create'
     
     if (isMobile && isCreateMode && titleInputRef.current) {
-      // Small delay to ensure the component is fully rendered
+      // Short delay to ensure the component is fully rendered
       const timer = setTimeout(() => {
         titleInputRef.current?.focus()
       }, 100)
@@ -96,50 +100,68 @@ export function DiaryEntryForm({
   // Handle keyboard visibility for action bar positioning
   useEffect(() => {
     let initialViewportHeight = window.innerHeight
-    let isKeyboardOpen = false
+    let keyboardHeight = 0
 
     const handleResize = () => {
-      if (actionBarRef.current) {
-        const currentViewportHeight = window.innerHeight
+      // Use visual viewport API if available (better for mobile keyboard detection)
+      if (window.visualViewport) {
+        const visualViewport = window.visualViewport
+        keyboardHeight = initialViewportHeight - visualViewport.height
         
-        // Use visual viewport API if available (better for mobile keyboard detection)
-        if (window.visualViewport) {
-          const visualViewport = window.visualViewport
-          const keyboardHeight = initialViewportHeight - visualViewport.height
+        if (keyboardHeight > 80 && visualViewport.height < initialViewportHeight * 0.9) {
+          // Keyboard is likely open
+          setIsKeyboardOpen(true)
+          console.log('Keyboard detected as open, height:', keyboardHeight)
           
-          if (keyboardHeight > 150 && visualViewport.height < initialViewportHeight * 0.8) {
-            // Keyboard is likely open
-            if (!isKeyboardOpen) {
-              isKeyboardOpen = true
-              actionBarRef.current.style.bottom = `${keyboardHeight}px`
-              actionBarRef.current.style.transition = 'bottom 0.3s ease'
-            }
-          } else {
-            // Keyboard is likely closed
-            if (isKeyboardOpen) {
-              isKeyboardOpen = false
-              actionBarRef.current.style.bottom = '0px'
-              actionBarRef.current.style.transition = 'bottom 0.3s ease'
-            }
+          // Update action bar position to be above keyboard
+          if (actionBarRef.current) {
+            actionBarRef.current.style.setProperty('--keyboard-height', `${keyboardHeight}px`)
+            actionBarRef.current.style.bottom = `${keyboardHeight}px`
+            actionBarRef.current.classList.add('keyboard-open')
+            // Force reflow to ensure the change is applied
+            actionBarRef.current.offsetHeight
           }
         } else {
-          // Fallback for browsers without visual viewport API
-          const heightDifference = initialViewportHeight - currentViewportHeight
+          // Keyboard is likely closed
+          setIsKeyboardOpen(false)
           
-          if (heightDifference > 200 && currentViewportHeight < initialViewportHeight * 0.8) {
-            // Keyboard is likely open
-            if (!isKeyboardOpen) {
-              isKeyboardOpen = true
-              actionBarRef.current.style.bottom = `${heightDifference}px`
-              actionBarRef.current.style.transition = 'bottom 0.3s ease'
-            }
-          } else {
-            // Keyboard is likely closed
-            if (isKeyboardOpen) {
-              isKeyboardOpen = false
-              actionBarRef.current.style.bottom = '0px'
-              actionBarRef.current.style.transition = 'bottom 0.3s ease'
-            }
+          // Reset action bar position
+          if (actionBarRef.current) {
+            actionBarRef.current.style.removeProperty('--keyboard-height')
+            actionBarRef.current.style.bottom = '0px'
+            actionBarRef.current.classList.remove('keyboard-open')
+            // Force reflow to ensure the change is applied
+            actionBarRef.current.offsetHeight
+          }
+        }
+      } else {
+        // Fallback for browsers without visual viewport API
+        const currentViewportHeight = window.innerHeight
+        const heightDifference = initialViewportHeight - currentViewportHeight
+        
+        if (heightDifference > 120 && currentViewportHeight < initialViewportHeight * 0.9) {
+          // Keyboard is likely open
+          setIsKeyboardOpen(true)
+          
+          // Update action bar position to be above keyboard
+          if (actionBarRef.current) {
+            actionBarRef.current.style.setProperty('--keyboard-height', `${heightDifference}px`)
+            actionBarRef.current.style.bottom = `${heightDifference}px`
+            actionBarRef.current.classList.add('keyboard-open')
+            // Force reflow to ensure the change is applied
+            actionBarRef.current.offsetHeight
+          }
+        } else {
+          // Keyboard is likely closed
+          setIsKeyboardOpen(false)
+          
+          // Reset action bar position
+          if (actionBarRef.current) {
+            actionBarRef.current.style.removeProperty('--keyboard-height')
+            actionBarRef.current.style.bottom = '0px'
+            actionBarRef.current.classList.remove('keyboard-open')
+            // Force reflow to ensure the change is applied
+            actionBarRef.current.offsetHeight
           }
         }
       }
@@ -147,9 +169,18 @@ export function DiaryEntryForm({
 
     const handleFocus = () => {
       // When input is focused, keyboard is likely to open
+      // Set keyboard as open immediately for better responsiveness
+      setIsKeyboardOpen(true)
+      
+      // Also check after a delay to ensure accuracy
       setTimeout(() => {
         handleResize()
-      }, 300) // Delay to allow keyboard to open
+      }, 150) // Shorter delay for faster response
+      
+      // Additional check after keyboard animation completes
+      setTimeout(() => {
+        handleResize()
+      }, 400) // Check after keyboard animation
     }
 
     const handleBlur = () => {
@@ -186,6 +217,21 @@ export function DiaryEntryForm({
       }, 500)
     })
     
+    // Handle iOS Safari keyboard events
+    if ('ontouchstart' in window) {
+      window.addEventListener('focusin', () => {
+        setTimeout(() => {
+          handleResize()
+        }, 100)
+      })
+      
+      window.addEventListener('focusout', () => {
+        setTimeout(() => {
+          handleResize()
+        }, 100)
+      })
+    }
+    
     // Initial call
     handleResize()
 
@@ -195,6 +241,13 @@ export function DiaryEntryForm({
       }
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('orientationchange', handleResize)
+      
+      // Remove iOS Safari keyboard event listeners
+      if ('ontouchstart' in window) {
+        window.removeEventListener('focusin', handleResize)
+        window.removeEventListener('focusout', handleResize)
+      }
+      
       if (titleInput) {
         titleInput.removeEventListener('focus', handleFocus)
         titleInput.removeEventListener('blur', handleBlur)
@@ -236,7 +289,7 @@ export function DiaryEntryForm({
           date: selectedDate.toISOString().split('T')[0],
         }
         await diaryApi.createDiaryEntry(entryData)
-        router.push('/diary')
+        navigateWithAnimation('/diary')
       } else if (mode === 'edit' && entry && onUpdate) {
         const updateData: DiaryEntryUpdate = {
           title: title.trim(),
@@ -264,7 +317,7 @@ export function DiaryEntryForm({
       if (window.history.length > 1) {
         router.back()
       } else {
-        router.push('/diary')
+        navigateWithAnimation('/diary')
       }
     }
   }
@@ -317,9 +370,20 @@ export function DiaryEntryForm({
   const isEditMode = mode === 'edit'
 
   return (
-    <div className="w-full min-h-screen bg-background flex flex-col overflow-x-hidden diary-entry-page">
+    <div className="w-full min-h-screen bg-background flex flex-col overflow-x-hidden diary-entry-page scrollbar-hide">
       {/* Mobile Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border overflow-x-hidden">
+      <motion.div 
+        className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border overflow-x-hidden"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ 
+          duration: 0.4,
+          delay: 0.1,
+          type: "spring",
+          damping: 25,
+          stiffness: 300
+        }}
+      >
         <div className="px-4 py-3 overflow-x-hidden">
           <div className="flex items-center justify-between w-full overflow-x-hidden">
             <Button
@@ -366,12 +430,34 @@ export function DiaryEntryForm({
             <div className="w-8"></div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Mobile Content */}
-      <div className="flex-1 px-6 py-4 space-y-6 overflow-x-hidden">
+      <motion.div 
+        className="flex-1 px-6 py-4 space-y-6 overflow-x-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ 
+          duration: 0.5,
+          delay: 0.2,
+          type: "spring",
+          damping: 25,
+          stiffness: 300
+        }}
+      >
         {/* Title Section */}
-        <div className="relative">
+        <motion.div 
+          className="relative"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.4,
+            delay: 0.3,
+            type: "spring",
+            damping: 25,
+            stiffness: 300
+          }}
+        >
           {/* Hidden Title Input */}
           <Input
             ref={titleInputRef}
@@ -428,10 +514,21 @@ export function DiaryEntryForm({
               {validationErrors.title}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Content Section */}
-        <div className="relative">
+        <motion.div 
+          className="relative"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.4,
+            delay: 0.4,
+            type: "spring",
+            damping: 25,
+            stiffness: 300
+          }}
+        >
           {/* Hidden Content Input */}
           <Textarea
             ref={contentInputRef}
@@ -489,14 +586,31 @@ export function DiaryEntryForm({
               {validationErrors.content}
             </div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Bottom Action Bar - Fixed at bottom */}
-      <div 
+      {/* Bottom Action Bar - Keyboard Aware */}
+      <motion.div 
         ref={actionBarRef}
-        className="fixed left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border px-6 py-3"
-        style={{ bottom: '0px' }}
+        className={`fixed left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border px-6 py-3 keyboard-aware ${
+          isKeyboardOpen ? 'keyboard-open' : ''
+        }`}
+        style={{ 
+          bottom: '0px',
+          transition: 'bottom 0.3s ease',
+          position: 'fixed',
+          transform: 'translateZ(0)' // Force hardware acceleration
+        }}
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ 
+          y: 0, 
+          opacity: 1
+        }}
+        transition={{ 
+          duration: 0.2,
+          delay: 0,
+          ease: "easeOut"
+        }}
       >
         <div className="w-full space-y-3">
           {/* Validation Error for Mood */}
@@ -509,6 +623,7 @@ export function DiaryEntryForm({
           
           {/* All Action Buttons in One Row */}
           <div className="flex items-center justify-center gap-2 w-full">
+            {/* Enhanced touch targets for better mobile UX */}
             {/* Mood Button */}
             <Button
               variant={validationErrors.mood ? "destructive" : selectedMood ? "default" : "outline"}
@@ -602,7 +717,7 @@ export function DiaryEntryForm({
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Hidden Mood Picker */}
       <div className={`fixed inset-0 z-50 bg-background/80 backdrop-blur overflow-x-hidden ${showMoodPicker ? 'block' : 'hidden'}`}>

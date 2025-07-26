@@ -124,6 +124,30 @@
     overflow-x: hidden;
   }
   
+  /* Global clickable item animations */
+  .clickable-item {
+    @apply cursor-pointer transition-all duration-150 ease-out;
+    @apply hover:bg-muted/50 active:bg-muted/30 active:scale-[0.98];
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+  
+  .clickable-item:disabled {
+    @apply cursor-not-allowed opacity-50 pointer-events-none;
+  }
+  
+  /* Global hover card animations */
+  .hover-card {
+    @apply hover:shadow-md transition-shadow duration-150 ease-out;
+  }
+  
+  /* Global list item animations */
+  .clickable-list-item {
+    @apply border-b border-border last:border-b-0;
+    @apply py-4 px-4;
+    @apply cursor-pointer transition-all duration-150 ease-out;
+    @apply hover:bg-muted/50 active:bg-muted/30 active:scale-[0.98];
+  }
+  
   /* Prevent hidden inputs from affecting layout when focused */
   .sr-only:focus {
     outline: none !important;
@@ -168,6 +192,48 @@
     }
   }
   
+  /* Enhanced keyboard-aware styling */
+  .keyboard-open {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    border-top: 2px solid hsl(var(--border)) !important;
+  }
+  
+  /* Ensure action bar is always visible when keyboard is open */
+  .keyboard-aware.keyboard-open {
+    z-index: 9999 !important;
+    background: hsl(var(--background)) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+  
+  /* Diary action bar keyboard positioning */
+  .diary-entry-page .keyboard-open {
+    position: fixed !important;
+    bottom: env(keyboard-inset-height, 0px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background: hsl(var(--background)) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Enhanced action bar styling for better visibility */
+  .diary-entry-page .keyboard-aware {
+    transition: bottom 0.3s ease !important;
+    will-change: bottom !important;
+  }
+  
+  /* Ensure action bar is always above keyboard */
+  .diary-entry-page .keyboard-aware.keyboard-open {
+    position: fixed !important;
+    z-index: 9999 !important;
+    background: hsl(var(--background)) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+  
   /* Force LTR direction for diary entry page on mobile */
   @media (max-width: 768px) {
     /* Comprehensive mobile text direction fix */
@@ -188,20 +254,47 @@
       text-orientation: mixed !important;
     }
     
-      /* Force LTR for all text elements in diary */
-  [class*="text-"] {
-    direction: ltr !important;
-    text-align: left !important;
-    unicode-bidi: isolate !important;
+    /* Force LTR for all text elements in diary */
+    [class*="text-"] {
+      direction: ltr !important;
+      text-align: left !important;
+      unicode-bidi: isolate !important;
+    }
+    
+    /* Specific fix for diary entry page */
+    .diary-entry-page * {
+      direction: ltr !important;
+      text-align: left !important;
+      unicode-bidi: isolate !important;
+      writing-mode: horizontal-tb !important;
+      text-orientation: mixed !important;
+    }
+    
+      /* Mobile-specific action bar positioning */
+  .diary-entry-page .keyboard-aware {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background: hsl(var(--background)) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+    padding: 12px 24px !important;
+    transition: bottom 0.3s ease !important;
+    will-change: bottom !important;
   }
   
-  /* Specific fix for diary entry page */
-  .diary-entry-page * {
-    direction: ltr !important;
-    text-align: left !important;
-    unicode-bidi: isolate !important;
-    writing-mode: horizontal-tb !important;
-    text-orientation: mixed !important;
+  /* Ensure action bar stays above keyboard on mobile */
+  .diary-entry-page .keyboard-aware.keyboard-open {
+    bottom: env(keyboard-inset-height, 0px) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    transform: translateZ(0) !important; /* Force hardware acceleration */
+  }
+  
+  /* Additional specificity for better override */
+  .diary-entry-page .keyboard-aware.keyboard-open[style*="bottom"] {
+    bottom: var(--keyboard-height, env(keyboard-inset-height, 0px)) !important;
   }
   }
   
@@ -218,5 +311,15 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  
+  /* Hide scrollbar while maintaining scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
   }
 }

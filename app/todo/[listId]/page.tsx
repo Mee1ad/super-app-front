@@ -39,9 +39,11 @@ export default function TodoListDetailPage() {
     updateTask,
     deleteTask,
     toggleTask,
+    reorderTasks,
     createItem,
     updateItem,
     deleteItem,
+    reorderItems,
   } = useTodoApi();
 
   React.useEffect(() => {
@@ -121,7 +123,40 @@ export default function TodoListDetailPage() {
     try {
       await deleteItem(listId, itemId);
     } catch (err) {
-      console.error('Failed to delete item:', err);
+      console.error('Failed to delete shopping item:', err);
+    }
+  };
+
+  // Reorder handlers
+  const handleTaskReorder = async () => {
+    try {
+      // For now, we'll just show a message that reorder is available
+      // In a full implementation, this would open a reorder interface
+      console.log('Reorder tasks for list:', listId);
+      // You could implement a drag-and-drop interface or a modal for reordering
+    } catch (err) {
+      console.error('Failed to reorder tasks:', err);
+    }
+  };
+
+  const handleShoppingReorder = async () => {
+    try {
+      // For now, we'll just show a message that reorder is available
+      // In a full implementation, this would open a reorder interface
+      console.log('Reorder shopping items for list:', listId);
+      // You could implement a drag-and-drop interface or a modal for reordering
+    } catch (err) {
+      console.error('Failed to reorder shopping items:', err);
+    }
+  };
+
+  const handleItemReorder = () => {
+    if (!currentList) return;
+    
+    if (currentList.type === "task") {
+      handleTaskReorder();
+    } else {
+      handleShoppingReorder();
     }
   };
 
@@ -239,7 +274,7 @@ export default function TodoListDetailPage() {
         </div>
 
         {/* Mobile Content */}
-        <div className="flex-1 px-6 py-4 space-y-6 overflow-x-hidden">
+        <div className="flex-1 space-y-6 overflow-x-hidden">
           {/* Mobile View */}
           <div className="block md:hidden">
             <div className="w-full">
@@ -261,6 +296,7 @@ export default function TodoListDetailPage() {
                       source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
                     });
                   }}
+                  onReorder={handleItemReorder}
                   isLast={index === items.length - 1}
                 />
               ))}

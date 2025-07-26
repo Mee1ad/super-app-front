@@ -1,4 +1,5 @@
 'use client';
+import { motion } from 'framer-motion';
 import { ListRow } from "../molecules/ListRow";
 
 interface List {
@@ -20,17 +21,24 @@ export function MobileListView({ lists, onUpdateTitle, onDelete, onListClick }: 
   return (
     <div className="w-full">
       {lists.map((list, index) => (
-        <ListRow
+        <motion.div
           key={list.id}
-          id={list.id}
-          title={list.title}
-          type={list.type}
-          itemCount={list.type === "task" ? (list.tasks?.length || 0) : (list.items?.length || 0)}
-          onUpdateTitle={onUpdateTitle}
-          onDelete={onDelete}
-          onClick={onListClick}
-          isLast={index === lists.length - 1}
-        />
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3, ease: "easeOut", delay: index * 0.1 }}
+        >
+          <ListRow
+            id={list.id}
+            title={list.title}
+            type={list.type}
+            itemCount={list.type === "task" ? (list.tasks?.length || 0) : (list.items?.length || 0)}
+            onUpdateTitle={onUpdateTitle}
+            onDelete={onDelete}
+            onClick={onListClick}
+            isLast={index === lists.length - 1}
+          />
+        </motion.div>
       ))}
     </div>
   );

@@ -12,8 +12,10 @@ import { MealPlanView } from './organisms/MealPlanView'
 import { FoodHistoryView } from './organisms/FoodHistoryView'
 import { CalendarView } from './organisms/CalendarView'
 import { useFoodPlannerApi } from './atoms/useFoodPlannerApi'
-import { FoodEntry, FoodEntryCreate } from './atoms/types'
+import { FoodEntry } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
+import { ListPageLayout } from '../shared/organisms/ListPageLayout'
+import { motion } from 'framer-motion'
 
 export default function FoodPlannerPage() {
   const {
@@ -51,7 +53,7 @@ export default function FoodPlannerPage() {
     return matchesSearch && matchesCategory && matchesMealType && matchesDate
   })
 
-  const handleAddEntry = async (newEntry: FoodEntryCreate) => {
+  const handleAddEntry = async (newEntry: Omit<FoodEntry, 'id' | 'created_at' | 'updated_at' | 'meal_type'>) => {
     try {
       await createFoodEntry({
         name: newEntry.name,
@@ -62,7 +64,7 @@ export default function FoodPlannerPage() {
         comment: newEntry.comment,
         image: newEntry.image,
         followed_plan: newEntry.followed_plan,
-        symptoms: newEntry.symptoms || []
+        symptoms: newEntry.symptoms
       })
       setIsAddDialogOpen(false)
     } catch {
@@ -119,7 +121,8 @@ export default function FoodPlannerPage() {
 
   return (
     <AppLayout title="Food Planner">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
+      <ListPageLayout>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
           <p className="text-sm md:text-base text-muted-foreground">Plan meals and track what you eat</p>
         </div>
@@ -181,7 +184,7 @@ export default function FoodPlannerPage() {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="plan" className="space-y-6">
+      <Tabs defaultValue="plan" className="space-y-6 scrollbar-hide overflow-hidden">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
           <TabsTrigger value="plan">Meal Plan</TabsTrigger>
           <TabsTrigger value="history">Food History</TabsTrigger>
@@ -279,6 +282,7 @@ export default function FoodPlannerPage() {
         mealTypes={mealTypes}
         onSubmit={handleAddEntry}
       />
+      </ListPageLayout>
     </AppLayout>
   )
 } 

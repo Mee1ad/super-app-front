@@ -87,6 +87,12 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
       setUrl(editItem.url || "");
       setPrice(editItem.price || "");
       setSource(editItem.source || "");
+      
+      // Auto-show input fields if there's data
+      setShowUrlInput(!!editItem.url);
+      setShowPriceInput(!!editItem.price);
+      setShowSourceInput(!!editItem.source);
+      
       setShowInput(true);
     } else {
       // Reset form when not editing
@@ -95,6 +101,9 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
       setUrl("");
       setPrice("");
       setSource("");
+      setShowUrlInput(false);
+      setShowPriceInput(false);
+      setShowSourceInput(false);
       setShowInput(false);
     }
   }, [editItem]);
@@ -189,14 +198,12 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
   };
 
   const handleFormClick = (e: React.MouseEvent) => {
-    // Prevent keyboard from closing when clicking inside the form
-    e.preventDefault();
+    // Only prevent propagation, don't prevent default to allow input interaction
     e.stopPropagation();
   };
 
   const handleFormTouch = (e: React.TouchEvent) => {
-    // Prevent keyboard from closing when touching inside the form
-    e.preventDefault();
+    // Only prevent propagation, don't prevent default to allow input interaction
     e.stopPropagation();
   };
 
@@ -230,7 +237,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       onKeyDown={handleKeyPress}
-                      placeholder={`Enter ${type === 'task' ? 'task' : 'item'} title...`}
+                      placeholder="Title"
                       className="w-full text-base border-none outline-none bg-transparent"
                       autoFocus
                       ref={titleInputRef}
@@ -245,7 +252,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         onKeyDown={handleKeyPress}
-                        placeholder="Enter description (optional)..."
+                        placeholder="Description"
                         className="flex-1 text-base border-none outline-none bg-transparent"
                       />
                       {/* Close button */}
@@ -286,25 +293,13 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                             onKeyDown={handleKeyPress}
-                            placeholder="Enter URL (optional)..."
+                            placeholder="URL"
                             className="w-full text-base border-none outline-none bg-transparent"
                           />
                         </div>
                       )}
                       {(showPriceInput || showSourceInput) && (
                         <div className="grid grid-cols-2 gap-4">
-                          {showPriceInput && (
-                            <div className="relative">
-                              <input
-                                type="text"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                                onKeyDown={handleKeyPress}
-                                placeholder="Price (optional)..."
-                                className="w-full text-base border-none outline-none bg-transparent"
-                              />
-                            </div>
-                          )}
                           {showSourceInput && (
                             <div className="relative">
                               <input
@@ -312,7 +307,19 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                                 value={source}
                                 onChange={(e) => setSource(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                placeholder="Source (optional)..."
+                                placeholder="Source"
+                                className="w-full text-base border-none outline-none bg-transparent"
+                              />
+                            </div>
+                          )}
+                          {showPriceInput && (
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                onKeyDown={handleKeyPress}
+                                placeholder="Price"
                                 className="w-full text-base border-none outline-none bg-transparent"
                               />
                             </div>
@@ -413,7 +420,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
             onClick={() => setShowInput(true)}
             className={cn(
               "w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
-              "flex items-center justify-center transition-all duration-300 transform",
+              "flex items-center justify-center",
               "hover:scale-110 active:scale-95"
             )}
             aria-label={`Add ${type === 'task' ? 'task' : 'shopping item'}`}

@@ -34,38 +34,44 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
   const [changelogData, setChangelogData] = useState<ChangelogData | null>(null)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isClient, setIsClient] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
 
   // Ensure we're on the client side
   useEffect(() => {
     setIsClient(true)
+    setMounted(true)
   }, [])
 
   // Close changelog when navigating to changelog page
   useEffect(() => {
+    if (!mounted) return
+    
     if (pathname === '/changelog' && isChangelogOpen) {
       setIsChangelogOpen(false)
       setChangelogData(null)
     }
-  }, [pathname, isChangelogOpen])
+  }, [pathname, isChangelogOpen, mounted])
 
   // Check for changelog updates
   useEffect(() => {
-    // Only run after we're on the client side
-    if (!isClient) return
+    // Only run after we're on the client side and mounted
+    if (!isClient || !mounted) return
     
     // Check for updates on all pages except changelog page
     if (pathname !== '/changelog') {
       checkAnonymousChangelog()
     }
-  }, [pathname, isClient])
+  }, [pathname, isClient, mounted])
 
   // Show changelog when we have data
   useEffect(() => {
+    if (!mounted) return
+    
     if (changelogData && changelogData.has_new_content && !isChangelogOpen) {
       setIsChangelogOpen(true)
     }
-  }, [changelogData, isChangelogOpen])
+  }, [changelogData, isChangelogOpen, mounted])
 
   const checkAnonymousChangelog = async () => {
     try {
@@ -151,6 +157,11 @@ export function ChangelogProvider({ children }: { children: React.ReactNode }) {
       // Silently handle network errors
       console.log('ChangelogProvider: Network error marking as viewed')
     }
+  }
+
+  // Don't render anything until mounted to prevent SSR issues
+  if (!mounted) {
+    return <>{children}</>
   }
 
   return (

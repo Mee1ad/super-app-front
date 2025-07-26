@@ -1,14 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { Loader2 } from 'lucide-react'
 import { DiaryEntryForm } from '../../organisms/DiaryEntryForm'
 import { Mood, DiaryEntry, DiaryEntryUpdate } from '../../atoms/types'
 import { diaryApi } from '../../atoms/api'
+import { usePageTransition } from '../../atoms/usePageTransition'
 
 export default function EditDiaryPage() {
   const params = useParams()
-  const router = useRouter()
+  // const router = useRouter() // Using navigateWithAnimation instead
+  const { navigateWithAnimation } = usePageTransition()
   const entryId = params.id as string
   
   const [moods, setMoods] = useState<Mood[]>([])
@@ -43,7 +47,7 @@ export default function EditDiaryPage() {
   const handleUpdate = async (id: string, updatedEntry: DiaryEntryUpdate) => {
     try {
       await diaryApi.updateDiaryEntry(id, updatedEntry)
-      router.push('/diary')
+      navigateWithAnimation('/diary')
     } catch (error) {
       console.error('Failed to update entry:', error)
       throw error
@@ -51,43 +55,98 @@ export default function EditDiaryPage() {
   }
 
   const handleCancel = () => {
-    router.push('/diary')
+    navigateWithAnimation('/diary')
   }
 
   if (loading) {
     return (
-      <div className="w-full min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
+      <motion.div 
+        className="w-full min-h-screen bg-background flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.div 
+          className="text-center"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ 
+            duration: 0.5,
+            type: "spring",
+            damping: 20,
+            stiffness: 300
+          }}
+        >
+          <motion.div 
+            className="mx-auto mb-4"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Loader2 className="h-8 w-8 text-primary" />
+          </motion.div>
+          <motion.p 
+            className="text-muted-foreground"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            Loading...
+          </motion.p>
+        </motion.div>
+      </motion.div>
     )
   }
 
   if (error || !entry) {
     return (
-      <div className="w-full min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-destructive mb-4">{error || 'Diary entry not found'}</p>
-          <button
-            onClick={() => router.push('/diary')}
+      <motion.div 
+        className="w-full min-h-screen bg-background flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.div 
+          className="text-center"
+          initial={{ scale: 0.8, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.5,
+            type: "spring",
+            damping: 20,
+            stiffness: 300
+          }}
+        >
+          <motion.p 
+            className="text-destructive mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
+            {error || 'Diary entry not found'}
+          </motion.p>
+          <motion.button
+            onClick={() => navigateWithAnimation('/diary')}
             className="text-primary hover:underline"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.15 }}
           >
             Back to Diary
-          </button>
-        </div>
-      </div>
+          </motion.button>
+        </motion.div>
+      </motion.div>
     )
   }
 
   return (
-    <DiaryEntryForm
-      mode="edit"
-      entry={entry}
-      moods={moods}
-      onUpdate={handleUpdate}
-      onCancel={handleCancel}
-    />
+    <div className="w-full min-h-screen bg-background scrollbar-hide">
+      <DiaryEntryForm
+        mode="edit"
+        entry={entry}
+        moods={moods}
+        onUpdate={handleUpdate}
+        onCancel={handleCancel}
+      />
+    </div>
   )
 } 

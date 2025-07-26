@@ -17,6 +17,8 @@ import { LoadingSpinner } from "./atoms/LoadingSpinner";
 import { TaskItemProps } from "./atoms/TaskItem";
 import { ShoppingItemProps } from "./atoms/ShoppingItem";
 import { AppLayout } from "../shared/organisms/AppLayout";
+import { ListPageLayout } from "../shared/organisms/ListPageLayout";
+import { motion } from "framer-motion";
 
 export default function TodoPage() {
   const [isClient, setIsClient] = useState(false);
@@ -162,10 +164,11 @@ export default function TodoPage() {
   return (
     <ErrorBoundary>
       <AppLayout title="Todo">
-        <AddNewList onCreate={handleCreateList} />
+        <ListPageLayout>
+          <AddNewList onCreate={handleCreateList} />
         
         {/* Mobile View */}
-        <div className="block md:hidden">
+        <div className="block md:hidden scrollbar-hide overflow-hidden">
           <MobileListView
             lists={lists}
             onUpdateTitle={handleUpdateListTitle}
@@ -178,9 +181,20 @@ export default function TodoPage() {
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-          {lists.map((list: ListWithItems) => (
-            <div key={list.id}>
+        <motion.div className="hidden md:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8 scrollbar-hide overflow-hidden">
+          {lists.map((list: ListWithItems, index: number) => (
+            <motion.div 
+              key={list.id}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.6 + (index * 0.1),
+                type: "spring",
+                damping: 25,
+                stiffness: 300
+              }}
+            >
               {list.type === "task" ? (
                 <TaskList
                   id={list.id}
@@ -207,9 +221,10 @@ export default function TodoPage() {
                   onItemReorder={(listId, newItems) => handleShoppingReorder(listId, newItems)}
                 />
               )}
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+        </ListPageLayout>
       </AppLayout>
     </ErrorBoundary>
   );

@@ -1,23 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import { Trash2, Calendar } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { EditIdeaDialog } from '../organisms/EditIdeaDialog'
+import { ClickableListItem, ClickableCard } from '@/components/ui/clickable-item'
 import { Idea, Category, IdeaUpdate } from '../atoms/types'
+import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
 interface IdeaCardProps {
   idea: Idea
   category: Category
-  onDelete: (id: string) => Promise<boolean>
   onUpdate: (id: string, updatedIdea: IdeaUpdate) => Promise<Idea>
   categories: Category[]
 }
 
-export function IdeaCard({ idea, category, onDelete, onUpdate, categories }: IdeaCardProps) {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+export function IdeaCard({ idea, category, onUpdate, categories }: IdeaCardProps) {
+  const router = useRouter()
 
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -28,65 +27,83 @@ export function IdeaCard({ idea, category, onDelete, onUpdate, categories }: Ide
   }
 
   const handleCardClick = () => {
-    setIsEditDialogOpen(true)
+    router.push(`/ideas/${idea.id}/edit`)
   }
 
-  return (
+  const renderContent = () => (
     <>
-      <Card 
-        className="hover:shadow-md transition-shadow cursor-pointer hover:bg-muted/50 active:bg-muted/30 active:scale-[0.98] transition-all duration-150 ease-out" 
-        onClick={handleCardClick}
-      >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{category.emoji}</span>
-              <div>
-                <h3 className="font-semibold text-lg">{idea.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  {formatDate(idea.created_at)}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-base sm:text-lg leading-tight mb-1">{idea.title}</h3>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <Calendar className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{formatDate(idea.created_at)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {idea.description && (
+        <p className="text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">{idea.description}</p>
+      )}
+      {idea.tags && idea.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {idea.tags.map((tag, index) => (
+            <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </>
+  )
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      {/* Mobile: Full width without card */}
+      <div className="block md:hidden">
+        <ClickableListItem onClick={handleCardClick}>
+          {renderContent()}
+        </ClickableListItem>
+      </div>
+
+      {/* Desktop: Card view */}
+      <div className="hidden md:block">
+        <ClickableCard onClick={handleCardClick}>
+          <CardHeader className="pb-3 px-4 sm:px-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg leading-tight mb-1">{idea.title}</h3>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{formatDate(idea.created_at)}</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete(idea.id)
-                }}
-                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {idea.description && (
-            <p className="text-muted-foreground mb-3">{idea.description}</p>
-          )}
-          {idea.tags && idea.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {idea.tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <EditIdeaDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        idea={idea}
-        onUpdate={onUpdate}
-        categories={categories}
-      />
-    </>
+          </CardHeader>
+          <CardContent className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
+            {idea.description && (
+              <p className="text-sm sm:text-base text-muted-foreground mb-3 leading-relaxed">{idea.description}</p>
+            )}
+            {idea.tags && idea.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {idea.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </ClickableCard>
+      </div>
+    </motion.div>
   )
 } 
