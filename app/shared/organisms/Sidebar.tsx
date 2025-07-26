@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ListTodo,
   Notebook,
@@ -10,7 +11,6 @@ import {
   Utensils,
   Settings,
   GitCommit,
-  X,
 } from "lucide-react";
 import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { GoogleLoginButton } from "@/app/auth/molecules/GoogleLoginButton";
@@ -35,12 +35,54 @@ const navItems: NavItem[] = [
   { label: "Changelog", icon: GitCommit, href: "/changelog", requiresPermission: PERMISSIONS.CHANGELOG_VIEW },
 ];
 
+// Animation variants for sidebar
+const sidebarVariants = {
+  hidden: { x: -300, opacity: 0 },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 30,
+      duration: 0.3
+    }
+  },
+  exit: { 
+    x: -300, 
+    opacity: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 30,
+      duration: 0.2
+    }
+  }
+};
+
+// Animation variants for backdrop
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { duration: 0.2 }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.2 }
+  }
+};
+
 export function Sidebar() {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const { isMobileMenuOpen, setIsMobileMenuOpen } = useSidebar();
   const { isAuthenticated, hasPermission, loading: authLoading } = useAuth();
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchCurrent, setTouchCurrent] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Handle client-side hydration
   useEffect(() => {
@@ -52,6 +94,58 @@ export function Sidebar() {
     setIsMobileMenuOpen(false);
   }, [pathname, setIsMobileMenuOpen]);
 
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+  const maxSidebarWidth = 256; // w-64 = 256px
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!isMobileMenuOpen) return;
+    setTouchStart(e.targetTouches[0].clientX);
+    setTouchCurrent(e.targetTouches[0].clientX);
+    setIsDragging(true);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    setTouchCurrent(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!isDragging || touchStart === null || touchCurrent === null) {
+      setIsDragging(false);
+      setTouchStart(null);
+      setTouchCurrent(null);
+      return;
+    }
+    const distance = touchStart - touchCurrent;
+    if (distance > minSwipeDistance) {
+      setIsMobileMenuOpen(false);
+    }
+    setIsDragging(false);
+    setTouchStart(null);
+    setTouchCurrent(null);
+  };
+
+  // Calculate sidebar translateX for drag
+  let sidebarTranslate = 0;
+  if (isDragging && touchStart !== null && touchCurrent !== null) {
+    const delta = touchCurrent - touchStart;
+    sidebarTranslate = Math.max(Math.min(delta, 0), -maxSidebarWidth); // Clamp between 0 and -sidebar width
+  }
+
+  // Apply styles only after client-side hydration to prevent hydration mismatch
+  useEffect(() => {
+    if (sidebarRef.current && isClient) {
+      if (isDragging) {
+        sidebarRef.current.style.transform = `translateX(${sidebarTranslate}px)`;
+        sidebarRef.current.style.transition = 'none';
+      } else {
+        sidebarRef.current.style.transform = '';
+        sidebarRef.current.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+      }
+    }
+  }, [isDragging, sidebarTranslate, isClient]);
+
   // Filter navigation items based on permissions
   const filteredNavItems = navItems.filter(item => {
     if (!item.requiresPermission) return true;
@@ -60,16 +154,14 @@ export function Sidebar() {
     return isAuthenticated && hasPermission(item.requiresPermission);
   });
 
+  // Don't render until after client-side hydration to prevent hydration mismatch
+  if (!isClient) {
+    return null;
+  }
+
   const SidebarContent = () => (
     <>
-      <div className="flex items-center justify-between mb-8">
-        <button
-          onClick={() => setIsMobileMenuOpen(false)}
-          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
+      <div className="mb-8" />
       <nav className="flex flex-col gap-4 flex-1">
         {filteredNavItems.map(({ label, icon: Icon, href }) => {
           const isActive = pathname === href;
@@ -139,17 +231,53 @@ export function Sidebar() {
 
   return (
     <>
+      {/* Backdrop overlay with Framer Motion */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-
-      {/* Sidebar */}
-      <aside className={`
-        fixed left-0 top-0 h-full bg-white shadow-md z-50 flex flex-col p-6 border-r border-gray-200 transition-transform duration-300
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} 
-        md:translate-x-0 md:z-30
-        w-64
-      `}>
-        <SidebarContent />
-      </aside>
+      {/* Sidebar with Framer Motion */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.aside
+            ref={sidebarRef}
+            className="fixed left-0 top-0 h-full bg-white shadow-md z-50 flex flex-col p-6 border-r border-gray-200 w-64 md:translate-x-0 md:z-30"
+            variants={sidebarVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            drag="x"
+            dragConstraints={{ left: -256, right: 0 }}
+            dragElastic={0.1}
+            onDragEnd={(event, info: { offset: { x: number } }) => {
+              if (info.offset.x < -50) {
+                setIsMobileMenuOpen(false);
+              }
+            }}
+          >
+            <div 
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              className="flex flex-col h-full"
+            >
+              <SidebarContent />
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       <FeedbackDialog 
         isOpen={isFeedbackOpen} 

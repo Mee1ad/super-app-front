@@ -8,7 +8,8 @@ import { Card, CardContent } from '@/components/ui/card'
 
 import { AddDiaryDialog } from './organisms/AddDiaryDialog'
 import { DiaryCard } from './molecules/DiaryCard'
-import { useDiaryApi } from './atoms/useDiaryApi'
+import { useInfiniteDiaryApi } from './atoms/useInfiniteDiaryApi'
+import { useInfiniteScroll } from './atoms/useInfiniteScroll'
 import { DiaryEntryCreate, DiaryEntryUpdate } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
 
@@ -25,14 +26,27 @@ export default function DiaryPage() {
     moods,
     entries,
     loading,
+    loadingMore,
     error,
-    meta,
+    hasMore,
     loadMoods,
     loadEntries,
+    loadMoreEntries,
     createEntry,
     updateEntry,
     deleteEntry
-  } = useDiaryApi()
+  } = useInfiniteDiaryApi()
+
+  // Infinite scroll setup
+  const observerRef = useInfiniteScroll({
+    onLoadMore: () => {
+      loadMoreEntries({
+        mood: selectedMood !== 'all' ? selectedMood : undefined
+      })
+    },
+    hasMore,
+    loading: loadingMore
+  })
 
   const [selectedMood] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -82,7 +96,7 @@ export default function DiaryPage() {
       <div className="min-h-screen bg-background md:hidden overflow-x-hidden">
                         <AppLayout title="Diary">
           {/* Mobile Content */}
-          <div className="flex flex-col gap-4 px-4 py-4 overflow-x-hidden">
+          <div className="flex flex-col gap-4 py-4 overflow-x-hidden">
           {/* Error Display */}
           {error && (
             <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
@@ -128,11 +142,20 @@ export default function DiaryPage() {
                   )
                 })}
                 
-                {/* Pagination info */}
-                {meta && (
-                  <div className="text-center text-xs text-muted-foreground mt-6 pb-20">
-                    Showing {entries.length} of {meta.total} entries
-                    {meta.pages > 1 && ` (Page ${meta.page} of ${meta.pages})`}
+                {/* Infinite scroll observer */}
+                <div ref={observerRef} className="h-1" />
+                
+                {/* Loading more indicator */}
+                {loadingMore && (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                
+                {/* End of list indicator */}
+                {!hasMore && entries.length > 0 && (
+                  <div className="w-full flex justify-center text-base text-muted-foreground mt-1">
+                    <span>That&apos;s all</span>
                   </div>
                 )}
               </>
@@ -160,7 +183,7 @@ export default function DiaryPage() {
 
             {/* Desktop Layout */}
       <div className="hidden md:block overflow-x-hidden">
-        <div className="container mx-auto px-4 pb-6 md:px-6 md:py-8 max-w-6xl">
+        <div className="container mx-auto pb-6 md:py-8">
           <div className="mb-6 md:mb-8">
             <div>
               <p className="text-sm md:text-base text-muted-foreground">Capture your thoughts and feelings</p>
@@ -220,11 +243,20 @@ export default function DiaryPage() {
                   )
                 })}
                 
-                {/* Pagination info */}
-                {meta && (
-                  <div className="text-center text-xs md:text-sm text-muted-foreground mt-4">
-                    Showing {entries.length} of {meta.total} entries
-                    {meta.pages > 1 && ` (Page ${meta.page} of ${meta.pages})`}
+                {/* Infinite scroll observer */}
+                <div ref={observerRef} className="h-4" />
+                
+                {/* Loading more indicator */}
+                {loadingMore && (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                
+                {/* End of list indicator */}
+                {!hasMore && entries.length > 0 && (
+                  <div className="w-full flex justify-center text-base md:text-lg text-muted-foreground mt-1">
+                    <span>That&apos;s all</span>
                   </div>
                 )}
               </>

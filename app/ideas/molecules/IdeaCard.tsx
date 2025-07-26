@@ -34,7 +34,7 @@ export function IdeaCard({ idea, category, onDelete, onUpdate, categories }: Ide
   return (
     <>
       <Card 
-        className="hover:shadow-md transition-shadow cursor-pointer" 
+        className="hover:shadow-md transition-shadow cursor-pointer hover:bg-muted/50 active:bg-muted/30 active:scale-[0.98] transition-all duration-150 ease-out" 
         onClick={handleCardClick}
       >
         <CardHeader className="pb-3">

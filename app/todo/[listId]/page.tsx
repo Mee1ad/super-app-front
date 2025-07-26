@@ -216,57 +216,62 @@ export default function TodoListDetailPage() {
   return (
     <ErrorBoundary>
       <AppLayout>
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleBack}
-            className="p-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-gray-900">{currentList.title}</h1>
-            <p className="text-sm text-gray-500">
-              {currentList.type === "task" ? "Task List" : "Shopping List"}
-            </p>
+        {/* Mobile Header */}
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border overflow-x-hidden">
+          <div className="px-4 py-3 overflow-x-hidden">
+            <div className="flex items-center justify-between w-full overflow-x-hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                className="h-8 w-8"
+              >
+                <ArrowLeft className="scale-150" strokeWidth={2.5} />
+              </Button>
+              <div className="text-center flex-1 min-w-0 relative px-4">
+                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                  {currentList.title}
+                </h1>
+              </div>
+              <div className="w-8"></div>
+            </div>
           </div>
         </div>
 
-        {/* Mobile View */}
-        <div className="block md:hidden">
-          <div className="w-full">
-            {items.map((item, index) => (
-              <MobileItemRow
-                key={item.id}
-                item={item}
-                type={currentList.type}
-                onUpdate={handleItemUpdate}
-                onDelete={handleItemDelete}
-                onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
-                onEdit={(item) => {
-                  setEditItem({
-                    id: item.id,
-                    title: item.title,
-                    description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
-                    url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
-                    price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
-                    source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
-                  });
-                }}
-                isLast={index === items.length - 1}
-              />
-            ))}
+        {/* Mobile Content */}
+        <div className="flex-1 px-6 py-4 space-y-6 overflow-x-hidden">
+          {/* Mobile View */}
+          <div className="block md:hidden">
+            <div className="w-full">
+              {items.map((item, index) => (
+                <MobileItemRow
+                  key={item.id}
+                  item={item}
+                  type={currentList.type}
+                  onUpdate={handleItemUpdate}
+                  onDelete={handleItemDelete}
+                  onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
+                  onEdit={(item) => {
+                    setEditItem({
+                      id: item.id,
+                      title: item.title,
+                      description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
+                      url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
+                      price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
+                      source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
+                    });
+                  }}
+                  isLast={index === items.length - 1}
+                />
+              ))}
+            </div>
           </div>
-          
 
-        </div>
-
-        {/* Desktop View - Keep existing card layout */}
-        <div className="hidden md:block">
-          <div className="text-center py-8">
-            <p className="text-gray-500">Desktop view not implemented for detail page</p>
+          {/* Desktop View - Keep existing card layout */}
+          <div className="hidden md:block">
+            <div className="text-center py-8">
+              <p className="text-gray-500">Desktop view not implemented for detail page</p>
+            </div>
           </div>
         </div>
 

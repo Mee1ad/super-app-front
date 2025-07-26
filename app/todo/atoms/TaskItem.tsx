@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,19 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editDesc, setEditDesc] = useState(description || "");
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus title input on mobile when entering edit mode
+  useEffect(() => {
+    if (isEditing && titleInputRef.current) {
+      // Small delay to ensure the input is fully rendered
+      const timer = setTimeout(() => {
+        titleInputRef.current?.focus()
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isEditing])
 
   const handleSave = () => {
     setIsEditing(false);
@@ -52,7 +65,7 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
   };
 
   return (
-    <Card className="relative">
+    <Card className="relative hover:bg-muted/50 active:bg-muted/30 active:scale-[0.98] transition-all duration-150 ease-out">
       <CardContent className="px-3">
         {isEditing ? (
           <div className="space-y-3">
@@ -63,6 +76,7 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
               onKeyDown={handleKeyPress}
               placeholder="Task title"
               autoFocus
+              ref={titleInputRef}
             />
             <Textarea 
               className="text-sm border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none" 

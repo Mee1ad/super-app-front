@@ -198,8 +198,8 @@ export function TaskList({ id, title, tasks, variant = "default", onUpdateTitle,
             <NewTask
               onCreate={(title, description) => {
                 onTaskUpdate?.({ id: '', title, description, checked: false, variant });
-                setShowAdd(false);
               }}
+              onClose={() => setShowAdd(false)}
             />
           )}
         </div>

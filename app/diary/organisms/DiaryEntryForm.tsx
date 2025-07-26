@@ -46,6 +46,11 @@ export function DiaryEntryForm({
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [showImagePicker, setShowImagePicker] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<{
+    title?: string
+    content?: string
+    mood?: string
+  }>({})
 
   // Reset form when entry changes (for edit mode)
   useEffect(() => {
@@ -55,8 +60,38 @@ export function DiaryEntryForm({
       setMood(entry.mood)
       setImages(entry.images)
       setSelectedDate(entry.date ? new Date(entry.date) : new Date())
+      setValidationErrors({})
     }
   }, [entry])
+
+  // Clear validation errors when user starts typing/selecting
+  useEffect(() => {
+    if (title.trim() && validationErrors.title) {
+      setValidationErrors(prev => ({ ...prev, title: undefined }))
+    }
+    if (content.trim() && validationErrors.content) {
+      setValidationErrors(prev => ({ ...prev, content: undefined }))
+    }
+    if (mood && validationErrors.mood) {
+      setValidationErrors(prev => ({ ...prev, mood: undefined }))
+    }
+  }, [title, content, mood, validationErrors])
+
+  // Auto-focus title input on mobile for keyboard activation
+  useEffect(() => {
+    // Only auto-focus on mobile devices and in create mode
+    const isMobile = window.innerWidth <= 768
+    const isCreateMode = mode === 'create'
+    
+    if (isMobile && isCreateMode && titleInputRef.current) {
+      // Small delay to ensure the component is fully rendered
+      const timer = setTimeout(() => {
+        titleInputRef.current?.focus()
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [mode])
 
   // Handle keyboard visibility for action bar positioning
   useEffect(() => {
@@ -172,7 +207,23 @@ export function DiaryEntryForm({
   }, [])
 
   const handleSubmit = async () => {
-    if (!title.trim() || !content.trim() || !mood) return
+    // Validate all required fields
+    const errors: typeof validationErrors = {}
+    
+    if (!title.trim()) {
+      errors.title = 'Title is required'
+    }
+    if (!content.trim()) {
+      errors.content = 'Content is required'
+    }
+    if (!mood) {
+      errors.mood = 'Please select your mood'
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
 
     setLoading(true)
     try {
@@ -327,7 +378,7 @@ export function DiaryEntryForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder=""
-            className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !caret-black !z-10"
+            className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !z-10 !shadow-none !text-2xl !font-semibold"
             required
             disabled={loading}
             style={{ 
@@ -340,24 +391,43 @@ export function DiaryEntryForm({
               caretColor: 'black',
               border: 'none',
               outline: 'none',
-              boxShadow: 'none'
+              boxShadow: 'none',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              fontSize: '1.5rem',
+              lineHeight: '2rem',
+              fontWeight: '600',
+              fontFamily: 'inherit'
             }}
           />
           
           {/* Visible Title Placeholder */}
           <div 
-            className="text-2xl font-semibold text-muted-foreground cursor-text break-words px-0 text-left relative z-0"
+            className={`text-2xl font-semibold cursor-text break-words px-0 text-left relative z-0 ${
+              validationErrors.title ? 'text-destructive' : title ? 'text-foreground' : 'text-muted-foreground'
+            }`}
             onClick={() => titleInputRef.current?.focus()}
             style={{ 
               direction: 'ltr', 
               textAlign: 'left', 
               unicodeBidi: 'isolate',
               writingMode: 'horizontal-tb',
-              textOrientation: 'mixed'
+              textOrientation: 'mixed',
+              fontSize: '1.5rem',
+              lineHeight: '2rem',
+              fontWeight: '600',
+              fontFamily: 'inherit'
             }}
           >
             {title || "What's on your mind?"}
           </div>
+          {validationErrors.title && (
+            <div className="text-sm text-destructive mt-1 flex items-center gap-1">
+              <span className="text-xs">⚠</span>
+              {validationErrors.title}
+            </div>
+          )}
         </div>
 
         {/* Content Section */}
@@ -368,7 +438,7 @@ export function DiaryEntryForm({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder=""
-            className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !resize-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !caret-black !z-10"
+            className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !resize-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !z-10 !shadow-none !text-base !leading-relaxed"
             rows={1}
             required
             disabled={loading}
@@ -382,24 +452,43 @@ export function DiaryEntryForm({
               caretColor: 'black',
               border: 'none',
               outline: 'none',
-              boxShadow: 'none'
+              boxShadow: 'none',
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              fontSize: '1rem',
+              lineHeight: '1.625',
+              fontWeight: '400',
+              fontFamily: 'inherit'
             }}
           />
 
           {/* Visible Content Placeholder */}
           <div 
-            className="flex-1 text-base leading-relaxed text-muted-foreground cursor-text min-h-[200px] break-words px-0 pb-32 text-left relative z-0"
+            className={`flex-1 text-base leading-relaxed cursor-text min-h-[200px] break-words px-0 pb-32 text-left relative z-0 ${
+              validationErrors.content ? 'text-destructive' : content ? 'text-foreground' : 'text-muted-foreground'
+            }`}
             onClick={() => contentInputRef.current?.focus()}
             style={{ 
               direction: 'ltr', 
               textAlign: 'left', 
               unicodeBidi: 'isolate',
               writingMode: 'horizontal-tb',
-              textOrientation: 'mixed'
+              textOrientation: 'mixed',
+              fontSize: '1rem',
+              lineHeight: '1.625',
+              fontWeight: '400',
+              fontFamily: 'inherit'
             }}
           >
             {content || "Write about your day..."}
           </div>
+          {validationErrors.content && (
+            <div className="text-sm text-destructive mt-1 flex items-center gap-1">
+              <span className="text-xs">⚠</span>
+              {validationErrors.content}
+            </div>
+          )}
         </div>
       </div>
 
@@ -409,15 +498,25 @@ export function DiaryEntryForm({
         className="fixed left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border px-6 py-3"
         style={{ bottom: '0px' }}
       >
-        <div className="space-y-3">
+        <div className="w-full space-y-3">
+          {/* Validation Error for Mood */}
+          {validationErrors.mood && (
+            <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3 flex items-center gap-2">
+              <span className="text-xs">⚠</span>
+              <span>{validationErrors.mood}</span>
+            </div>
+          )}
+          
           {/* All Action Buttons in One Row */}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 w-full">
             {/* Mood Button */}
             <Button
-              variant="outline"
+              variant={validationErrors.mood ? "destructive" : selectedMood ? "default" : "outline"}
               size="sm"
               onClick={() => setShowMoodPicker(true)}
-              className="flex items-center gap-1 flex-1"
+              className={`flex items-center gap-1 flex-1 h-10 ${
+                validationErrors.mood ? 'animate-pulse' : ''
+              }`}
               disabled={loading}
             >
               {selectedMood ? (
@@ -425,7 +524,9 @@ export function DiaryEntryForm({
               ) : (
                 <>
                   <Smile className="h-4 w-4 flex-shrink-0" />
-                  <span className="flex-shrink-0 text-xs">Mood</span>
+                  <span className="flex-shrink-0 text-xs">
+                    Mood {!selectedMood && <span className="text-destructive">*</span>}
+                  </span>
                 </>
               )}
             </Button>
@@ -436,7 +537,7 @@ export function DiaryEntryForm({
                 variant="outline"
                 size="sm"
                 onClick={() => setShowDatePicker(true)}
-                className="flex items-center gap-1 flex-1"
+                className="flex items-center gap-1 flex-1 h-10"
                 disabled={loading}
               >
                 <Calendar className="h-4 w-4 flex-shrink-0" />
@@ -454,7 +555,7 @@ export function DiaryEntryForm({
               variant="outline"
               size="sm"
               onClick={openCamera}
-              className="flex items-center gap-1 flex-1"
+              className="flex items-center gap-1 flex-1 h-10"
               disabled={loading}
             >
               <Camera className="h-4 w-4 flex-shrink-0" />
@@ -466,7 +567,7 @@ export function DiaryEntryForm({
               variant="outline"
               size="sm"
               onClick={openFileDialog}
-              className="flex items-center gap-1 flex-1"
+              className="flex items-center gap-1 flex-1 h-10"
               disabled={loading}
             >
               <Image className="h-4 w-4 flex-shrink-0" />
@@ -480,24 +581,26 @@ export function DiaryEntryForm({
           </div>
 
           {/* Full Width Save Button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!title.trim() || !content.trim() || !mood || loading}
-            className="w-full h-12"
-            size="lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-5 w-5 mr-2" />
-                {isEditMode ? 'Update Entry' : 'Save Entry'}
-              </>
-            )}
-          </Button>
+          <div className="w-full">
+            <Button
+              onClick={handleSubmit}
+              disabled={!title.trim() || !content.trim() || !mood || loading}
+              className="w-full h-12"
+              size="lg"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-5 w-5 mr-2" />
+                  {isEditMode ? 'Update Entry' : 'Save Entry'}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 

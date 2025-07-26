@@ -53,7 +53,7 @@ export function ListRow({
   return (
     <>
       <div 
-        className="flex items-center justify-between py-4 px-0 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="flex items-center justify-between py-4 px-0 cursor-pointer hover:bg-gray-50 active:bg-muted/30 active:scale-[0.98] transition-all duration-150 ease-out"
         onClick={() => onClick?.(id)}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">

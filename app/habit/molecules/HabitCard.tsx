@@ -25,7 +25,7 @@ export function HabitCard({ habit, onToggle, onEdit, onDelete }: HabitCardProps)
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow hover:bg-muted/50 active:bg-muted/30 active:scale-[0.98] transition-all duration-150 ease-out">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold">{habit.name}</CardTitle>

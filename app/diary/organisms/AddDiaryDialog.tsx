@@ -1,17 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2 } from 'lucide-react'
-import { ImageAlbum } from '../molecules/ImageAlbum'
 import { DiaryEntryCreate, Mood } from '../atoms/types'
-import { DatePicker } from "@/components/ui/date-picker";
-
-import React from 'react';
+import { useMobileKeyboardFocusWithDismissal } from '@/hooks/use-mobile-keyboard-focus'
 
 interface AddDiaryDialogProps {
   open: boolean
@@ -26,6 +22,50 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
   const [content, setContent] = useState('')
   const [mood, setMood] = useState('')
   const [images, setImages] = useState<string[]>([])
+  
+  // Prevent scroll when dialog is open
+  useEffect(() => {
+    if (open) {
+      // Store current scroll position
+      const scrollY = window.scrollY
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+    } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      const scrollY = document.body.style.top
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
+    }
+  }, [open])
+  
+  const { ref: titleInputRef } = useMobileKeyboardFocusWithDismissal(
+    open,
+    () => {
+      // Auto-close dialog when keyboard is dismissed on mobile
+      if (window.innerWidth <= 768) {
+        handleCancel();
+      }
+    }
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +91,14 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
     }
   }
 
+  const handleCancel = () => {
+    setTitle('')
+    setContent('')
+    setMood('')
+    setImages([])
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -69,6 +117,7 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
               placeholder="What's on your mind?"
               required
               disabled={loading}
+              ref={titleInputRef}
             />
           </div>
 
@@ -108,37 +157,12 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
             </Select>
           </div>
 
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium mb-2">
-              Date *
-            </label>
-            <DatePicker />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Images
-            </label>
-            <ImageAlbum
-              images={images}
-              onImagesChange={setImages}
-              disabled={loading}
-            />
-          </div>
-
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim() || !content.trim() || !mood || loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                'Save Entry'
-              )}
+            <Button type="submit" disabled={loading || !title.trim() || !content.trim() || !mood}>
+              {loading ? 'Adding...' : 'Add Entry'}
             </Button>
           </div>
         </form>

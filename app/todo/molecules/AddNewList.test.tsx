@@ -3,19 +3,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AddNewList } from './AddNewList';
 
-// Polyfill ResizeObserver for cmdk
-beforeAll(() => {
-  global.ResizeObserver =
-    global.ResizeObserver ||
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
-  if (!Element.prototype.scrollIntoView) {
-    Element.prototype.scrollIntoView = function () {};
-  }
-});
+// Mock the mobile keyboard focus hook
+jest.mock('@/hooks/use-mobile-keyboard-focus', () => ({
+  useMobileKeyboardFocusWithBackGesture: () => ({
+    ref: { current: null },
+    keyboardHeight: 0
+  })
+}));
 
 describe('AddNewList', () => {
   const mockOnCreate = jest.fn();
@@ -27,66 +21,85 @@ describe('AddNewList', () => {
   it('renders add new list button', () => {
     render(<AddNewList onCreate={mockOnCreate} />);
     
-    expect(screen.getByText('Add a new list')).toBeInTheDocument();
+    expect(screen.getByLabelText('Add new list')).toBeInTheDocument();
   });
 
-  it('opens dropdown when button is clicked', () => {
+  it('opens options when button is clicked', () => {
     render(<AddNewList onCreate={mockOnCreate} />);
     
-    const button = screen.getByText('Add a new list').closest('button');
-    fireEvent.click(button!);
+    const button = screen.getByLabelText('Add new list');
+    fireEvent.click(button);
     
-    expect(screen.getByPlaceholderText('Search list type...')).toBeInTheDocument();
     expect(screen.getByText('Task List')).toBeInTheDocument();
     expect(screen.getByText('Shopping List')).toBeInTheDocument();
   });
 
-  it('calls onCreate with "task" when Task List is selected', () => {
+  it('opens keyboard form when Task List is selected', () => {
     render(<AddNewList onCreate={mockOnCreate} />);
     
-    const button = screen.getByText('Add a new list').closest('button');
-    fireEvent.click(button!);
+    const button = screen.getByLabelText('Add new list');
+    fireEvent.click(button);
     
     fireEvent.click(screen.getByText('Task List'));
     
-    expect(mockOnCreate).toHaveBeenCalledWith('task');
+    expect(screen.getByPlaceholderText('Enter task list name...')).toBeInTheDocument();
   });
 
-  it('calls onCreate with "shopping" when Shopping List is selected', () => {
+  it('opens keyboard form when Shopping List is selected', () => {
     render(<AddNewList onCreate={mockOnCreate} />);
     
-    const button = screen.getByText('Add a new list').closest('button');
-    fireEvent.click(button!);
+    const button = screen.getByLabelText('Add new list');
+    fireEvent.click(button);
     
     fireEvent.click(screen.getByText('Shopping List'));
     
-    expect(mockOnCreate).toHaveBeenCalledWith('shopping');
+    expect(screen.getByPlaceholderText('Enter shopping list name...')).toBeInTheDocument();
   });
 
-  it('closes dropdown after selection', () => {
+  it('calls onCreate when form is submitted', () => {
     render(<AddNewList onCreate={mockOnCreate} />);
     
-    const button = screen.getByText('Add a new list').closest('button');
-    fireEvent.click(button!);
-    
-    expect(screen.getByPlaceholderText('Search list type...')).toBeInTheDocument();
+    const button = screen.getByLabelText('Add new list');
+    fireEvent.click(button);
     
     fireEvent.click(screen.getByText('Task List'));
     
-    expect(screen.queryByPlaceholderText('Search list type...')).not.toBeInTheDocument();
+    const input = screen.getByPlaceholderText('Enter task list name...');
+    fireEvent.change(input, { target: { value: 'My Task List' } });
+    
+    const submitButton = screen.getByLabelText('Submit form');
+    fireEvent.click(submitButton);
+    
+    expect(mockOnCreate).toHaveBeenCalledWith('task', 'My Task List');
   });
 
-  it('toggles dropdown when button is clicked twice', () => {
+  it('closes form when cancel button is clicked', () => {
     render(<AddNewList onCreate={mockOnCreate} />);
     
-    const button = screen.getByText('Add a new list').closest('button');
+    const button = screen.getByLabelText('Add new list');
+    fireEvent.click(button);
     
-    // First click opens dropdown
-    fireEvent.click(button!);
-    expect(screen.getByPlaceholderText('Search list type...')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Task List'));
     
-    // Second click closes dropdown
-    fireEvent.click(button!);
-    expect(screen.queryByPlaceholderText('Search list type...')).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter task list name...')).toBeInTheDocument();
+    
+    const cancelButton = screen.getByLabelText('Close form');
+    fireEvent.click(cancelButton);
+    
+    expect(screen.queryByPlaceholderText('Enter task list name...')).not.toBeInTheDocument();
+  });
+
+  it('toggles options when button is clicked twice', () => {
+    render(<AddNewList onCreate={mockOnCreate} />);
+    
+    const button = screen.getByLabelText('Add new list');
+    
+    // First click opens options
+    fireEvent.click(button);
+    expect(screen.getByText('Task List')).toBeInTheDocument();
+    
+    // Second click closes options
+    fireEvent.click(button);
+    expect(screen.queryByText('Task List')).not.toBeInTheDocument();
   });
 }); 

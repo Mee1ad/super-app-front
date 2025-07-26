@@ -207,8 +207,8 @@ export function ShoppingList({ id, title, items, variant = "default", onUpdateTi
             <NewShopping
               onCreate={(title, url, price, source) => {
                 onItemUpdate?.({ id: '', title, url, price, source, variant });
-                setShowAdd(false);
               }}
+              onClose={() => setShowAdd(false)}
             />
           )}
         </div>

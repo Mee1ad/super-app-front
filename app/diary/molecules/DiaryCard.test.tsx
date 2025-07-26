@@ -129,7 +129,7 @@ describe('DiaryCard', () => {
     )
 
     const titleElements = screen.getAllByText('Test Entry')
-    const desktopCard = titleElements[1].closest('[data-slot="card"]') // Use the second one (desktop view)
+    const desktopCard = titleElements[1].closest('div') // Use the second one (desktop view)
     fireEvent.click(desktopCard!)
 
     expect(mockPush).toHaveBeenCalledWith('/diary/1/edit')
