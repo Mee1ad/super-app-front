@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { authApi } from './api'
 import { AuthState, GoogleLoginResponse } from './types'
-import { hasPermission, hasRole, setupTokenExpiration, logout as logoutUser } from '@/lib/permissions'
+import { hasPermission, hasRole, setupTokenExpiration, logout as logoutUser, checkAndClearExpiredTokens, clearAuthData } from '@/lib/permissions'
 
 // Storage keys matching backend documentation
 const STORAGE_KEYS = {
@@ -26,6 +26,9 @@ export function useAuth() {
   useEffect(() => {
     const loadAuthState = () => {
       try {
+        // First, check and clear any expired tokens
+        const hadExpiredTokens = checkAndClearExpiredTokens()
+        
         const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
         const userStr = localStorage.getItem(STORAGE_KEYS.USER)
@@ -46,7 +49,11 @@ export function useAuth() {
           // Setup token expiration check
           setupTokenExpiration()
         } else {
-          console.log('No auth data found in storage') // Debug log
+          if (hadExpiredTokens) {
+            console.log('Cleared expired tokens, user needs to login again') // Debug log
+          } else {
+            console.log('No auth data found in storage') // Debug log
+          }
           setAuthState(prev => ({ ...prev, loading: false }))
         }
       } catch (error) {
@@ -56,6 +63,18 @@ export function useAuth() {
     }
 
     loadAuthState()
+    
+    // Listen for auth data updates from URL processing
+    const handleAuthDataUpdate = (event: CustomEvent) => {
+      console.log('🔄 Auth data updated from URL, reloading auth state')
+      loadAuthState()
+    }
+    
+    window.addEventListener('authDataUpdated', handleAuthDataUpdate as EventListener)
+    
+    return () => {
+      window.removeEventListener('authDataUpdated', handleAuthDataUpdate as EventListener)
+    }
   }, [])
 
   // Save auth state to localStorage
@@ -67,9 +86,7 @@ export function useAuth() {
 
   // Clear auth state from localStorage
   const clearAuthState = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
-    localStorage.removeItem(STORAGE_KEYS.USER)
+    clearAuthData()
   }, [])
 
   // Get Google OAuth URL
@@ -112,10 +129,7 @@ export function useAuth() {
       // Setup token expiration check
       setupTokenExpiration()
 
-      toast({
-        title: "Success",
-        description: `Welcome back, ${response.user.username}!`,
-      })
+      // Removed success toast
 
       return response
     } catch (error) {

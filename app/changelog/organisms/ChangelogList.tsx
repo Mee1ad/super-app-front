@@ -67,10 +67,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
   const handlePublish = async (entryId: string) => {
     try {
       await publishChangelog({ entry_id: entryId });
-      toast({
-        title: "Success",
-        description: "Changelog entry published successfully",
-      });
+      // Removed success toast
       refetchChangelog();
     } catch {
       // Error is handled by the mutation hook
@@ -80,10 +77,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
   const handleUnpublish = async (entryId: string) => {
     try {
       await unpublishChangelog({ entry_id: entryId });
-      toast({
-        title: "Success",
-        description: "Changelog entry unpublished successfully",
-      });
+      // Removed success toast
       refetchChangelog();
     } catch {
       // Error is handled by the mutation hook
@@ -94,10 +88,7 @@ export function ChangelogList({ className = '', statusFilter = 'all' }: Changelo
     if (confirm('Are you sure you want to delete this changelog entry? This action cannot be undone.')) {
       try {
         await deleteChangelogEntry(entryId);
-        toast({
-          title: "Success",
-          description: "Changelog entry deleted successfully",
-        });
+        // Removed success toast
         refetchChangelog();
       } catch {
         // Error is handled by the mutation hook

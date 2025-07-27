@@ -11,12 +11,13 @@ import {
   shoppingItemPropsToShoppingItemCreate
 } from "../atoms/adapters";
 import { ErrorBoundary } from "../atoms/ErrorBoundary";
-import { LoadingSpinner } from "../atoms/LoadingSpinner";
+import { TodoDetailSkeleton } from "../atoms/TodoDetailSkeleton";
 import { TaskItemProps } from "../atoms/TaskItem";
 import { ShoppingItemProps } from "../atoms/ShoppingItem";
 import { AppLayout } from "../../shared/organisms/AppLayout";
 import { MobileItemRow } from "../molecules/MobileItemRow";
 import { AddNewItem } from "../molecules/AddNewItem";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function TodoListDetailPage() {
   const params = useParams();
@@ -158,33 +159,27 @@ export default function TodoListDetailPage() {
     }
   };
 
-  if (!isClient || loading) {
-    return <LoadingSpinner />;
-  }
 
-  if (!currentList) {
-    return <div>List not found</div>;
-  }
 
   // Unified handler for both task and shopping items
   const handleItemUpdate = async (item: TaskItemProps | ShoppingItemProps) => {
-    if (currentList.type === "task") {
+    if (currentList?.type === "task") {
       await handleTaskUpdate(item as TaskItemProps);
-    } else {
+    } else if (currentList?.type === "shopping") {
       await handleShoppingUpdate(item as ShoppingItemProps);
     }
   };
 
   const handleItemDelete = async (itemId: string) => {
-    if (currentList.type === "task") {
+    if (currentList?.type === "task") {
       await handleTaskDelete(itemId);
-    } else {
+    } else if (currentList?.type === "shopping") {
       await handleShoppingDelete(itemId);
     }
   };
 
   const handleAddItem = (title: string, description?: string, url?: string, price?: string, source?: string) => {
-    if (currentList.type === "task") {
+    if (currentList?.type === "task") {
       handleTaskUpdate({ 
         id: '', 
         title, 
@@ -192,7 +187,7 @@ export default function TodoListDetailPage() {
         checked: false, 
         variant: currentList.variant || 'default' 
       });
-    } else {
+    } else if (currentList?.type === "shopping") {
       handleShoppingUpdate({ 
         id: '', 
         title, 
@@ -205,7 +200,7 @@ export default function TodoListDetailPage() {
   };
 
   const handleUpdateItem = (id: string, title: string, description?: string, url?: string, price?: string, source?: string) => {
-    if (currentList.type === "task") {
+    if (currentList?.type === "task") {
       handleTaskUpdate({ 
         id, 
         title, 
@@ -213,7 +208,7 @@ export default function TodoListDetailPage() {
         checked: false, 
         variant: currentList.variant || 'default' 
       });
-    } else {
+    } else if (currentList?.type === "shopping") {
       handleShoppingUpdate({ 
         id, 
         title, 
@@ -242,80 +237,97 @@ export default function TodoListDetailPage() {
     );
   }
 
-  const items = currentList.type === "task" 
-    ? (currentList.tasks || []).map(taskResponseToTaskItemProps)
-    : (currentList.items || []).map(shoppingItemResponseToShoppingItemProps);
-
   return (
     <ErrorBoundary>
-      <AppLayout>
-        {/* Mobile Header */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border overflow-x-hidden">
-          <div className="px-4 py-3 overflow-x-hidden">
-            <div className="flex items-center justify-between w-full overflow-x-hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBack}
-                className="h-8 w-8"
-              >
-                <ArrowLeft className="scale-150" strokeWidth={2.5} />
-              </Button>
-              <div className="text-center flex-1 min-w-0 relative px-4">
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
-                  {currentList.title}
-                </h1>
-              </div>
-              <div className="w-8"></div>
-            </div>
+      <AppLayout title={currentList?.title || "Todo List"}>
+        {(!isClient || loading) ? (
+          <TodoDetailSkeleton count={5} />
+        ) : !currentList ? (
+          <div className="text-center py-8">
+            <h1 className="text-xl font-semibold text-gray-900 mb-4">List not found</h1>
+            <Button onClick={handleBack} variant="outline">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Lists
+            </Button>
           </div>
-        </div>
+        ) : (
+          <>
+            {(() => {
+              const items = currentList.type === "task" 
+                ? (currentList.tasks || []).map(taskResponseToTaskItemProps)
+                : (currentList.items || []).map(shoppingItemResponseToShoppingItemProps);
 
-        {/* Mobile Content */}
-        <div className="flex-1 space-y-6 overflow-x-hidden">
-          {/* Mobile View */}
-          <div className="block md:hidden">
-            <div className="w-full">
-              {items.map((item, index) => (
-                <MobileItemRow
-                  key={item.id}
-                  item={item}
-                  type={currentList.type}
-                  onUpdate={handleItemUpdate}
-                  onDelete={handleItemDelete}
-                  onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
-                  onEdit={(item) => {
-                    setEditItem({
-                      id: item.id,
-                      title: item.title,
-                      description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
-                      url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
-                      price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
-                      source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
-                    });
-                  }}
-                  onReorder={handleItemReorder}
-                  isLast={index === items.length - 1}
-                />
-              ))}
-            </div>
-          </div>
+              return (
+                <>
+                  {/* Mobile Content */}
+                  <div className="flex-1 space-y-6 overflow-x-hidden">
+                    {/* Mobile View */}
+                    <div className="block md:hidden">
+                      <div className="w-full">
+                        <AnimatePresence>
+                          {items.map((item, index) => (
+                            <motion.div
+                              key={item.id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ 
+                                opacity: 0, 
+                                x: -100,
+                                scale: 0.95,
+                                transition: { duration: 0.2, ease: "easeInOut" }
+                              }}
+                              transition={{ 
+                                duration: 0.3, 
+                                delay: index * 0.05,
+                                ease: "easeOut"
+                              }}
+                            >
+                              <MobileItemRow
+                                item={item}
+                                type={currentList.type}
+                                onUpdate={handleItemUpdate}
+                                onDelete={handleItemDelete}
+                                onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
+                                onEdit={(item) => {
+                                  setEditItem({
+                                    id: item.id,
+                                    title: item.title,
+                                    description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
+                                    url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
+                                    price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
+                                    source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
+                                  });
+                                }}
+                                onReorder={handleItemReorder}
+                                isLast={index === items.length - 1}
+                              />
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
 
-          {/* Desktop View - Keep existing card layout */}
-          <div className="hidden md:block">
-            <div className="text-center py-8">
-              <p className="text-gray-500">Desktop view not implemented for detail page</p>
-            </div>
-          </div>
-        </div>
+                    {/* Desktop View - Keep existing card layout */}
+                    <div className="hidden md:block">
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">Desktop view not implemented for detail page</p>
+                      </div>
+                    </div>
+                  </div>
 
-        {/* Floating Action Button for adding items */}
-        <AddNewItem 
-          type={currentList.type} 
-          onCreate={handleAddItem}
-          onUpdate={handleUpdateItem}
-          editItem={editItem}
-        />
+                  {/* Floating Action Button for adding items */}
+                  <AddNewItem 
+                    type={currentList.type} 
+                    onCreate={handleAddItem}
+                    onUpdate={handleUpdateItem}
+                    onCancel={() => setEditItem(null)}
+                    editItem={editItem}
+                  />
+                </>
+              );
+            })()}
+          </>
+        )}
       </AppLayout>
     </ErrorBoundary>
   );

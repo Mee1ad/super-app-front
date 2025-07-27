@@ -9,6 +9,7 @@ export type AddNewItemProps = {
   type: "task" | "shopping";
   onCreate: (title: string, description?: string, url?: string, price?: string, source?: string) => void;
   onUpdate?: (id: string, title: string, description?: string, url?: string, price?: string, source?: string) => void;
+  onCancel?: () => void;
   editItem?: {
     id: string;
     title: string;
@@ -19,7 +20,7 @@ export type AddNewItemProps = {
   } | null;
 };
 
-export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemProps) {
+export function AddNewItem({ type, onCreate, onUpdate, onCancel, editItem }: AddNewItemProps) {
   const [showInput, setShowInput] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -132,6 +133,11 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
     setShowPriceInput(false);
     setShowSourceInput(false);
     setShowInput(false);
+    
+    // Notify parent to clear editItem when canceling
+    if (editItem) {
+      onCancel?.();
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -146,13 +152,29 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
   };
 
   const handleFormClick = (e: React.MouseEvent) => {
-    // Only prevent propagation, don't prevent default to allow input interaction
+    // Prevent propagation and default to keep keyboard open
     e.stopPropagation();
+    e.preventDefault();
   };
 
   const handleFormTouch = (e: React.TouchEvent) => {
-    // Only prevent propagation, don't prevent default to allow input interaction
+    // Prevent propagation and default to keep keyboard open
     e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+    // Prevent default to keep keyboard open, then execute action
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Execute the action
+    action();
+    
+    // Re-focus the title input to keep keyboard open
+    setTimeout(() => {
+      titleInputRef.current?.focus();
+    }, 10);
   };
 
   const isEditing = !!editItem;
@@ -205,7 +227,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                       />
                       {/* Close button */}
                       <button
-                        onClick={handleCancel}
+                        onClick={(e) => handleButtonClick(e, handleCancel)}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                         className="p-3 rounded-full bg-gray-500 hover:bg-gray-600 text-white transition-colors shadow-lg flex-shrink-0"
@@ -215,7 +237,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                       </button>
                       {/* Add button */}
                       <button
-                        onClick={handleCreateItem}
+                        onClick={(e) => handleButtonClick(e, handleCreateItem)}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                         disabled={!title.trim()}
@@ -290,7 +312,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                             ? 'border-blue-600 bg-blue-600 text-white shadow-md' 
                             : 'border-blue-600 text-blue-600 active:bg-blue-600 active:text-white active:scale-95'
                         }`}
-                        onClick={() => setShowUrlInput(!showUrlInput)}
+                        onClick={(e) => handleButtonClick(e, () => setShowUrlInput(!showUrlInput))}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                       >
@@ -304,7 +326,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                             ? 'border-green-600 bg-green-600 text-white shadow-md' 
                             : 'border-green-600 text-green-600 active:bg-green-600 active:text-white active:scale-95'
                         }`}
-                        onClick={() => setShowPriceInput(!showPriceInput)}
+                        onClick={(e) => handleButtonClick(e, () => setShowPriceInput(!showPriceInput))}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                       >
@@ -318,7 +340,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                             ? 'border-purple-600 bg-purple-600 text-white shadow-md' 
                             : 'border-purple-600 text-purple-600 active:bg-purple-600 active:text-white active:scale-95'
                         }`}
-                        onClick={() => setShowSourceInput(!showSourceInput)}
+                        onClick={(e) => handleButtonClick(e, () => setShowSourceInput(!showSourceInput))}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                       >
@@ -329,7 +351,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                     {/* Action buttons */}
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={handleCancel}
+                        onClick={(e) => handleButtonClick(e, handleCancel)}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                         className="p-3 rounded-full bg-gray-500 hover:bg-gray-600 text-white transition-colors shadow-lg"
@@ -338,7 +360,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                         <X className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={handleCreateItem}
+                        onClick={(e) => handleButtonClick(e, handleCreateItem)}
                         onMouseDown={handleFormClick}
                         onTouchStart={handleFormTouch}
                         disabled={!title.trim()}
@@ -348,6 +370,7 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
                             ? "bg-primary hover:bg-primary/90 text-white" 
                             : "bg-gray-300 text-gray-500 cursor-not-allowed"
                         )}
+                        aria-label="Save item"
                       >
                         <Check className="w-6 h-6" />
                       </button>
@@ -360,8 +383,8 @@ export function AddNewItem({ type, onCreate, onUpdate, editItem }: AddNewItemPro
         </>
       )}
 
-      {/* Floating Action Button - Only show when not editing */}
-      {!isEditing && (
+      {/* Floating Action Button - Only show when not editing and not showing input */}
+      {!isEditing && !showInput && (
         <motion.button
           type="button"
           onClick={() => setShowInput(true)}

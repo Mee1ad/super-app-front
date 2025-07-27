@@ -13,9 +13,10 @@ export type AddFoodEntryFormProps = {
   onUpdate?: (id: string, data: FoodEntryUpdate) => Promise<void>
   editEntry?: FoodEntry | null
   loading?: boolean
+  onCancel?: () => void
 }
 
-export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = false }: AddFoodEntryFormProps) {
+export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = false, onCancel }: AddFoodEntryFormProps) {
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -27,6 +28,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
   const [showImageInput, setShowImageInput] = useState(false)
   const [mealType, setMealType] = useState('breakfast')
   const [showMealTypeDropdown, setShowMealTypeDropdown] = useState(false)
+  const [showFabTooltip, setShowFabTooltip] = useState(true)
 
   // Prevent scroll when form is open
   useEffect(() => {
@@ -82,9 +84,11 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
       setImageUrl(editEntry.image_url || '')
       setDate(new Date(editEntry.date).toISOString().split('T')[0])
       
+      // Only show optional fields if they have data, but don't auto-show description
       setShowPriceInput(!!editEntry.price)
-      setShowDescriptionInput(!!editEntry.description)
       setShowImageInput(!!editEntry.image_url)
+      // Keep description input hidden by default, even if entry has description
+      setShowDescriptionInput(false)
       
       setShowForm(true)
     } else {
@@ -149,6 +153,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
     setShowPriceInput(false)
     setShowDescriptionInput(false)
     setShowImageInput(false)
+    onCancel?.()
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -335,7 +340,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                         "px-3 py-2 rounded-md border-2 text-sm font-medium transition-all duration-200 touch-manipulation",
                         showDescriptionInput 
                           ? 'border-primary bg-primary text-primary-foreground shadow-md' 
-                          : 'border-primary text-primary active:bg-primary active:text-primary-foreground active:scale-95'
+                          : 'border-gray-300 text-gray-600 bg-white hover:bg-gray-50 active:bg-gray-100 active:scale-95'
                       )}
                       onClick={(e) => {
                         e.preventDefault()
@@ -363,8 +368,8 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                       className={cn(
                         "px-3 py-2 rounded-md border-2 text-sm font-medium transition-all duration-200 touch-manipulation",
                         showPriceInput 
-                          ? 'border-secondary bg-secondary text-secondary-foreground shadow-md' 
-                          : 'border-secondary text-secondary-foreground active:bg-secondary active:text-secondary-foreground active:scale-95'
+                          ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                          : 'border-gray-300 text-gray-600 bg-white hover:bg-gray-50 active:bg-gray-100 active:scale-95'
                       )}
                       onClick={(e) => {
                         e.preventDefault()
@@ -392,13 +397,19 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                       className={cn(
                         "px-3 py-2 rounded-md border-2 text-sm font-medium transition-all duration-200 touch-manipulation",
                         showImageInput 
-                          ? 'border-accent bg-accent text-accent-foreground shadow-md' 
-                          : 'border-accent text-accent-foreground active:bg-accent active:text-accent-foreground active:scale-95'
+                          ? 'border-primary bg-primary text-primary-foreground shadow-md' 
+                          : 'border-gray-300 text-gray-600 bg-white hover:bg-gray-50 active:bg-gray-100 active:scale-95'
                       )}
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        handleCameraClick()
+                        if (!showImageInput) {
+                          setShowImageInput(true)
+                          handleCameraClick()
+                        } else {
+                          setShowImageInput(false)
+                          setImageUrl('')
+                        }
                         // Refocus the name input to keep keyboard open after camera
                         setTimeout(() => {
                           nameInputRef.current?.focus()
@@ -440,14 +451,14 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                           e.preventDefault()
                           e.stopPropagation()
                         }}
-                        className="w-32 h-10 border-2 border-muted text-muted-foreground bg-background rounded-md flex items-center justify-between px-3 text-sm font-medium"
+                        className="w-32 h-10 border-2 border-gray-300 text-gray-600 bg-white hover:bg-gray-50 active:bg-gray-100 rounded-md flex items-center justify-between px-3 text-sm font-medium transition-all duration-200 touch-manipulation"
                       >
                         <span className="capitalize">{mealType}</span>
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       
                       {showMealTypeDropdown && (
-                        <div className="absolute bottom-full left-0 mb-1 w-32 bg-background border-2 border-muted rounded-md shadow-lg z-[10000]">
+                        <div className="absolute bottom-full left-0 mb-1 w-32 bg-white border-2 border-gray-300 rounded-md shadow-lg z-[10000]">
                           {['breakfast', 'lunch', 'dinner', 'snack'].map((type) => (
                             <button
                               key={type}
@@ -471,8 +482,10 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                                 e.stopPropagation()
                               }}
                               className={cn(
-                                "w-full px-3 py-2 text-left text-sm hover:bg-muted/50 transition-colors",
-                                mealType === type ? "bg-muted text-muted-foreground" : "text-muted-foreground"
+                                "w-full px-3 py-2 text-left text-sm transition-colors",
+                                mealType === type 
+                                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                                  : "text-gray-600 hover:bg-gray-50"
                               )}
                             >
                               <span className="capitalize">{type}</span>
@@ -545,7 +558,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
       {!isEditing && (
         <motion.button
           type="button"
-          onClick={() => setShowForm(true)}
+          onClick={() => { setShowForm(true); setShowFabTooltip && setShowFabTooltip(false); }}
           className={cn(
             "fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
             "flex items-center justify-center"
@@ -563,9 +576,9 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
             damping: 25, 
             stiffness: 300
           }}
-                 >
-           <Plus className="w-6 h-6" />
-         </motion.button>
+        >
+          <Plus className="w-6 h-6" />
+        </motion.button>
       )}
     </>
   )

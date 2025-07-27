@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { showErrorToast, showSuccessToast, showWarningToast, showInfoToast } from "@/lib/error-handler"
+import { showErrorToast, showWarningToast, showInfoToast } from "@/lib/error-handler"
 
 export function ErrorDemo() {
   const handleTestErrors = () => {
@@ -27,9 +27,7 @@ export function ErrorDemo() {
     }, 2000)
   }
 
-  const handleTestSuccess = () => {
-    showSuccessToast("Operation Successful", "Your action was completed successfully")
-  }
+  // Removed handleTestSuccess function
 
   const handleTestWarning = () => {
     showWarningToast("Warning", "This action might have unexpected consequences")
@@ -42,31 +40,31 @@ export function ErrorDemo() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Error Handling Demo</CardTitle>
+        <CardTitle>Toast Notification Demo</CardTitle>
         <CardDescription>
-          Test the animated error handling system
+          Test different types of toast notifications
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-2">
-          <Button onClick={handleTestErrors} variant="destructive">
-            Test Errors
-          </Button>
-          <Button onClick={handleTestSuccess} variant="default">
-            Test Success
-          </Button>
-          <Button onClick={handleTestWarning} variant="outline">
-            Test Warning
-          </Button>
-          <Button onClick={handleTestInfo} variant="secondary">
-            Test Info
-          </Button>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          <p>• Error toasts show validation errors, server errors, etc.</p>
-          <p>• Success toasts confirm successful operations</p>
-          <p>• Warning toasts show important notices</p>
-          <p>• Info toasts provide helpful information</p>
+        <Button onClick={handleTestErrors} variant="destructive" className="w-full">
+          Test Error Toasts
+        </Button>
+        
+        {/* Removed success test button */}
+        
+        <Button onClick={handleTestWarning} variant="outline" className="w-full">
+          Test Warning Toast
+        </Button>
+        
+        <Button onClick={handleTestInfo} variant="outline" className="w-full">
+          Test Info Toast
+        </Button>
+        
+        <div className="text-sm text-gray-600 space-y-1">
+          <p>• Error toasts show when operations fail</p>
+          {/* Removed success toast description */}
+          <p>• Warning toasts show important warnings</p>
+          <p>• Info toasts show helpful information</p>
         </div>
       </CardContent>
     </Card>

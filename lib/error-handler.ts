@@ -118,16 +118,6 @@ export const handleApiError = async (response: Response): Promise<never> => {
   throw error
 }
 
-// Show success toast
-export const showSuccessToast = (title: string, description?: string) => {
-  toast({
-    variant: 'success',
-    title,
-    description,
-    duration: 3000,
-  })
-}
-
 // Show warning toast
 export const showWarningToast = (title: string, description?: string) => {
   toast({

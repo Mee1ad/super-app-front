@@ -63,7 +63,7 @@ export function ChangelogFilters({
             placeholder="Search changelog entries..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="h-12 pl-10"
           />
         </div>
         

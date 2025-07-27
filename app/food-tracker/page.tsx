@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useFoodTrackerApi } from './atoms/useFoodTrackerApi'
 import { FoodEntry, FoodEntryCreate, FoodEntryUpdate, FoodEntriesFilters } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
@@ -10,6 +9,7 @@ import { ListPageLayout } from '../shared/organisms/ListPageLayout'
 import { FoodEntryCard } from './molecules/FoodEntryCard'
 import { AddFoodEntryForm } from './molecules/AddFoodEntryForm'
 import { Button } from '@/components/ui/button'
+import { FoodTrackerSkeleton } from './atoms/FoodTrackerSkeleton'
 
 export default function FoodTrackerPage() {
   const [entries, setEntries] = useState<FoodEntry[]>([])
@@ -20,6 +20,9 @@ export default function FoodTrackerPage() {
   const [isClient, setIsClient] = useState(false)
 
   const { getFoodEntries, createFoodEntry, updateFoodEntry, deleteFoodEntry, loading: apiLoading } = useFoodTrackerApi()
+
+  // Show skeleton immediately when page loads, before any API calls
+  const shouldShowSkeleton = !isClient || loading || apiLoading
 
   // Handle client-side hydration and scroll to top
   useEffect(() => {
@@ -55,6 +58,30 @@ export default function FoodTrackerPage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
+
+  // Control body/html overflow to prevent scrollbar in empty state
+  useEffect(() => {
+    if (!isClient) return
+
+    const groupedEntries = groupEntriesByDate(entries)
+    const isEmpty = !loading && !error && groupedEntries.length === 0
+
+    if (isEmpty) {
+      // Prevent scrollbar in empty state
+      document.documentElement.style.overflowY = 'hidden'
+      document.body.style.overflowY = 'hidden'
+    } else {
+      // Restore normal scroll behavior when there's data
+      document.documentElement.style.overflowY = ''
+      document.body.style.overflowY = ''
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.documentElement.style.overflowY = ''
+      document.body.style.overflowY = ''
+    }
+  }, [entries, loading, error, isClient])
 
   const loadData = async () => {
     setLoading(true)
@@ -98,7 +125,7 @@ export default function FoodTrackerPage() {
         setEntries(prev => [newEntry, ...prev])
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add food entry')
+      console.error('Failed to create food entry:', err)
     }
   }
 
@@ -106,24 +133,20 @@ export default function FoodTrackerPage() {
     try {
       const updatedEntry = await updateFoodEntry(id, data)
       if (updatedEntry) {
-        setEntries(prev => prev.map(entry => 
-          entry.id === id ? updatedEntry : entry
-        ))
+        setEntries(prev => prev.map(entry => entry.id === id ? updatedEntry : entry))
         setEditingEntry(null)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update food entry')
+      console.error('Failed to update food entry:', err)
     }
   }
 
   const handleDeleteEntry = async (id: string) => {
     try {
-      const success = await deleteFoodEntry(id)
-      if (success) {
-        setEntries(prev => prev.filter(entry => entry.id !== id))
-      }
+      await deleteFoodEntry(id)
+      setEntries(prev => prev.filter(entry => entry.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete food entry')
+      console.error('Failed to delete food entry:', err)
     }
   }
 
@@ -131,32 +154,28 @@ export default function FoodTrackerPage() {
     setEditingEntry(entry)
   }
 
+  const handleCancelEdit = () => {
+    setEditingEntry(null)
+  }
 
-
-  // Group entries by date
   const groupEntriesByDate = (entries: FoodEntry[]) => {
     const groups: { [key: string]: FoodEntry[] } = {}
     
     entries.forEach(entry => {
-      const dateKey = new Date(entry.date).toISOString().split('T')[0]
+      const date = new Date(entry.created_at)
+      const dateKey = date.toISOString().split('T')[0]
+      
       if (!groups[dateKey]) {
         groups[dateKey] = []
       }
       groups[dateKey].push(entry)
     })
     
-    // Sort dates and entries within each date
-    return Object.keys(groups)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()) // Most recent first
-      .map(date => ({
-        date,
-        entries: groups[date].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Most recent first within day
-      }))
+    return Object.entries(groups)
+      .map(([date, entries]) => ({ date, entries }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }
 
-  const groupedEntries = groupEntriesByDate(entries)
-
-  // Format date for display
   const formatDateDisplay = (dateString: string) => {
     const date = new Date(dateString)
     const today = new Date()
@@ -180,15 +199,16 @@ export default function FoodTrackerPage() {
     return null
   }
 
+  const groupedEntries = groupEntriesByDate(entries)
+  const isEmpty = !loading && !error && groupedEntries.length === 0
+
   return (
     <AppLayout title="Food Tracker" className="!container !max-w-none min-h-screen">
       <ListPageLayout>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className={isEmpty ? "relative h-[calc(100vh-56px)] bg-white" : "min-h-screen bg-white"}>
           {/* Mobile Layout */}
           <div className="block md:hidden">
-
-          {/* Content */}
-          <div className="px-4 pb-20">
+            {/* Content */}
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
@@ -200,33 +220,18 @@ export default function FoodTrackerPage() {
                   Try Again
                 </Button>
               </div>
-            ) : groupedEntries.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Plus className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No food entries yet
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  Start tracking your meals and expenses
-                </p>
-
+            ) : shouldShowSkeleton ? (
+              <FoodTrackerSkeleton count={5} />
+            ) : isEmpty ? (
+              <div className="w-full flex justify-center items-start mt-20 mb-4">
+                <span className="text-lg text-gray-500 font-medium">There is nothing here, lets add some data</span>
               </div>
             ) : (
-              <div className="space-y-6">
-                <AnimatePresence>
-                  {groupedEntries.map((group, groupIndex) => (
-                    <motion.div
+              <div className="px-4 pb-20">
+                <div className="space-y-6">
+                  {groupedEntries.map((group) => (
+                    <div
                       key={group.date}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ 
-                        duration: 0.3, 
-                        delay: groupIndex * 0.1,
-                        ease: "easeOut"
-                      }}
                       className="space-y-3"
                     >
                       {/* Day Header */}
@@ -237,51 +242,34 @@ export default function FoodTrackerPage() {
                           </h2>
                         </div>
                       </div>
-
-                      
-
                       {/* Entries for this day */}
                       <div className="space-y-3">
-                        <AnimatePresence>
-                          {group.entries.map((entry, entryIndex) => (
-                            <motion.div
-                              key={entry.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: 20 }}
-                              transition={{ 
-                                duration: 0.2, 
-                                delay: entryIndex * 0.05,
-                                ease: "easeOut"
-                              }}
-                            >
-                              <FoodEntryCard
-                                entry={entry}
-                                onEdit={() => handleEdit(entry)}
-                                onDelete={() => handleDeleteEntry(entry.id)}
-                              />
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
+                        {group.entries.map((entry) => (
+                          <div
+                            key={entry.id}
+                          >
+                            <FoodEntryCard
+                              entry={entry}
+                              onEdit={() => handleEdit(entry)}
+                              onDelete={() => handleDeleteEntry(entry.id)}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
-                </AnimatePresence>
+                </div>
               </div>
             )}
           </div>
 
 
-        </div>
-
         {/* Desktop Layout */}
         <div className="hidden md:block">
           <div className="max-w-4xl mx-auto px-6 py-8">
 
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-              </div>
+            {shouldShowSkeleton ? (
+              <FoodTrackerSkeleton count={5} />
             ) : error ? (
               <div className="text-center py-12">
                 <p className="text-red-500 mb-4">{error}</p>
@@ -289,71 +277,40 @@ export default function FoodTrackerPage() {
                   Try Again
                 </Button>
               </div>
-            ) : groupedEntries.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Plus className="h-10 w-10 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  No food entries yet
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Start tracking your meals and expenses to see your food history and spending patterns
-                </p>
-
+            ) : isEmpty ? (
+              <div className="w-full flex justify-center items-start mt-20 mb-4">
+                <span className="text-lg text-gray-500 font-medium">There is nothing here, lets add some data</span>
               </div>
             ) : (
               <div className="space-y-8">
-                <AnimatePresence>
-                  {groupedEntries.map((group, groupIndex) => (
-                    <motion.div
-                      key={group.date}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ 
-                        duration: 0.3, 
-                        delay: groupIndex * 0.1,
-                        ease: "easeOut"
-                      }}
-                      className="space-y-4"
-                    >
-                                             {/* Day Header */}
-                       <div className="flex items-center justify-between py-3">
-                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                           {formatDateDisplay(group.date)}
-                         </h2>
-                       </div>
+                {groupedEntries.map((group) => (
+                  <div
+                    key={group.date}
+                    className="space-y-4"
+                  >
+                    {/* Day Header */}
+                    <div className="flex items-center justify-between py-3">
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {formatDateDisplay(group.date)}
+                      </h2>
+                    </div>
 
-                      
-
-                      {/* Entries for this day */}
-                      <div className="grid gap-4">
-                        <AnimatePresence>
-                          {group.entries.map((entry, entryIndex) => (
-                            <motion.div
-                              key={entry.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: 20 }}
-                              transition={{ 
-                                duration: 0.2, 
-                                delay: entryIndex * 0.05,
-                                ease: "easeOut"
-                              }}
-                            >
-                              <FoodEntryCard
-                                entry={entry}
-                                onEdit={() => handleEdit(entry)}
-                                onDelete={() => handleDeleteEntry(entry.id)}
-                              />
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                    {/* Entries for this day */}
+                    <div className="grid gap-4">
+                      {group.entries.map((entry) => (
+                        <div
+                          key={entry.id}
+                        >
+                          <FoodEntryCard
+                            entry={entry}
+                            onEdit={() => handleEdit(entry)}
+                            onDelete={() => handleDeleteEntry(entry.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -367,6 +324,7 @@ export default function FoodTrackerPage() {
           onUpdate={handleEditEntry}
           editEntry={editingEntry}
           loading={apiLoading}
+          onCancel={handleCancelEdit}
         />
         </div>
       </ListPageLayout>

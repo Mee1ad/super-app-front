@@ -13,12 +13,12 @@ import {
   shoppingItemPropsToShoppingItemCreate
 } from "./atoms/adapters";
 import { ErrorBoundary } from "./atoms/ErrorBoundary";
-import { LoadingSpinner } from "./atoms/LoadingSpinner";
+import { TodoSkeleton } from "./atoms/TodoSkeleton";
 import { TaskItemProps } from "./atoms/TaskItem";
 import { ShoppingItemProps } from "./atoms/ShoppingItem";
 import { AppLayout } from "../shared/organisms/AppLayout";
 import { ListPageLayout } from "../shared/organisms/ListPageLayout";
-import { motion } from "framer-motion";
+
 
 export default function TodoPage() {
   const [isClient, setIsClient] = useState(false);
@@ -43,6 +43,9 @@ export default function TodoPage() {
   React.useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Show skeleton immediately when page loads, before any API calls
+  const shouldShowSkeleton = !isClient || loading;
 
   // Hide scrollbars globally for this page
   React.useEffect(() => {
@@ -176,73 +179,76 @@ export default function TodoPage() {
 
 
 
-  if (!isClient || loading) {
-    return <LoadingSpinner />;
-  }
-
   return (
     <ErrorBoundary>
       <AppLayout title="Todo" className="!container !max-w-none min-h-screen todo-page">
         <ListPageLayout>
           <div className="flex flex-col todo-page">
           
-          {/* Mobile View */}
-          <div className="block md:hidden">
-            <MobileListView
-              lists={lists}
-              onUpdateTitle={handleUpdateListTitle}
-              onDelete={handleDeleteList}
-              onListClick={(listId) => {
-                // Navigate to the detail page
-                window.location.href = `/todo/${listId}`;
-              }}
-            />
-          </div>
+          {shouldShowSkeleton ? (
+            <div className="w-full">
+              <TodoSkeleton count={3} />
+            </div>
+          ) : (
+            <>
+              {/* Mobile View */}
+              <div className="block md:hidden">
+                <MobileListView
+                  lists={lists}
+                  onUpdateTitle={handleUpdateListTitle}
+                  onDelete={handleDeleteList}
+                  onListClick={(listId) => {
+                    // Navigate to the detail page
+                    window.location.href = `/todo/${listId}`;
+                  }}
+                />
+              </div>
 
-          {/* Desktop View */}
-          <motion.div className="hidden md:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-            {lists.map((list: ListWithItems, index: number) => (
-              <motion.div 
-                key={list.id}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.4,
-                  delay: 0.6 + (index * 0.1),
-                  type: "spring",
-                  damping: 25,
-                  stiffness: 300
-                }}
-              >
-                {list.type === "task" ? (
-                  <TaskList
-                    id={list.id}
-                    title={list.title}
-                    tasks={(list.tasks || []).map(taskResponseToTaskItemProps)}
-                    variant={list.variant}
-                    onUpdateTitle={handleUpdateListTitle}
-                    onDelete={handleDeleteList}
-                    onTaskUpdate={task => handleTaskUpdate(list.id, task)}
-                    onTaskDelete={taskId => handleTaskDelete(list.id, taskId)}
-                    onTaskToggle={(taskId) => handleTaskToggle(list.id, taskId)}
-                    onTaskReorder={(listId, newTasks) => handleTaskReorder(listId, newTasks)}
-                  />
+              {/* Desktop View */}
+              <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+                {lists.length === 0 ? (
+                  <div 
+                    className="w-full flex justify-center mt-20 mb-4"
+                  >
+                    <span className="text-lg text-gray-500 font-medium">There is nothing here, lets add some data</span>
+                  </div>
                 ) : (
-                  <ShoppingList
-                    id={list.id}
-                    title={list.title}
-                    items={(list.items || []).map(shoppingItemResponseToShoppingItemProps)}
-                    variant={list.variant}
-                    onUpdateTitle={handleUpdateListTitle}
-                    onDelete={handleDeleteList}
-                    onItemUpdate={item => handleShoppingUpdate(list.id, item)}
-                    onItemDelete={itemId => handleShoppingDelete(list.id, itemId)}
-                    onItemReorder={(listId, newItems) => handleShoppingReorder(listId, newItems)}
-                  />
+                  lists.map((list: ListWithItems) => (
+                    <div
+                      key={list.id}
+                    >
+                      {list.type === "task" ? (
+                        <TaskList
+                          id={list.id}
+                          title={list.title}
+                          tasks={(list.tasks || []).map(taskResponseToTaskItemProps)}
+                          variant={list.variant}
+                          onUpdateTitle={handleUpdateListTitle}
+                          onDelete={handleDeleteList}
+                          onTaskUpdate={task => handleTaskUpdate(list.id, task)}
+                          onTaskDelete={taskId => handleTaskDelete(list.id, taskId)}
+                          onTaskToggle={(taskId) => handleTaskToggle(list.id, taskId)}
+                          onTaskReorder={(listId, newTasks) => handleTaskReorder(listId, newTasks)}
+                        />
+                      ) : (
+                        <ShoppingList
+                          id={list.id}
+                          title={list.title}
+                          items={(list.items || []).map(shoppingItemResponseToShoppingItemProps)}
+                          variant={list.variant}
+                          onUpdateTitle={handleUpdateListTitle}
+                          onDelete={handleDeleteList}
+                          onItemUpdate={item => handleShoppingUpdate(list.id, item)}
+                          onItemDelete={itemId => handleShoppingDelete(list.id, itemId)}
+                          onItemReorder={(listId, newItems) => handleShoppingReorder(listId, newItems)}
+                        />
+                      )}
+                    </div>
+                  ))
                 )}
-              </motion.div>
-            ))}
-          </motion.div>
+              </div>
+            </>
+          )}
           </div>
         </ListPageLayout>
       </AppLayout>

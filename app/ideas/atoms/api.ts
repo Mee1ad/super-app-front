@@ -161,10 +161,7 @@ export const ideasApi = {
       
       const result = await handleResponse<Idea>(response)
       
-      toast({
-        title: 'Idea created',
-        description: 'Your idea has been successfully created',
-      })
+      // Removed success toast
       
       return result
     } catch (error) {
@@ -232,11 +229,7 @@ export const ideasApi = {
       })
       
       await handleResponse<DeleteResponse>(response)
-      
-      toast({
-        title: 'Idea deleted',
-        description: 'Your idea has been successfully deleted',
-      })
+      // Removed success toast
     } catch (error) {
       if (error instanceof ApiError) {
         toast({

@@ -93,6 +93,7 @@ export const useTodoApi = () => {
         await mockApi.deleteList(id);
       }
       setLists(prev => prev.filter(list => list.id !== id));
+      // No success toast
     } catch {
       showErrorToast('Failed to delete list');
       throw new Error('Failed to delete list');
@@ -148,6 +149,7 @@ export const useTodoApi = () => {
           ? { ...list, tasks: (list.tasks || []).filter(task => task.id !== taskId) }
           : list
       ));
+      // No success toast
     } catch {
       showErrorToast('Failed to delete task');
       throw new Error('Failed to delete task');
@@ -243,6 +245,7 @@ export const useTodoApi = () => {
           ? { ...list, items: (list.items || []).filter(item => item.id !== itemId) }
           : list
       ));
+      // No success toast
     } catch {
       showErrorToast('Failed to delete item');
       throw new Error('Failed to delete item');

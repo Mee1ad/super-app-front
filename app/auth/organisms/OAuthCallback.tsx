@@ -26,9 +26,9 @@ export function OAuthCallback() {
             const tokens = authData.tokens
             
             // Store the authentication data using the correct keys
-            localStorage.setItem('access_token', tokens.access_token)
-            localStorage.setItem('refresh_token', tokens.refresh_token)
-            localStorage.setItem('user', JSON.stringify(user))
+            localStorage.setItem('auth_access_token', tokens.access_token)
+            localStorage.setItem('auth_refresh_token', tokens.refresh_token)
+            localStorage.setItem('auth_user', JSON.stringify(user))
             
             // Redirect to home page
             window.location.href = '/'

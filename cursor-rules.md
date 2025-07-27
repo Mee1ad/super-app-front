@@ -266,3 +266,108 @@
   - Page transitions
   - Loading states
   - Interactive feedback animations 
+
+💡 Animation Guidelines
+
+Keep animation durations < 300ms
+Avoid blocking animations (modals, drawers)
+Use animations for user feedback only
+Use consistent animation duration and easing across app
+Consistent animations on click/hover/focus
+Native-like animations for mobile (e.g., spring-based for FAB)
+
+🗑️ Delete Animation (MANDATORY)
+Use consistent delete animation across all apps for list items, cards, and entries:
+
+```tsx
+// Standard delete animation pattern
+<AnimatePresence>
+  {items.map((item, index) => (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ 
+        opacity: 0, 
+        x: -100,
+        scale: 0.95,
+        transition: { duration: 0.2, ease: "easeInOut" }
+      }}
+      transition={{ 
+        duration: 0.3, 
+        delay: index * 0.05,
+        ease: "easeOut"
+      }}
+    >
+      <ItemCard
+        item={item}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
+    </motion.div>
+  ))}
+</AnimatePresence>
+```
+
+**Delete Animation Standards:**
+- **Exit animation**: `opacity: 0, x: -100, scale: 0.95`
+- **Duration**: 200ms for exit, 300ms for enter
+- **Easing**: `easeInOut` for exit, `easeOut` for enter
+- **Stagger delay**: 50ms between items (`index * 0.05`)
+- **Direction**: Slide left (`x: -100`) for consistent direction
+- **Scale**: Slight shrink (`scale: 0.95`) for visual feedback
+- **Opacity**: Fade out for smooth transition
+
+**Implementation Requirements:**
+- Always wrap list items with `AnimatePresence`
+- Use unique `key` prop for each item (usually `item.id`)
+- Apply to all deletable items: diary entries, todo items, food entries, ideas, etc.
+- Ensure parent container has `overflow: hidden` if needed
+- Test on both mobile and desktop
+
+**Example Usage:**
+```tsx
+// For mobile lists
+<div className="space-y-3 overflow-hidden">
+  <AnimatePresence>
+    {entries.map((entry, index) => (
+      <motion.div
+        key={entry.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ 
+          opacity: 0, 
+          x: -100,
+          scale: 0.95,
+          transition: { duration: 0.2, ease: "easeInOut" }
+        }}
+        transition={{ 
+          duration: 0.3, 
+          delay: index * 0.05,
+          ease: "easeOut"
+        }}
+      >
+        <EntryCard entry={entry} onDelete={handleDelete} />
+      </motion.div>
+    ))}
+  </AnimatePresence>
+</div>
+```
+
+## Unified Empty State Design
+
+- All empty pages (no data) in the app must use the shared `EmptyState` component from `components/ui/EmptyState.tsx`.
+- The design must include a large icon, bold title, optional description, and (if needed) a primary action button.
+- Do not use custom empty state markup in feature pages; always use the shared component.
+- If you add a new page, its empty state must follow this rule.
+- Example usage:
+
+```tsx
+<EmptyState
+  title="No items yet"
+  description="Start by adding your first item."
+  action={<Button onClick={...} variant="default">Add item</Button>}
+/>
+```
+
+🛠 Developer Experience 

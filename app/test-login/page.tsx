@@ -15,9 +15,9 @@ export default function TestLoginPage() {
 
   useEffect(() => {
     // Get raw storage data
-    const accessToken = localStorage.getItem('access_token');
-    const refreshToken = localStorage.getItem('refresh_token');
-    const userStr = localStorage.getItem('user');
+    const accessToken = localStorage.getItem('auth_access_token');
+    const refreshToken = localStorage.getItem('auth_refresh_token');
+    const userStr = localStorage.getItem('auth_user');
     
     setStorageData({
       accessToken: accessToken ? 'Present' : 'Missing',

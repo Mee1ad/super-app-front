@@ -1,7 +1,12 @@
-import { makeAuthenticatedRequest } from '@/lib/auth-request'
 import { FoodEntry, FoodEntryCreate, FoodEntryUpdate, FoodEntriesResponse, FoodSummaryResponse, FoodEntriesFilters } from './types'
 
 const API_BASE = '/api/food-entries'
+
+// Helper function to get auth headers
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('auth_access_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export const foodTrackerApi = {
   // Get food entries with filtering and pagination
@@ -17,7 +22,12 @@ export const foodTrackerApi = {
     if (filters.max_price !== undefined) params.append('max_price', filters.max_price.toString())
     
     const url = `${API_BASE}?${params.toString()}`
-    const response = await makeAuthenticatedRequest(url)
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      }
+    })
     
     if (!response.ok) {
       throw new Error(`Failed to fetch food entries: ${response.statusText}`)
@@ -28,7 +38,12 @@ export const foodTrackerApi = {
   
   // Get a specific food entry
   async getFoodEntry(id: string): Promise<FoodEntry> {
-    const response = await makeAuthenticatedRequest(`${API_BASE}/${id}`)
+    const response = await fetch(`${API_BASE}/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      }
+    })
     
     if (!response.ok) {
       throw new Error(`Failed to fetch food entry: ${response.statusText}`)
@@ -39,10 +54,11 @@ export const foodTrackerApi = {
   
   // Create a new food entry
   async createFoodEntry(data: FoodEntryCreate): Promise<FoodEntry> {
-    const response = await makeAuthenticatedRequest(API_BASE, {
+    const response = await fetch(API_BASE, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders()
       },
       body: JSON.stringify(data),
     })
@@ -56,10 +72,11 @@ export const foodTrackerApi = {
   
   // Update an existing food entry
   async updateFoodEntry(id: string, data: FoodEntryUpdate): Promise<FoodEntry> {
-    const response = await makeAuthenticatedRequest(`${API_BASE}/${id}`, {
+    const response = await fetch(`${API_BASE}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeaders()
       },
       body: JSON.stringify(data),
     })
@@ -73,8 +90,12 @@ export const foodTrackerApi = {
   
   // Delete a food entry
   async deleteFoodEntry(id: string): Promise<void> {
-    const response = await makeAuthenticatedRequest(`${API_BASE}/${id}`, {
+    const response = await fetch(`${API_BASE}/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      }
     })
     
     if (!response.ok) {
@@ -89,7 +110,12 @@ export const foodTrackerApi = {
     if (end_date) params.append('end_date', end_date)
     
     const url = `${API_BASE}/summary?${params.toString()}`
-    const response = await makeAuthenticatedRequest(url)
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      }
+    })
     
     if (!response.ok) {
       throw new Error(`Failed to fetch food summary: ${response.statusText}`)

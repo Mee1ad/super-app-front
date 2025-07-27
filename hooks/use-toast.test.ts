@@ -2,7 +2,7 @@ import { toast } from './use-toast';
 
 describe('toast', () => {
   it('should add a toast with correct props', () => {
-    const result = toast({ title: 'Test', description: 'Desc', variant: 'success' });
+    const result = toast({ title: 'Test', description: 'Desc', variant: 'destructive' });
     expect(result).toHaveProperty('id');
     // No error thrown
   });

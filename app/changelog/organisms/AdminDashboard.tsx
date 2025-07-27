@@ -112,18 +112,12 @@ export function AdminDashboard({ className = '' }: AdminDashboardProps) {
       
       // Only fetch new data if items were actually created
       if (result.created_count > 0) {
-        toast({
-          title: "Success!",
-          description: `${result.created_count} new changelog entries created successfully in ${duration}s. Fetching updated list...`,
-        });
+        // Removed success toast
         
         // Fetch the updated changelog list from the API
         await refetchChangelog();
       } else {
-        toast({
-          title: "Completed",
-          description: `No new entries were created in ${duration}s`,
-        });
+        // Removed success toast
       }
     } catch (error) {
       console.error('Process commits error:', error);

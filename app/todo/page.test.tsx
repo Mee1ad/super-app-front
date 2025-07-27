@@ -167,7 +167,7 @@ describe('TodoPage', () => {
     expect(screen.getByTestId('add-new-list')).toBeInTheDocument();
   });
 
-  it('should show loading spinner initially', () => {
+  it('should show header and loading spinner during loading', () => {
     // Mock loading state
     jest.doMock('./atoms/useTodoApi', () => ({
       useTodoApi: () => ({
@@ -189,6 +189,41 @@ describe('TodoPage', () => {
     }));
 
     render(<TodoPage />);
+    
+    // Header should always be visible
+    expect(screen.getByText('Todo')).toBeInTheDocument();
+    
+    // Loading spinner should be visible in content area
     expect(screen.getByText('Loading...')).toBeInTheDocument();
+  });
+
+  it('should always show header even when not loading', () => {
+    // Mock non-loading state
+    jest.doMock('./atoms/useTodoApi', () => ({
+      useTodoApi: () => ({
+        lists: [],
+        loading: false,
+        createList: jest.fn(),
+        updateList: jest.fn(),
+        deleteList: jest.fn(),
+        createTask: jest.fn(),
+        updateTask: jest.fn(),
+        deleteTask: jest.fn(),
+        toggleTask: jest.fn(),
+        reorderTasks: jest.fn(),
+        createItem: jest.fn(),
+        updateItem: jest.fn(),
+        deleteItem: jest.fn(),
+        reorderItems: jest.fn(),
+      })
+    }));
+
+    render(<TodoPage />);
+    
+    // Header should always be visible
+    expect(screen.getByText('Todo')).toBeInTheDocument();
+    
+    // Should not show loading spinner
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
   });
 }); 

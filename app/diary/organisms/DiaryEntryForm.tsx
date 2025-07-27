@@ -474,7 +474,7 @@ export function DiaryEntryForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder=""
-            className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !z-10 !shadow-none !text-2xl !font-semibold"
+            className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !z-10 !shadow-none !text-2xl !font-semibold h-12"
             required
             disabled={loading}
             style={{ 
@@ -587,7 +587,8 @@ export function DiaryEntryForm({
               fontSize: '1rem',
               lineHeight: '1.625',
               fontWeight: '400',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              whiteSpace: 'pre-wrap'
             }}
           >
             {content || "Write about your day..."}

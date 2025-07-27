@@ -52,12 +52,16 @@ export function FoodEntryCard({ entry, onEdit, onDelete }: FoodEntryCardProps) {
   return (
     <>
       {/* Mobile: Native app look */}
-      <motion.div
-        className="flex flex-row w-full bg-transparent dark:bg-transparent py-4 cursor-pointer md:hidden overflow-hidden select-none border-b border-border px-4"
-        whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-      >
+      <div className="md:hidden">
+        <ContextMenu>
+          <ContextMenuTrigger data-testid="context-menu-trigger">
+            <motion.div
+              className="flex flex-row w-full bg-transparent dark:bg-transparent py-4 cursor-pointer overflow-hidden select-none border-b border-border px-4"
+              whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              onClick={() => onEdit(entry)}
+            >
         {/* Left Side: Day and Meal Type */}
         <div className="flex flex-col items-start justify-center min-w-[67px] max-w-[80px]">
           <span className="text-md text-muted-foreground mt-0.5">{mealType}</span>
@@ -94,16 +98,30 @@ export function FoodEntryCard({ entry, onEdit, onDelete }: FoodEntryCardProps) {
             />
           </div>
         )}
-      </motion.div>
+            </motion.div>
+          </ContextMenuTrigger>
+
+          <ContextMenuContent className="p-2">
+            <ContextMenuItem onClick={() => onEdit(entry)}>
+              <Edit className="w-4 h-4 mr-2" /> Edit
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem onClick={() => onDelete(entry.id)} variant="destructive">
+              <Trash2 className="w-4 h-4 mr-2" /> Delete
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </div>
 
       {/* Desktop: Card layout */}
       <div className="hidden md:block">
         <ContextMenu>
-          <ContextMenuTrigger>
+          <ContextMenuTrigger data-testid="context-menu-trigger">
             <motion.div
               whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
+              onClick={() => onEdit(entry)}
             >
               <Card className="cursor-pointer">
                 <CardContent className="p-4">

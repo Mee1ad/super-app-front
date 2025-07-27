@@ -108,17 +108,7 @@ function ChangelogContent() {
       
       const duration = processingStartTime ? Math.round((Date.now() - processingStartTime) / 1000) : 0;
       
-      if (result.created_count > 0) {
-        toast({
-          title: "Success!",
-          description: `${result.created_count} new changelog entries created successfully in ${duration}s.`,
-        });
-      } else {
-        toast({
-          title: "Completed",
-          description: `No new entries were created in ${duration}s`,
-        });
-      }
+      // Removed success toasts
     } catch (error) {
       console.error('Process commits error:', error);
       toast({

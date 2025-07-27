@@ -62,8 +62,19 @@ export const mockIdeasApi = {
 
   getIdea: async (id: string): Promise<Idea> => {
     await new Promise(resolve => setTimeout(resolve, 100))
-    const idea = demoIdeas.find(idea => idea.id === id)
-    if (!idea) throw new Error('Idea not found')
+    
+    // First try to find in demoIdeas (which includes any newly created ideas)
+    let idea = demoIdeas.find(idea => idea.id === id)
+    
+    // If not found, try to find in the original mockIdeas
+    if (!idea) {
+      idea = mockIdeas.find(idea => idea.id === id)
+    }
+    
+    if (!idea) {
+      throw new Error('Idea not found')
+    }
+    
     return idea
   },
 

@@ -173,7 +173,7 @@ export function AddFoodEntryDialog({
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="Enter food name"
-                      className={errors.name ? 'border-red-500' : ''}
+                      className={`h-12 ${errors.name ? 'border-red-500' : ''}`}
                       ref={keyboardRef}
                     />
                     {errors.name && (
@@ -192,7 +192,7 @@ export function AddFoodEntryDialog({
                       value={formData.price || ''}
                       onChange={(e) => handleInputChange('price', e.target.value ? parseFloat(e.target.value) : undefined)}
                       placeholder="0.00"
-                      className={errors.price ? 'border-red-500' : ''}
+                      className={`h-12 ${errors.price ? 'border-red-500' : ''}`}
                     />
                     {errors.price && (
                       <p className="text-sm text-red-500">{errors.price}</p>
@@ -221,7 +221,7 @@ export function AddFoodEntryDialog({
                         value={formData.image_url}
                         onChange={(e) => handleInputChange('image_url', e.target.value)}
                         placeholder="https://example.com/image.jpg"
-                        className={errors.image_url ? 'border-red-500' : ''}
+                        className={`h-12 ${errors.image_url ? 'border-red-500' : ''}`}
                       />
                       <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     </div>
@@ -239,7 +239,7 @@ export function AddFoodEntryDialog({
                         type="date"
                         value={formData.date}
                         onChange={(e) => handleInputChange('date', e.target.value)}
-                        className="pr-10"
+                        className="h-12 pr-10"
                       />
                       <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     </div>

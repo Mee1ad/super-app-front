@@ -1,0 +1,108 @@
+# Frontend Development Rules
+
+## 🎨 UI/UX Standards
+
+### 🗑️ Delete Animation (MANDATORY)
+All delete operations must use consistent exit animation:
+- **Exit Properties**: `opacity: 0, x: -100, scale: 0.95`
+- **Duration**: 200ms exit, 300ms enter
+- **Easing**: `easeInOut` for exit, `easeOut` for enter
+- **Stagger Delay**: 50ms between items
+- **Direction**: Slide left with slight shrink
+
+**Implementation Requirements:**
+- Use `AnimatePresence` wrapper around mapped items
+- Apply `motion.div` with standard exit properties
+- Ensure proper key prop for each item
+- Test both mobile and desktop views
+
+**Example:**
+```tsx
+<AnimatePresence>
+  {items.map(item => (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 1, x: 0, scale: 1 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -100, scale: 0.95 }}
+      transition={{ 
+        duration: 0.2, 
+        ease: "easeInOut" 
+      }}
+    >
+      <ItemCard item={item} onDelete={handleDelete} />
+    </motion.div>
+  ))}
+</AnimatePresence>
+```
+
+### 📏 Input & Button Height Standards (MANDATORY)
+All form inputs and buttons must use consistent height:
+- Standard height: `h-12` (48px) for all inputs and buttons
+- Small buttons: `h-10` (40px) for secondary actions
+- Large buttons: `h-14` (56px) for primary actions
+- Input groups: Use `h-12` for consistency with buttons
+- Touch targets: Minimum 44px for mobile accessibility
+
+**Examples:**
+```tsx
+<Input className="h-12" placeholder="Enter text..." />
+<Button className="h-12">Primary Action</Button>
+<Button size="sm" className="h-10">Secondary Action</Button>
+<Button size="lg" className="h-14">Large Action</Button>
+```
+
+### 🔔 Toast Notifications (MANDATORY)
+Only show error toast notifications. No success toasts allowed:
+- **Error Toasts**: Show for failed operations, validation errors, network issues
+- **No Success Toasts**: Remove all success notifications from create, update, delete operations
+- **Warning/Info**: Can be used for important warnings or helpful information
+- **Duration**: 5000ms for errors, 4000ms for warnings/info
+
+**Implementation:**
+- Use `showErrorToast()` for all error scenarios
+- Remove all `toast({ title: "Success", ... })` calls
+- Keep error handling in try-catch blocks
+- Test error scenarios to ensure proper error toasts
+
+**Example:**
+```tsx
+try {
+  await createItem(data);
+  // No success toast - operation completed silently
+} catch (error) {
+  showErrorToast('Failed to create item');
+}
+```
+
+## 🧪 Testing Requirements
+
+### Animation Testing
+- Test delete animations on all list views
+- Verify consistent behavior across mobile/desktop
+- Check stagger delays work correctly
+- Ensure smooth transitions
+
+### Toast Testing
+- Test error scenarios trigger proper error toasts
+- Verify no success toasts appear
+- Test warning and info toasts if used
+- Check toast positioning and styling
+
+## 📱 Mobile Considerations
+
+### Keyboard Handling
+- Use `useMobileKeyboardDetection` hook for keyboard-aware layouts
+- Position action bars above virtual keyboard
+- Adjust padding to prevent content overlap
+- Test on various mobile devices
+
+### Touch Interactions
+- Ensure minimum 44px touch targets
+- Test context menus on mobile
+- Verify swipe gestures work properly
+- Check accessibility on mobile devices
+description:
+globs:
+alwaysApply: false
+---

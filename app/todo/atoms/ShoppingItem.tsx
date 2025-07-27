@@ -97,7 +97,11 @@ export function ShoppingItem({ id, title, url, price, source, checked = false, o
                 variant="ghost" 
                 size="sm" 
                 className="text-green-600 hover:text-green-700 hover:bg-green-50" 
-                onClick={handleSave}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSave();
+                }}
               >
                 Save
               </Button>
@@ -105,7 +109,11 @@ export function ShoppingItem({ id, title, url, price, source, checked = false, o
                 variant="ghost" 
                 size="sm" 
                 className="text-gray-500 hover:text-gray-700" 
-                onClick={handleCancel}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancel();
+                }}
               >
                 Cancel
               </Button>
@@ -141,11 +149,19 @@ export function ShoppingItem({ id, title, url, price, source, checked = false, o
               <div className="flex gap-2 ml-2">
                 <Edit 
                   className="w-4 h-4 text-blue-600 cursor-pointer hover:text-blue-800 transition-colors" 
-                  onClick={() => setIsEditing(true)} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }} 
                 />
                 <Trash2 
                   className="w-4 h-4 text-red-500 cursor-pointer hover:text-red-700 transition-colors" 
-                  onClick={() => onDelete?.(id)} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete?.(id);
+                  }} 
                 />
               </div>
             </div>

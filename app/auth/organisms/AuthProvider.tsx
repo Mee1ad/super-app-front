@@ -31,23 +31,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Global handler for ?auth=... param in URL
   useEffect(() => {
     if (typeof window === 'undefined') return
+    
     const url = new URL(window.location.href)
     const authParam = url.searchParams.get('auth')
+    
     if (authParam) {
       try {
+        console.log('🔐 Processing auth parameter from URL')
         const authData = JSON.parse(decodeURIComponent(authParam))
         const user = authData.user
         const tokens = authData.tokens
+        
+        // Store auth data
         localStorage.setItem('auth_access_token', tokens.access_token)
         localStorage.setItem('auth_refresh_token', tokens.refresh_token)
         localStorage.setItem('auth_user', JSON.stringify(user))
-        // Remove the auth param from the URL
+        
+        console.log('✅ Auth data stored successfully')
+        
+        // Remove the auth param from the URL without reloading
         url.searchParams.delete('auth')
         window.history.replaceState({}, '', url.pathname + url.search)
-        // Reload to update state
-        window.location.reload()
-      } catch {
-        // Ignore parse errors
+        
+        // Trigger auth state update by dispatching a custom event
+        window.dispatchEvent(new CustomEvent('authDataUpdated', { 
+          detail: { user, tokens } 
+        }))
+        
+      } catch (error) {
+        console.error('❌ Error processing auth parameter:', error)
       }
     }
   }, [])

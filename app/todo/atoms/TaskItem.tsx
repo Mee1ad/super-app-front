@@ -91,7 +91,11 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
                 variant="ghost" 
                 size="sm" 
                 className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
-                onClick={handleSave}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSave();
+                }}
               >
                 Save
               </Button>
@@ -99,7 +103,11 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
                 variant="ghost" 
                 size="sm" 
                 className="text-gray-500 hover:text-gray-700" 
-                onClick={handleCancel}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancel();
+                }}
               >
                 Cancel
               </Button>
@@ -119,7 +127,7 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
                     {title}
                   </h3>
                   {description && (
-                    <p className={`text-sm text-gray-600 mt-3 leading-relaxed ${checked ? 'line-through' : ''}`}>
+                    <p className={`text-sm text-gray-600 mt-3 leading-relaxed ${checked ? 'line-through' : ''}`} style={{ whiteSpace: 'pre-wrap' }}>
                       {description}
                     </p>
                   )}
@@ -128,11 +136,19 @@ export function TaskItem({ id, title, description, checked = false, onUpdate, on
               <div className="flex gap-2 ml-2">
                 <Edit 
                   className="w-4 h-4 text-blue-600 cursor-pointer hover:text-blue-800 transition-colors" 
-                  onClick={() => setIsEditing(true)} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }} 
                 />
                 <Trash2 
                   className="w-4 h-4 text-red-500 cursor-pointer hover:text-red-700 transition-colors" 
-                  onClick={() => onDelete?.(id)} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDelete?.(id);
+                  }} 
                 />
               </div>
             </div>

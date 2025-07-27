@@ -115,6 +115,7 @@ export function AddDiaryDialog({ open, onOpenChange, onAdd, moods, loading = fal
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What's on your mind?"
+              className="h-12"
               required
               disabled={loading}
               ref={titleInputRef}

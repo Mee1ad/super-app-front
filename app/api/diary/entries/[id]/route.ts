@@ -32,7 +32,7 @@ export async function GET(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)
@@ -88,7 +88,7 @@ export async function PUT(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export async function DELETE(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/diary-entries/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/diary-entries/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

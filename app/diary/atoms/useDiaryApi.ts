@@ -83,10 +83,6 @@ export const useDiaryApi = () => {
       setError(null)
       const newEntry = await diaryApi.createDiaryEntry(data)
       setEntries(prev => [newEntry, ...prev])
-      toast({
-        title: "Success",
-        description: "Diary entry created successfully"
-      })
       return newEntry
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create diary entry'
@@ -111,10 +107,6 @@ export const useDiaryApi = () => {
       setEntries(prev => prev.map(entry => 
         entry.id === id ? updatedEntry : entry
       ))
-      toast({
-        title: "Success",
-        description: "Diary entry updated successfully"
-      })
       return updatedEntry
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update diary entry'
@@ -137,10 +129,7 @@ export const useDiaryApi = () => {
       setError(null)
       await diaryApi.deleteDiaryEntry(id)
       setEntries(prev => prev.filter(entry => entry.id !== id))
-      toast({
-        title: "Success",
-        description: "Diary entry deleted successfully"
-      })
+      // Removed success toast
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete diary entry'
       setError(errorMessage)
@@ -161,10 +150,6 @@ export const useDiaryApi = () => {
       setLoading(true)
       setError(null)
       const response = await diaryApi.uploadImage(file)
-      toast({
-        title: "Success",
-        description: "Image uploaded successfully"
-      })
       return response.url
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload image'

@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react'
 // import { useRouter } from 'next/navigation' // Using navigateWithAnimation instead
 import { Plus, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { motion, AnimatePresence } from 'framer-motion'
-
 import { AddDiaryDialog } from './organisms/AddDiaryDialog'
+import { DiarySkeleton } from './atoms/DiarySkeleton'
 import { DiaryCard } from './molecules/DiaryCard'
 import { useInfiniteDiaryApi } from './atoms/useInfiniteDiaryApi'
 import { useInfiniteScroll } from './atoms/useInfiniteScroll'
 import { usePageTransition } from './atoms/usePageTransition'
 import { DiaryEntryCreate, DiaryEntryUpdate } from './atoms/types'
 import { AppLayout } from '../shared/organisms/AppLayout'
+
 
 export default function DiaryPage() {
   // const router = useRouter() // Using navigateWithAnimation instead
@@ -61,6 +61,9 @@ export default function DiaryPage() {
 
   const [selectedMood] = useState<string>('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+
+  // Show skeleton immediately when page loads, before any API calls
+  const shouldShowSkeleton = !isClient || loading
 
   // Scroll to top when page becomes visible (for back navigation)
   useEffect(() => {
@@ -134,154 +137,67 @@ export default function DiaryPage() {
       <div className="min-h-screen bg-background md:hidden overflow-x-hidden scrollbar-hide">
         <AppLayout title="Diary">
           {/* Mobile Content */}
-          <motion.div 
-            className="flex flex-col gap-4 py-4 overflow-x-hidden scrollbar-hide"
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ 
-              type: "spring", 
-              damping: 25, 
-              stiffness: 300,
-              duration: 0.5
-            }}
-          >
+          <div className="flex flex-col gap-4 overflow-x-hidden scrollbar-hide">
             {/* Error Display */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
-                >
-                  <p className="text-destructive text-sm">{error}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {error && (
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-destructive text-sm">{error}</p>
+              </div>
+            )}
 
             {/* Entries List */}
             <div className="space-y-3">
-              {loading && entries.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center justify-center py-16"
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Loader2 className="h-8 w-8 text-muted-foreground mb-4" />
-                  </motion.div>
-                  <p className="text-muted-foreground text-sm">Loading entries...</p>
-                </motion.div>
+              {shouldShowSkeleton ? (
+                <DiarySkeleton count={5} />
               ) : entries.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center justify-center py-16"
-                >
-                  <div className="text-muted-foreground text-center">
-                    <p className="text-base font-medium mb-2">No entries found</p>
-                    <p className="text-xs">
-                      {selectedMood !== 'all' 
-                        ? 'Try adjusting your filters'
-                        : 'Start by writing your first diary entry'
-                      }
-                    </p>
-                  </div>
-                </motion.div>
+                <div className="w-full flex justify-center items-start mt-20 mb-4">
+                  <span className="text-lg text-gray-500 font-medium">There is nothing here, lets add some data</span>
+                </div>
               ) : (
                 <>
-                  <AnimatePresence>
-                    {entries.map((entry, index) => {
-                      const mood = moods.find(m => m.id === entry.mood)
-                      if (!mood) return null
-                      
-                      return (
-                        <motion.div
-                          key={entry.id}
-                          initial={{ opacity: 0, y: 50 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ 
-                            duration: 0.4, 
-                            delay: 0.6 + (index * 0.1),
-                            ease: "easeOut"
-                          }}
-                        >
-                          <DiaryCard
-                            entry={entry}
-                            mood={mood}
-                            moods={moods}
-                            onDelete={handleDeleteEntry}
-                            onUpdate={handleUpdateEntry}
-                            loading={loading}
-                          />
-                        </motion.div>
-                      )
-                    })}
-                  </AnimatePresence>
+                  {entries.map((entry) => {
+                    const mood = moods.find(m => m.id === entry.mood)
+                    if (!mood) return null
+                    
+                    return (
+                      <div
+                        key={entry.id}
+                      >
+                        <DiaryCard
+                          entry={entry}
+                          mood={mood}
+                          moods={moods}
+                          onDelete={handleDeleteEntry}
+                          onUpdate={handleUpdateEntry}
+                          loading={loading}
+                        />
+                      </div>
+                    )
+                  })}
                   
                   {/* Infinite scroll observer */}
                   <div ref={observerRef} className="h-1" />
                   
                   {/* Loading more indicator */}
-                  <AnimatePresence>
-                    {loadingMore && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex justify-center py-4"
-                      >
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Loader2 className="h-6 w-6 text-muted-foreground" />
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {loadingMore && (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
                   
                   {/* End of list indicator */}
                   {!hasMore && entries.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ 
-                        duration: 0.5,
-                        delay: 1.0 + (entries.length * 0.1)
-                      }}
-                      className="w-full flex justify-center text-base text-muted-foreground mt-1"
-                    >
+                    <div className="w-full flex justify-center text-base text-muted-foreground mt-1">
                       <span>That&apos;s all</span>
-                    </motion.div>
+                    </div>
                   )}
                 </>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Floating Action Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ 
-              duration: 0.4, 
-              ease: "easeOut",
-              delay: 0.2,
-              type: "spring", 
-              damping: 25, 
-              stiffness: 300
-            }}
+          <button
             onClick={() => {
               console.log('Diary FAB clicked - animation should be working');
               navigateWithAnimation('/diary/new');
@@ -295,114 +211,48 @@ export default function DiaryPage() {
             }}
           >
             {loading ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <Loader2 className="h-6 w-6" />
-              </motion.div>
+              <Loader2 className="h-6 w-6" />
             ) : (
               <Plus className="h-6 w-6" />
             )}
-          </motion.button>
+          </button>
         </AppLayout>
       </div>
 
       {/* Desktop Layout */}
       <div className="hidden md:block overflow-x-hidden scrollbar-hide">
-        <motion.div 
-          className="container mx-auto pb-6 md:py-8"
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ 
-            type: "spring", 
-            damping: 25, 
-            stiffness: 300,
-            duration: 0.5
-          }}
-        >
-          <div className="mb-6 md:mb-8">
-            <div>
-              <p className="text-sm md:text-base text-muted-foreground">Capture your thoughts and feelings</p>
+        <AppLayout title="Diary">
+          <div className="container mx-auto pb-6 md:py-8">
+            <div className="mb-6 md:mb-8">
+              <div>
+                <p className="text-sm md:text-base text-muted-foreground">Capture your thoughts and feelings</p>
+              </div>
             </div>
-          </div>
 
-          {/* Error Display */}
-          <AnimatePresence>
+            {/* Error Display */}
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="mb-6 border-destructive">
-                  <CardContent className="pt-6">
-                    <p className="text-destructive text-sm md:text-base">{error}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+              <Card className="mb-6 border-destructive">
+                <CardContent className="pt-6">
+                  <p className="text-destructive text-sm md:text-base">{error}</p>
+                </CardContent>
+              </Card>
             )}
-          </AnimatePresence>
 
-          {/* Entries List */}
-          <div className="space-y-4 scrollbar-hide">
-            {loading && entries.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Loader2 className="h-8 w-8 text-muted-foreground mb-4" />
-                    </motion.div>
-                    <p className="text-muted-foreground text-sm md:text-base">Loading entries...</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : entries.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <div className="text-muted-foreground text-center">
-                      <p className="text-base md:text-lg font-medium mb-2">No entries found</p>
-                      <p className="text-xs md:text-sm">
-                        {selectedMood !== 'all' 
-                          ? 'Try adjusting your filters'
-                          : 'Start by writing your first diary entry'
-                        }
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <>
-                <AnimatePresence>
-                  {entries.map((entry, index) => {
+            {/* Entries List */}
+            <div className="space-y-4 scrollbar-hide">
+              {shouldShowSkeleton ? (
+                <DiarySkeleton count={5} />
+              ) : entries.length === 0 ? (
+                null
+              ) : (
+                <>
+                  {entries.map((entry) => {
                     const mood = moods.find(m => m.id === entry.mood)
                     if (!mood) return null
                     
                     return (
-                      <motion.div
+                      <div
                         key={entry.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ 
-                          duration: 0.3, 
-                          delay: index * 0.1,
-                          ease: "easeOut"
-                        }}
                       >
                         <DiaryCard
                           entry={entry}
@@ -412,52 +262,31 @@ export default function DiaryPage() {
                           onUpdate={handleUpdateEntry}
                           loading={loading}
                         />
-                      </motion.div>
+                      </div>
                     )
                   })}
-                </AnimatePresence>
-                
-                {/* Infinite scroll observer */}
-                <div ref={observerRef} className="h-4" />
-                
-                {/* Loading more indicator */}
-                <AnimatePresence>
+                  
+                  {/* Infinite scroll observer */}
+                  <div ref={observerRef} className="h-4" />
+                  
+                  {/* Loading more indicator */}
                   {loadingMore && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex justify-center py-4"
-                    >
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Loader2 className="h-6 w-6 text-muted-foreground" />
-                      </motion.div>
-                    </motion.div>
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-6 w-6 text-muted-foreground" />
+                    </div>
                   )}
-                </AnimatePresence>
-                
-                {/* End of list indicator */}
-                {!hasMore && entries.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                      duration: 0.5,
-                      delay: 1.0 + (entries.length * 0.1)
-                    }}
-                    className="w-full flex justify-center text-base md:text-lg text-muted-foreground mt-1"
-                  >
-                    <span>That&apos;s all</span>
-                  </motion.div>
-                )}
-              </>
-            )}
+                  
+                  {/* End of list indicator */}
+                  {!hasMore && entries.length > 0 && (
+                    <div className="w-full flex justify-center text-base md:text-lg text-muted-foreground mt-1">
+                      <span>That&apos;s all</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </motion.div>
+        </AppLayout>
       </div>
 
       <AddDiaryDialog

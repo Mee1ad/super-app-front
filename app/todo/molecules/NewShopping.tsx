@@ -113,6 +113,20 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
     onClose?.();
   };
 
+  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+    // Prevent default to keep keyboard open, then execute action
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Execute the action
+    action();
+    
+    // Re-focus the title input to keep keyboard open
+    setTimeout(() => {
+      titleInputRef.current?.focus();
+    }, 10);
+  };
+
   return (
     <>
       {/* Dark background overlay */}
@@ -195,7 +209,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
               className={`p-2 rounded-full transition-colors shadow-lg ${
                 showUrl ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
-              onClick={() => setShowUrl(!showUrl)}
+              onClick={(e) => handleButtonClick(e, () => setShowUrl(!showUrl))}
               aria-label="Toggle URL input"
             >
               <Link className="w-4 h-4" />
@@ -206,7 +220,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
               className={`p-2 rounded-full transition-colors shadow-lg ${
                 showPrice ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
-              onClick={() => setShowPrice(!showPrice)}
+              onClick={(e) => handleButtonClick(e, () => setShowPrice(!showPrice))}
               aria-label="Toggle price input"
             >
               <DollarSign className="w-4 h-4" />
@@ -217,7 +231,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
               className={`p-2 rounded-full transition-colors shadow-lg ${
                 showSource ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
-              onClick={() => setShowSource(!showSource)}
+              onClick={(e) => handleButtonClick(e, () => setShowSource(!showSource))}
               aria-label="Toggle source input"
             >
               <MapPin className="w-4 h-4" />
@@ -225,7 +239,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
             
             {/* Close button */}
             <button
-              onClick={handleClose}
+              onClick={(e) => handleButtonClick(e, handleClose)}
               className="p-3 rounded-full bg-gray-500 hover:bg-gray-600 text-white transition-colors shadow-lg"
               aria-label="Close form"
             >
@@ -234,7 +248,7 @@ export function NewShopping({ onCreate, onClose }: NewShoppingProps) {
             
             {/* Add button */}
             <button
-              onClick={handleSubmit}
+              onClick={(e) => handleButtonClick(e, () => handleSubmit(e as React.FormEvent))}
               disabled={!title.trim()}
               className={cn(
                 "p-3 rounded-full transition-colors shadow-lg",

@@ -87,11 +87,11 @@ export async function handleAuthCallback(code: string): Promise<{ tokens: { acce
     const authData = await response.json();
     
     // Store tokens securely
-          localStorage.setItem('auth_access_token', authData.tokens.access_token);
-      localStorage.setItem('auth_refresh_token', authData.tokens.refresh_token);
+    localStorage.setItem('auth_access_token', authData.tokens.access_token);
+    localStorage.setItem('auth_refresh_token', authData.tokens.refresh_token);
     
     // Store user info
-          localStorage.setItem('auth_user', JSON.stringify(authData.user));
+    localStorage.setItem('auth_user', JSON.stringify(authData.user));
     
     return authData;
   } catch (error) {

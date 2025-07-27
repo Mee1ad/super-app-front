@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, ArrowLeft, Save, X, Plus } from 'lucide-react'
+import { Loader2, ArrowLeft, Save, X } from 'lucide-react'
 import { IdeaCreate, IdeaUpdate, Idea, Category } from '../atoms/types'
 import { useIdeasApi } from '../atoms/useIdeasApi'
+import { useMobileKeyboardDetection } from '@/hooks/use-mobile-keyboard-focus'
 
 interface IdeaFormProps {
   mode: 'create' | 'edit'
@@ -34,12 +35,15 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
 
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const [validationErrors, setValidationErrors] = useState<{
     title?: string
     description?: string
     category?: string
   }>({})
+
+  // Use the mobile keyboard detection hook
+  const keyboardHeight = useMobileKeyboardDetection()
+  const isKeyboardOpen = keyboardHeight > 0
 
   // Reset form when idea changes (for edit mode)
   useEffect(() => {
@@ -79,97 +83,9 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
     }
   }, [mode])
 
-  // Handle keyboard visibility for action bar positioning
-  useEffect(() => {
-    const handleResize = () => {
-      const visualViewport = window.visualViewport
-      if (visualViewport) {
-        const keyboardHeight = window.innerHeight - visualViewport.height
-        // Consider keyboard open if it takes up more than 150px of screen height
-        setIsKeyboardOpen(keyboardHeight > 150)
-      } else {
-        // Fallback for browsers without visualViewport support
-        const screenHeight = window.screen.height
-        const windowHeight = window.innerHeight
-        const keyboardHeight = screenHeight - windowHeight
-        setIsKeyboardOpen(keyboardHeight > 150)
-      }
-    }
 
-    const handleFocus = () => {
-      // When any input is focused, assume keyboard might open
-      setTimeout(() => {
-        const visualViewport = window.visualViewport
-        if (visualViewport) {
-          const keyboardHeight = window.innerHeight - visualViewport.height
-          setIsKeyboardOpen(keyboardHeight > 150)
-        } else {
-          // Fallback
-          const screenHeight = window.screen.height
-          const windowHeight = window.innerHeight
-          const keyboardHeight = screenHeight - windowHeight
-          setIsKeyboardOpen(keyboardHeight > 150)
-        }
-      }, 300) // Small delay to allow keyboard to open
-    }
 
-    const handleBlur = () => {
-      // Small delay to allow for other focus events
-      setTimeout(() => {
-        const activeElement = document.activeElement
-        if (!activeElement || !actionBarRef.current?.contains(activeElement)) {
-          const visualViewport = window.visualViewport
-          if (visualViewport) {
-            const keyboardHeight = window.innerHeight - visualViewport.height
-            setIsKeyboardOpen(keyboardHeight > 150)
-          } else {
-            // Fallback
-            const screenHeight = window.screen.height
-            const windowHeight = window.innerHeight
-            const keyboardHeight = screenHeight - windowHeight
-            setIsKeyboardOpen(keyboardHeight > 150)
-          }
-        }
-      }, 100)
-    }
 
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize)
-      window.addEventListener('focus', handleFocus, true)
-      window.addEventListener('blur', handleBlur, true)
-      
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleResize)
-        window.removeEventListener('focus', handleFocus, true)
-        window.removeEventListener('blur', handleBlur, true)
-      }
-    } else {
-      // Fallback for browsers without visualViewport
-      window.addEventListener('resize', handleResize)
-      window.addEventListener('focus', handleFocus, true)
-      window.addEventListener('blur', handleBlur, true)
-      
-      return () => {
-        window.removeEventListener('resize', handleResize)
-        window.removeEventListener('focus', handleFocus, true)
-        window.removeEventListener('blur', handleBlur, true)
-      }
-    }
-  }, [])
-
-  const handleFocus = () => {
-    setIsKeyboardOpen(true)
-  }
-
-  const handleBlur = () => {
-    // Small delay to allow for other focus events
-    setTimeout(() => {
-      const activeElement = document.activeElement
-      if (!activeElement || !actionBarRef.current?.contains(activeElement)) {
-        setIsKeyboardOpen(false)
-      }
-    }, 100)
-  }
 
   const validateForm = () => {
     const errors: typeof validationErrors = {}
@@ -334,8 +250,6 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
             className="!m-0 !p-0 !border-0 !outline-none !ring-0 !focus:ring-0 !focus:border-0 !focus:outline-none !absolute !inset-0 !w-full !h-full !bg-transparent !text-transparent !z-10 !shadow-none !text-2xl !font-semibold"
             required
             disabled={loading}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
             onKeyDown={handleFormKeyDown}
             style={{ 
               direction: 'ltr', 
@@ -409,8 +323,6 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
             rows={1}
             required
             disabled={loading}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
             onKeyDown={handleFormKeyDown}
             style={{ 
               direction: 'ltr', 
@@ -435,7 +347,7 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
 
           {/* Visible Description Placeholder */}
           <div 
-            className={`flex-1 text-base leading-relaxed cursor-text min-h-[200px] break-words px-0 pb-32 text-left relative z-0 ${
+            className={`flex-1 text-base leading-relaxed cursor-text min-h-[200px] break-words px-0 text-left relative z-0 ${
               validationErrors.description ? 'text-destructive' : description ? 'text-foreground' : 'text-muted-foreground'
             }`}
             onClick={() => contentInputRef.current?.focus()}
@@ -448,7 +360,9 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
               fontSize: '1rem',
               lineHeight: '1.625',
               fontWeight: '400',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              paddingBottom: isKeyboardOpen ? `${keyboardHeight + 20}px` : '20px',
+              whiteSpace: 'pre-wrap'
             }}
           >
             {description || "Describe your idea in detail..."}
@@ -461,62 +375,7 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
           )}
         </motion.div>
 
-        {/* Tags Section */}
-        <motion.div 
-          className="space-y-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 0.4,
-            delay: 0.5,
-            type: "spring",
-            damping: 25,
-            stiffness: 300
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Input
-              ref={tagInputRef}
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              placeholder="Add tags..."
-              className="flex-1"
-              onKeyPress={handleKeyPress}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={addTag}
-              disabled={!tagInput.trim()}
-              className="h-10 px-3"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="text-sm px-3 py-1"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="ml-2 hover:text-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </motion.div>
+
       </motion.div>
 
       {/* Bottom Action Bar - Fixed at bottom */}
@@ -524,7 +383,7 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
         ref={actionBarRef}
         className="fixed left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border px-6 py-3"
         style={{ 
-          bottom: isKeyboardOpen ? 'env(keyboard-inset-height, 0px)' : '0px',
+          bottom: isKeyboardOpen ? `${keyboardHeight}px` : '0px',
           transition: 'bottom 0.3s ease',
           position: 'fixed'
         }}
@@ -547,8 +406,8 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
               <span>{validationErrors.category}</span>
             </div>
           )}
-          
-          {/* Category and Save buttons in one row */}
+
+          {/* Category and Tags in one row */}
           <div className="flex items-center gap-3">
             {/* Category Button */}
             <Button
@@ -572,26 +431,60 @@ export function IdeaForm({ mode, idea, onCancel }: IdeaFormProps) {
               )}
             </Button>
 
-            {/* Save Button */}
-            <Button
-              onClick={handleSubmit}
-              disabled={!title.trim() || !description.trim() || !category || loading}
-              className="flex-1 h-12"
-              size="lg"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-5 w-5 mr-2" />
-                  {isEditMode ? 'Update Idea' : 'Save Idea'}
-                </>
-              )}
-            </Button>
+            {/* Tag Input */}
+            <div className="flex-1">
+              <Input
+                ref={tagInputRef}
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                placeholder="Add tag"
+                className="w-full h-12"
+                onKeyPress={handleKeyPress}
+              />
+            </div>
           </div>
+
+          {/* Tags Display */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 max-h-16 overflow-y-auto">
+              {tags.map((tag, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="text-sm px-3 py-1"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-2 hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+          
+          {/* Save Button */}
+          <Button
+            onClick={handleSubmit}
+            disabled={!title.trim() || !description.trim() || !category || loading}
+            className="w-full h-12"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-5 w-5 mr-2" />
+                {isEditMode ? 'Update Idea' : 'Save Idea'}
+              </>
+            )}
+          </Button>
         </div>
       </motion.div>
 
