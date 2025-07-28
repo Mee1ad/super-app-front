@@ -177,16 +177,16 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
   }
 
   const handleCameraClick = () => {
-    // Create a file input element for camera access
+    // Create a file input element for image upload
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
-    input.capture = 'environment' // Use back camera by default
+    // Remove capture attribute to allow both camera and gallery selection
     
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        // Convert the captured image to a data URL
+        // Convert the uploaded image to a data URL
         const reader = new FileReader()
         reader.onload = (event) => {
           const dataUrl = event.target?.result as string
@@ -269,22 +269,8 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                     </div>
                   )}
 
-                  {/* Image URL */}
-                  {showImageInput && (
-                    <div className="relative">
-                      <input
-                        type="url"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        placeholder="Image URL (optional)"
-                        className="w-full text-base border-none outline-none bg-transparent"
-                      />
-                    </div>
-                  )}
-
-                  {/* Image Thumbnail Preview */}
-                  {imageUrl && (
+                  {/* Local Image Upload - No URL input, only file upload */}
+                  {showImageInput && imageUrl && (
                     <div className="relative mt-2">
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
@@ -299,7 +285,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                           />
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-muted-foreground">Image preview</p>
+                          <p className="text-xs text-muted-foreground">Local image uploaded</p>
                         </div>
                         <button
                           type="button"
@@ -395,14 +381,14 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                       type="button"
                       className={cn(
                         "px-3 py-2 rounded-md border-2 text-sm font-medium transition-all duration-200 touch-manipulation",
-                        showImageInput 
+                        showImageInput && imageUrl
                           ? 'border-primary bg-primary text-primary-foreground shadow-md' 
                           : 'border-gray-300 text-gray-600 bg-white hover:bg-gray-50 active:bg-gray-100 active:scale-95'
                       )}
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        if (!showImageInput) {
+                        if (!showImageInput || !imageUrl) {
                           setShowImageInput(true)
                           handleCameraClick()
                         } else {
@@ -423,7 +409,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                         e.stopPropagation()
                       }}
                     >
-                      Camera
+                      {imageUrl ? 'Change Image' : 'Add Image'}
                     </button>
                   </div>
 
