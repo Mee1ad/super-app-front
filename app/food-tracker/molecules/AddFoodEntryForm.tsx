@@ -84,11 +84,10 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
       setImageUrl(editEntry.image_url || '')
       setDate(new Date(editEntry.date).toISOString().split('T')[0])
       
-      // Only show optional fields if they have data, but don't auto-show description
+      // Show optional fields if they have data, including description
       setShowPriceInput(!!editEntry.price)
       setShowImageInput(!!editEntry.image_url)
-      // Keep description input hidden by default, even if entry has description
-      setShowDescriptionInput(false)
+      setShowDescriptionInput(!!editEntry.description)
       
       setShowForm(true)
     } else {
@@ -535,10 +534,10 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                           e.preventDefault()
                           e.stopPropagation()
                         }}
-                        disabled={!name.trim() || loading}
+                        disabled={(!name.trim() && !isEditing) || loading}
                         className={cn(
                           "p-3 rounded-full transition-colors shadow-lg",
-                          name.trim() && !loading
+                          (name.trim() || (isEditing && (editEntry?.name || editEntry?.description || editEntry?.price || editEntry?.image_url))) && !loading
                             ? "bg-primary hover:bg-primary/90 text-white" 
                             : "bg-gray-300 text-gray-500 cursor-not-allowed"
                         )}

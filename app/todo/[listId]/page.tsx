@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTodoApi } from "../atoms/useTodoApi";
@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function TodoListDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const listId = params.listId as string;
   const [isClient, setIsClient] = useState(false);
   const [editItem, setEditItem] = useState<{
@@ -32,6 +33,9 @@ export default function TodoListDetailPage() {
     price?: string;
     source?: string;
   } | null>(null);
+  
+  // Get list data from URL search params to avoid refetching
+  const listTitle = searchParams.get('title') || "Todo List";
   
   const {
     lists,
@@ -53,6 +57,9 @@ export default function TodoListDetailPage() {
   const currentList = useMemo(() => {
     return lists.find(list => list.id === listId);
   }, [lists, listId]);
+
+  // Use currentList title if available, otherwise use URL param title
+  const displayTitle = currentList?.title || listTitle;
 
   const handleBack = () => {
     router.push('/todo');
@@ -221,10 +228,57 @@ export default function TodoListDetailPage() {
     setEditItem(null);
   };
 
+  if (!isClient || loading) {
+    return (
+      <ErrorBoundary>
+        <AppLayout 
+          customHeader={
+            <div className="flex items-center justify-between px-4 py-2 md:px-6 md:py-2">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBack}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  aria-label="Go back"
+                  type="button"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+                  {displayTitle}
+                </h1>
+              </div>
+            </div>
+          }
+        >
+          <TodoDetailSkeleton count={5} />
+        </AppLayout>
+      </ErrorBoundary>
+    );
+  }
+
+  // Only show "List not found" after loading is complete and list is still not found
   if (!currentList) {
     return (
       <ErrorBoundary>
-        <AppLayout>
+        <AppLayout 
+          customHeader={
+            <div className="flex items-center justify-between px-4 py-2 md:px-6 md:py-2">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBack}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  aria-label="Go back"
+                  type="button"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+                  {displayTitle}
+                </h1>
+              </div>
+            </div>
+          }
+        >
           <div className="text-center py-8">
             <h1 className="text-xl font-semibold text-gray-900 mb-4">List not found</h1>
             <Button onClick={handleBack} variant="outline">
@@ -239,95 +293,99 @@ export default function TodoListDetailPage() {
 
   return (
     <ErrorBoundary>
-      <AppLayout title={currentList?.title || "Todo List"}>
-        {(!isClient || loading) ? (
-          <TodoDetailSkeleton count={5} />
-        ) : !currentList ? (
-          <div className="text-center py-8">
-            <h1 className="text-xl font-semibold text-gray-900 mb-4">List not found</h1>
-            <Button onClick={handleBack} variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Lists
-            </Button>
+      <AppLayout 
+        customHeader={
+          <div className="flex items-center justify-between px-4 py-2 md:px-6 md:py-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBack}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                aria-label="Go back"
+                type="button"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+                {displayTitle}
+              </h1>
+            </div>
           </div>
-        ) : (
-          <>
-            {(() => {
-              const items = currentList.type === "task" 
-                ? (currentList.tasks || []).map(taskResponseToTaskItemProps)
-                : (currentList.items || []).map(shoppingItemResponseToShoppingItemProps);
+        }
+      >
+        {(() => {
+          const items = currentList.type === "task" 
+            ? (currentList.tasks || []).map(taskResponseToTaskItemProps)
+            : (currentList.items || []).map(shoppingItemResponseToShoppingItemProps);
 
-              return (
-                <>
-                  {/* Mobile Content */}
-                  <div className="flex-1 space-y-6 overflow-x-hidden">
-                    {/* Mobile View */}
-                    <div className="block md:hidden">
-                      <div className="w-full">
-                        <AnimatePresence>
-                          {items.map((item, index) => (
-                            <motion.div
-                              key={item.id}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ 
-                                opacity: 0, 
-                                x: -100,
-                                scale: 0.95,
-                                transition: { duration: 0.2, ease: "easeInOut" }
-                              }}
-                              transition={{ 
-                                duration: 0.3, 
-                                delay: index * 0.05,
-                                ease: "easeOut"
-                              }}
-                            >
-                              <MobileItemRow
-                                item={item}
-                                type={currentList.type}
-                                onUpdate={handleItemUpdate}
-                                onDelete={handleItemDelete}
-                                onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
-                                onEdit={(item) => {
-                                  setEditItem({
-                                    id: item.id,
-                                    title: item.title,
-                                    description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
-                                    url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
-                                    price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
-                                    source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
-                                  });
-                                }}
-                                onReorder={handleItemReorder}
-                                isLast={index === items.length - 1}
-                              />
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-
-                    {/* Desktop View - Keep existing card layout */}
-                    <div className="hidden md:block">
-                      <div className="text-center py-8">
-                        <p className="text-gray-500">Desktop view not implemented for detail page</p>
-                      </div>
-                    </div>
+          return (
+            <>
+              {/* Mobile Content */}
+              <div className="flex-1 space-y-6 overflow-x-hidden">
+                {/* Mobile View */}
+                <div className="block md:hidden">
+                  <div className="w-full">
+                    <AnimatePresence>
+                      {items.map((item, index) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ 
+                            opacity: 0, 
+                            x: -100,
+                            scale: 0.95,
+                            transition: { duration: 0.2, ease: "easeInOut" }
+                          }}
+                          transition={{ 
+                            duration: 0.3, 
+                            delay: index * 0.05,
+                            ease: "easeOut"
+                          }}
+                        >
+                          <MobileItemRow
+                            item={item}
+                            type={currentList.type}
+                            onUpdate={handleItemUpdate}
+                            onDelete={handleItemDelete}
+                            onToggle={currentList.type === "task" ? handleTaskToggle : undefined}
+                            onEdit={(item) => {
+                              setEditItem({
+                                id: item.id,
+                                title: item.title,
+                                description: currentList.type === "task" ? (item as TaskItemProps).description : undefined,
+                                url: currentList.type === "shopping" ? (item as ShoppingItemProps).url : undefined,
+                                price: currentList.type === "shopping" ? (item as ShoppingItemProps).price : undefined,
+                                source: currentList.type === "shopping" ? (item as ShoppingItemProps).source : undefined,
+                              });
+                            }}
+                            onReorder={handleItemReorder}
+                            isLast={index === items.length - 1}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
+                </div>
 
-                  {/* Floating Action Button for adding items */}
-                  <AddNewItem 
-                    type={currentList.type} 
-                    onCreate={handleAddItem}
-                    onUpdate={handleUpdateItem}
-                    onCancel={() => setEditItem(null)}
-                    editItem={editItem}
-                  />
-                </>
-              );
-            })()}
-          </>
-        )}
+                {/* Desktop View - Keep existing card layout */}
+                <div className="hidden md:block">
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Desktop view not implemented for detail page</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Action Button for adding items */}
+              <AddNewItem 
+                type={currentList.type} 
+                onCreate={handleAddItem}
+                onUpdate={handleUpdateItem}
+                onCancel={() => setEditItem(null)}
+                editItem={editItem}
+              />
+            </>
+          );
+        })()}
       </AppLayout>
     </ErrorBoundary>
   );

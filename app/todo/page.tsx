@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AddNewList } from "./molecules/AddNewList";
 import { TaskList } from "./organisms/TaskList";
 import { ShoppingList } from "./organisms/ShoppingList";
@@ -22,6 +23,7 @@ import { ListPageLayout } from "../shared/organisms/ListPageLayout";
 
 export default function TodoPage() {
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
   
   const {
     lists,
@@ -198,8 +200,20 @@ export default function TodoPage() {
                   onUpdateTitle={handleUpdateListTitle}
                   onDelete={handleDeleteList}
                   onListClick={(listId) => {
-                    // Navigate to the detail page
-                    window.location.href = `/todo/${listId}`;
+                    // Find the list data to pass along
+                    const list = lists.find(l => l.id === listId);
+                    if (list) {
+                      // Navigate to the detail page with list data in search params
+                      const searchParams = new URLSearchParams({
+                        title: list.title,
+                        type: list.type,
+                        variant: list.variant || 'default'
+                      });
+                      router.push(`/todo/${listId}?${searchParams.toString()}`);
+                    } else {
+                      // Fallback to just listId if list not found
+                      router.push(`/todo/${listId}`);
+                    }
                   }}
                 />
               </div>

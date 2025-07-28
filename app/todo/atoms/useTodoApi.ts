@@ -50,8 +50,7 @@ export const useTodoApi = () => {
   // Clear mock data when user logs in
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      setLists([]);
-      // Reload data from real API when user becomes authenticated
+      // Don't clear lists immediately - just reload data from real API
       loadLists();
     }
   }, [isAuthenticated, authLoading, loadLists]);

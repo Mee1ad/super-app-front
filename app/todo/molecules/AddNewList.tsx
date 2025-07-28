@@ -78,11 +78,11 @@ export function AddNewList({ onCreate }: AddNewListProps) {
   const handleCreateList = () => {
     if (listName.trim() && selectedType) {
       onCreate(selectedType, listName.trim());
-      // Keep form open for adding another list
+      // Close the form and dropdown after creating a list
       setListName("");
       setSelectedType(null);
       setShowInput(false);
-      // Don't close the main overlay, keep it open for more lists
+      setIsOpen(false);
     }
   };
 
