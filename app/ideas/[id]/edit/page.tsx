@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { IdeaForm } from '../../organisms/IdeaForm'
 import { useIdeasApi } from '../../atoms/useIdeasApi'
 import { LoadingSpinner } from '../../atoms/LoadingSpinner'
-import { Idea } from '../../atoms/types'
+// Idea import removed as it's not used
 
 export default function EditIdeaPage() {
   const params = useParams()

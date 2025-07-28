@@ -104,9 +104,9 @@ function ChangelogContent() {
         description: "Analyzing git commits and generating changelog entries...",
       });
       
-      const result = await processCommits();
+      await processCommits();
       
-      const duration = processingStartTime ? Math.round((Date.now() - processingStartTime) / 1000) : 0;
+      // Duration calculation removed as it's not used
       
       // Removed success toasts
     } catch (error) {

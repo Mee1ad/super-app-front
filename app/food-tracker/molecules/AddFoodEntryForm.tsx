@@ -28,7 +28,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
   const [showImageInput, setShowImageInput] = useState(false)
   const [mealType, setMealType] = useState('breakfast')
   const [showMealTypeDropdown, setShowMealTypeDropdown] = useState(false)
-  const [showFabTooltip, setShowFabTooltip] = useState(true)
+  // showFabTooltip removed as it's not used
 
   // Prevent scroll when form is open
   useEffect(() => {
@@ -558,7 +558,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
       {!isEditing && (
         <motion.button
           type="button"
-          onClick={() => { setShowForm(true); setShowFabTooltip && setShowFabTooltip(false); }}
+          onClick={() => { setShowForm(true); }}
           className={cn(
             "fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg",
             "flex items-center justify-center"

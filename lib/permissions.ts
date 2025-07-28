@@ -145,8 +145,8 @@ export function setupTokenExpiration(): void {
   if (typeof window === 'undefined') return;
   
   // Prevent multiple calls in quick succession
-  if ((window as any).tokenExpirationSetupTime) {
-    const timeSinceLastSetup = Date.now() - (window as any).tokenExpirationSetupTime;
+  if (window.tokenExpirationSetupTime) {
+    const timeSinceLastSetup = Date.now() - window.tokenExpirationSetupTime;
     if (timeSinceLastSetup < 1000) { // Less than 1 second
       console.log('⏭️ Skipping token expiration setup - called too recently');
       return;
@@ -154,8 +154,8 @@ export function setupTokenExpiration(): void {
   }
   
   // Clear any existing timeout to prevent multiple timers
-  if ((window as any).tokenExpirationTimer) {
-    clearTimeout((window as any).tokenExpirationTimer);
+  if (window.tokenExpirationTimer) {
+    clearTimeout(window.tokenExpirationTimer);
     console.log('🧹 Cleared existing timer');
   }
   
@@ -163,7 +163,7 @@ export function setupTokenExpiration(): void {
   if (!token) return;
   
   // Mark this setup time
-  (window as any).tokenExpirationSetupTime = Date.now();
+  window.tokenExpirationSetupTime = Date.now();
   
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -195,7 +195,7 @@ export function setupTokenExpiration(): void {
         console.log('✅ Token will be checked on next page load');
       } else if (timeUntilExpiry > 0) {
         // Store the timer reference to prevent multiple timers
-        (window as any).tokenExpirationTimer = setTimeout(() => {
+        window.tokenExpirationTimer = setTimeout(() => {
           console.log('🕐 TIMER FIRED - Token expired, logging out');
           console.log('Timer details:', {
             expiresAt: new Date(expiresAt).toISOString(),
@@ -222,6 +222,14 @@ export function setupTokenExpiration(): void {
   }
 }
 
+// Extend Window interface to include our custom properties
+declare global {
+  interface Window {
+    tokenExpirationSetupTime?: number;
+    tokenExpirationTimer?: NodeJS.Timeout;
+  }
+}
+
 // Clear auth data without redirecting
 export function clearAuthData(): void {
   if (typeof window === 'undefined') return;
@@ -236,9 +244,9 @@ export function logout(): void {
   if (typeof window === 'undefined') return;
   
   // Clear the token expiration timer
-  if ((window as any).tokenExpirationTimer) {
-    clearTimeout((window as any).tokenExpirationTimer);
-    (window as any).tokenExpirationTimer = null;
+  if (window.tokenExpirationTimer) {
+    clearTimeout(window.tokenExpirationTimer);
+    window.tokenExpirationTimer = undefined;
   }
   
   clearAuthData();

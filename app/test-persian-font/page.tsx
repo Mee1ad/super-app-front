@@ -9,25 +9,25 @@ export default function PersianFontTestPage() {
         {/* Default font */}
         <div className="border p-4 rounded-lg">
           <h2 className="text-xl font-semibold mb-2">فونت پیش‌فرض</h2>
-          <p>این متن با فونت پیش‌فرض نمایش داده می‌شود.</p>
+          <p>این متن با فونت پیش‌فرض نمایش داده می&apos;شود.</p>
         </div>
 
         {/* Persian font class */}
         <div className="border p-4 rounded-lg">
           <h2 className="text-xl font-semibold mb-2 font-persian">فونت فارسی وزیر (کلاس)</h2>
-          <p className="font-persian">این متن با فونت فارسی وزیر (Vazirmatn) نمایش داده می‌شود.</p>
+          <p className="font-persian">این متن با فونت فارسی وزیر (Vazirmatn) نمایش داده می&apos;شود.</p>
         </div>
 
         {/* Lang attribute */}
         <div className="border p-4 rounded-lg">
-          <h2 className="text-xl font-semibold mb-2" lang="fa">فونت فارسی (lang="fa")</h2>
-          <p lang="fa">این متن با استفاده از lang="fa" فونت فارسی دریافت می‌کند.</p>
+          <h2 className="text-xl font-semibold mb-2" lang="fa">فونت فارسی (lang=&quot;fa&quot;)</h2>
+          <p lang="fa">این متن با استفاده از lang=&quot;fa&quot; فونت فارسی دریافت می&apos;کند.</p>
         </div>
 
         {/* RTL direction */}
         <div className="border p-4 rounded-lg">
-          <h2 className="text-xl font-semibold mb-2" dir="rtl">فونت فارسی (dir="rtl")</h2>
-          <p dir="rtl">این متن با استفاده از dir="rtl" فونت فارسی دریافت می‌کند.</p>
+          <h2 className="text-xl font-semibold mb-2" dir="rtl">فونت فارسی (dir=&quot;rtl&quot;)</h2>
+          <p dir="rtl">این متن با استفاده از dir=&quot;rtl&quot; فونت فارسی دریافت می&apos;کند.</p>
         </div>
 
         {/* Mixed content */}

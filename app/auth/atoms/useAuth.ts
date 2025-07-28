@@ -65,7 +65,7 @@ export function useAuth() {
     loadAuthState()
     
     // Listen for auth data updates from URL processing
-    const handleAuthDataUpdate = (event: CustomEvent) => {
+    const handleAuthDataUpdate = () => {
       console.log('🔄 Auth data updated from URL, reloading auth state')
       loadAuthState()
     }

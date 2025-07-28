@@ -108,7 +108,7 @@ export function AdminDashboard({ className = '' }: AdminDashboardProps) {
       
       const result = await processCommits();
       
-      const duration = processingStartTime ? Math.round((Date.now() - processingStartTime) / 1000) : 0;
+      // Duration calculation removed as it's not used
       
       // Only fetch new data if items were actually created
       if (result.created_count > 0) {

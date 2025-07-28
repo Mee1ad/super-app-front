@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useFoodTrackerApi } from './atoms/useFoodTrackerApi'
 import { FoodEntry, FoodEntryCreate, FoodEntryUpdate, FoodEntriesFilters } from './atoms/types'
@@ -83,7 +83,7 @@ export default function FoodTrackerPage() {
     }
   }, [entries, loading, error, isClient])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     setError(null)
     
@@ -97,14 +97,14 @@ export default function FoodTrackerPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters, getFoodEntries])
 
   // Load data on mount and when filters change
   useEffect(() => {
     if (isClient) {
       loadData()
     }
-  }, [filters, isClient])
+  }, [filters, isClient, loadData])
 
   // Scroll to top when entries change (for fresh loads)
   useEffect(() => {

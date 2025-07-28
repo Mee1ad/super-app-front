@@ -10,7 +10,7 @@ import type { ChangelogFilters as ChangelogFiltersType, ChangelogEntry } from '.
 import { PERMISSIONS } from '@/lib/permissions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+// useToast import removed as it's not used;
 
 interface ChangelogListProps {
   className?: string;
@@ -18,7 +18,7 @@ interface ChangelogListProps {
 }
 
 export function ChangelogList({ className = '', statusFilter = 'all' }: ChangelogListProps) {
-  const { toast } = useToast();
+  // Toast removed as it's not used
   const { hasPermission } = useAuth();
   
   // State

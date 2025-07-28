@@ -11,14 +11,15 @@ function authHeaders(request: NextRequest): HeadersInit {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     // Check if user is authenticated
     if (shouldUseMockData(request)) {
       // Return mock data for non-authenticated users
       const mockEntry = {
-        id: params.id,
+        id: id,
         user_id: 'user-1',
         name: 'Sample Food Entry',
         price: 10.99,
@@ -33,7 +34,7 @@ export async function GET(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/food-entries/${params.id}`, {
+    const response = await fetch(`${API_BASE_URL}/food-entries/${id}`, {
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders(request)
@@ -56,8 +57,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const data = await request.json()
     
@@ -65,7 +67,7 @@ export async function PUT(
     if (shouldUseMockData(request)) {
       // Return mock response for non-authenticated users
       const updatedEntry = {
-        id: params.id,
+        id: id,
         user_id: 'user-1',
         name: data.name || 'Updated Food Entry',
         price: data.price || 10.99,
@@ -80,7 +82,7 @@ export async function PUT(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/food-entries/${params.id}`, {
+    const response = await fetch(`${API_BASE_URL}/food-entries/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -105,8 +107,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     // Check if user is authenticated
     if (shouldUseMockData(request)) {
@@ -115,7 +118,7 @@ export async function DELETE(
     }
 
     // Use real API for authenticated users
-    const response = await fetch(`${API_BASE_URL}/food-entries/${params.id}`, {
+    const response = await fetch(`${API_BASE_URL}/food-entries/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
