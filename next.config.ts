@@ -3,19 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   
-  // Server Actions configuration for file uploads
-  serverActions: {
-    bodySizeLimit: '10mb'
-  },
+  // Note: serverActions.bodySizeLimit is not supported in Next.js 15
+  // File upload size limits should be handled in API routes
   
-  // Sentry configuration
-  sentry: {
-    // Suppresses source map uploading logs during build
-    hideSourceMaps: true,
-    
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
-  },
+  // Note: sentry configuration should be handled via @sentry/nextjs plugin
+  // or environment variables
 };
 
 export default nextConfig;

@@ -850,7 +850,7 @@ export function DiaryEntryForm({
                   <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                     <img
                       src={image}
-                      alt={`Image ${index + 1}`}
+                      alt={`Selected image ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
