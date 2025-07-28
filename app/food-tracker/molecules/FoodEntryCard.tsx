@@ -6,6 +6,7 @@ import { Calendar, DollarSign, Edit, Trash2, Image as ImageIcon } from 'lucide-r
 import { FoodEntry } from '../atoms/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu'
+import { getImageUrl } from '@/lib/image-utils'
 
 interface FoodEntryCardProps {
   entry: FoodEntry
@@ -91,7 +92,7 @@ export function FoodEntryCard({ entry, onEdit, onDelete }: FoodEntryCardProps) {
         {entry.image_url && !imageError && (
           <div className="flex-shrink-0 ml-3">
             <img
-              src={entry.image_url}
+              src={getImageUrl(entry.image_url)}
               alt={entry.name}
               className="w-16 h-16 object-cover rounded-md"
               onError={() => setImageError(true)}
@@ -171,7 +172,7 @@ export function FoodEntryCard({ entry, onEdit, onDelete }: FoodEntryCardProps) {
                     <div className="flex-shrink-0">
                       {entry.image_url && !imageError ? (
                         <img
-                          src={entry.image_url}
+                          src={getImageUrl(entry.image_url)}
                           alt={entry.name}
                           className="w-16 h-16 rounded-lg object-cover"
                           onError={() => setImageError(true)}

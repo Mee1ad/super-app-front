@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   
+  // Server Actions configuration for file uploads
+  serverActions: {
+    bodySizeLimit: '10mb'
+  },
+  
   // Sentry configuration
   sentry: {
     // Suppresses source map uploading logs during build

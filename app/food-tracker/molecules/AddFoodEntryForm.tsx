@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { X, Check, Plus, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getImageUrl } from '@/lib/image-utils'
 import { useMobileKeyboardFocusWithBackGesture } from '@/hooks/use-mobile-keyboard-focus'
 import { FoodEntry, FoodEntryCreate, FoodEntryUpdate } from '../atoms/types'
+import { foodTrackerApi } from '../atoms/api'
 
 
 export type AddFoodEntryFormProps = {
@@ -177,27 +179,22 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
   }
 
   const handleCameraClick = () => {
-    // Create a file input element for image upload
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
-    // Remove capture attribute to allow both camera and gallery selection
-    
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        // Convert the uploaded image to a data URL
-        const reader = new FileReader()
-        reader.onload = (event) => {
-          const dataUrl = event.target?.result as string
-          setImageUrl(dataUrl)
+        try {
+          const { url } = await foodTrackerApi.uploadImage(file)
+          setImageUrl(url)
           setShowImageInput(true)
+        } catch (error) {
+          console.error('Failed to upload image:', error)
+          // Optionally show error toast
         }
-        reader.readAsDataURL(file)
       }
     }
-    
-    // Trigger the file input
     input.click()
   }
 
@@ -275,7 +272,7 @@ export function AddFoodEntryForm({ onCreate, onUpdate, editEntry, loading = fals
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                           <img
-                            src={imageUrl}
+                            src={getImageUrl(imageUrl)}
                             alt="Food preview"
                             className="w-full h-full object-cover"
                             onError={(e) => {

@@ -36,7 +36,8 @@ export function IdeaCard({ idea, onEdit, onDelete }: IdeaCardProps) {
     if (onEdit) {
       onEdit(idea)
     } else {
-      router.push(`/ideas/${idea.id}/edit`)
+      // Navigate directly to edit page using replace to avoid history issues
+      router.replace(`/ideas/${idea.id}/edit`)
     }
   }
 
@@ -45,7 +46,8 @@ export function IdeaCard({ idea, onEdit, onDelete }: IdeaCardProps) {
     if (onEdit) {
       onEdit(idea)
     } else {
-      router.push(`/ideas/${idea.id}/edit`)
+      // Navigate directly to edit page using replace to avoid history issues
+      router.replace(`/ideas/${idea.id}/edit`)
     }
   }
 

@@ -41,7 +41,7 @@ export default function IdeasPage() {
   }
 
   const handleEditIdea = (idea: Idea) => {
-    router.push(`/ideas/${idea.id}/edit`)
+    router.replace(`/ideas/${idea.id}/edit`)
   }
 
   const handleDeleteIdea = async (id: string) => {

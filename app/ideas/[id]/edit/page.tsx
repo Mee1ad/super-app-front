@@ -10,60 +10,51 @@ import { LoadingSpinner } from '../../atoms/LoadingSpinner'
 export default function EditIdeaPage() {
   const params = useParams()
   const router = useRouter()
-  const { ideas, loadIdeas } = useIdeasApi()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { ideas, isLoading: apiLoading } = useIdeasApi()
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
   
   const ideaId = params.id as string
   const idea = ideas.find(i => i.id === ideaId)
 
+  // Track when data has initially loaded
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        await loadIdeas()
-      } catch (error) {
-        console.error('❌ Failed to load ideas:', error)
-        setError('Failed to load idea')
-      } finally {
-        setIsLoading(false)
-      }
+    if (!apiLoading && ideas.length > 0) {
+      setHasInitiallyLoaded(true)
     }
-    
-    if (ideaId) {
-      loadData()
-    }
-  }, [ideaId, loadIdeas])
+  }, [apiLoading, ideas.length])
 
   const handleCancel = () => {
     router.push('/ideas')
   }
 
-  return (
-    <>
-      {isLoading ? (
-        <div className="w-full min-h-screen flex items-center justify-center">
-          <LoadingSpinner />
+  // Show loading spinner while API is loading OR before initial data load
+  if (apiLoading || !hasInitiallyLoaded) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  // Show "not found" if idea doesn't exist after data has loaded
+  if (!idea) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-medium text-muted-foreground mb-4">
+            Idea not found
+          </p>
+          <button
+            onClick={handleCancel}
+            className="text-primary hover:underline"
+          >
+            Back to Ideas
+          </button>
         </div>
-      ) : error || !idea ? (
-        <div className="w-full min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg font-medium text-muted-foreground mb-4">
-              {error || 'Idea not found'}
-            </p>
-            <button
-              onClick={handleCancel}
-              className="text-primary hover:underline"
-            >
-              Back to Ideas
-            </button>
-          </div>
-        </div>
-      ) : (
-        <IdeaForm mode="edit" idea={idea} onCancel={handleCancel} />
-      )}
-    </>
-  )
+      </div>
+    )
+  }
+
+  // Render the edit form when idea is found
+  return <IdeaForm mode="edit" idea={idea} onCancel={handleCancel} />
 } 

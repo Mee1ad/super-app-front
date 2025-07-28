@@ -122,5 +122,22 @@ export const foodTrackerApi = {
     }
     
     return response.json()
+  },
+  
+  // Upload image for food entry
+  async uploadImage(file: File): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/food-entries/upload', {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders()
+      },
+      body: formData
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to upload image: ${response.statusText}`);
+    }
+    return response.json();
   }
 } 
