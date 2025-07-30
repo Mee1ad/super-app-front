@@ -1,0 +1,78 @@
+---
+description: Performance optimization standards covering lazy loading, bundle splitting, React memoization patterns, font optimization with Vazir for Persian text, offline-first architecture using Replicache, PWA support with cross-platform compatibility for iOS/Android/desktop.
+alwaysApply: false
+---
+# 🚀 Performance Guidelines
+
+## Core Optimization:
+
+* Lazy load non-critical content/components
+* Bundle splitting, dynamic imports
+* Use `<Image>` with `priority`, `sizes` when needed
+* Memoize: `useMemo`, `React.memo`, `useCallback`
+* Avoid rerenders, use shallow compare when applicable
+
+## Font Optimization:
+
+* Use `font-display: swap` for custom fonts
+* Preload critical font files with `<link rel="preload">`
+* Use Vazir font for Persian text
+
+## Testing Performance:
+
+* Test offline mode and throttled network conditions
+* Performance testing (Lighthouse)
+* Cross-device + cross-browser testing
+* Include Design QA during test cycles
+
+## Component Testing:
+
+* All components must include snapshot tests and props edge cases
+* Test UI behavior with null/empty props
+* Test accessibility with `axe-core`
+
+## 🧱 Platform Features
+
+* **Offline-first**: use Replicache
+* **PWA support**: Manifest, Splash screen, App icon, Offline assets
+* **Optional Native (Capacitor)**: Compatible with Android/iOS builds
+* Support iOS home screen web app feel
+* Document and test behavior across iOS/Android/desktop PWA versions
+* Ensure app features work across latest 2 platform versions (iOS 16+, Android 12+)
+# 🚀 Performance Guidelines
+
+## Core Optimization:
+
+* Lazy load non-critical content/components
+* Bundle splitting, dynamic imports
+* Use `<Image>` with `priority`, `sizes` when needed
+* Memoize: `useMemo`, `React.memo`, `useCallback`
+* Avoid rerenders, use shallow compare when applicable
+
+## Font Optimization:
+
+* Use `font-display: swap` for custom fonts
+* Preload critical font files with `<link rel="preload">`
+* Use Vazir font for Persian text
+
+## Testing Performance:
+
+* Test offline mode and throttled network conditions
+* Performance testing (Lighthouse)
+* Cross-device + cross-browser testing
+* Include Design QA during test cycles
+
+## Component Testing:
+
+* All components must include snapshot tests and props edge cases
+* Test UI behavior with null/empty props
+* Test accessibility with `axe-core`
+
+## 🧱 Platform Features
+
+* **Offline-first**: use Replicache
+* **PWA support**: Manifest, Splash screen, App icon, Offline assets
+* **Optional Native (Capacitor)**: Compatible with Android/iOS builds
+* Support iOS home screen web app feel
+* Document and test behavior across iOS/Android/desktop PWA versions
+* Ensure app features work across latest 2 platform versions (iOS 16+, Android 12+)

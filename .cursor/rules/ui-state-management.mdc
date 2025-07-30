@@ -1,0 +1,49 @@
+---
+alwaysApply: false
+---
+# 📦 UI State Management
+
+## State Architecture:
+
+* Ephemeral UI state (modals, inputs, toggles) → `useState`, `useReducer`, or `Zustand`
+* Shared and persistent state (tasks, lists, settings) → `Replicache`
+* Avoid syncing or persisting temporary UI state via Replicache
+
+## State Requirements:
+
+* Explicit empty states with visuals and helpful CTA
+* Descriptive error states with retry actions or diagnostics
+* Always show instant feedback (e.g. toasts, inline validation, undo)
+* Confirmations where destructive actions happen
+
+## Offline-First Behavior (MANDATORY):
+
+* All features must progressively degrade
+* Never show blank screens—fallbacks always required
+* Offline writes must be queued and retried
+* Show sync status (e.g., last synced time, sync errors)
+* Use background sync when available
+* Display user-friendly messages for outdated or unsynced data
+
+## Mock Data Handling:
+
+* When user is not logged in, use mock data in frontend
+* Ensure seamless transition from mock to real data
+* Maintain consistent UI state during authentication
+
+## Toast Notifications:
+
+* Show only error toast notifications
+* No success toast notifications
+* Provide clear error messages with actionable steps
+
+## Data Synchronization:
+
+* Use Replicache for offline-first functionality
+* Implement proper conflict resolution
+* Show sync indicators and status
+* Handle network failures gracefully
+description:
+globs:
+alwaysApply: false
+---

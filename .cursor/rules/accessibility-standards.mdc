@@ -1,0 +1,82 @@
+---
+description: Mandatory accessibility standards covering ARIA usage, keyboard navigation, screen reader compatibility, proper image alt text, form labeling, interactive element states, and comprehensive testing requirements including axe-core validation.
+alwaysApply: false
+---
+# 🧠 Accessibility (MANDATORY)
+
+## Core Requirements:
+
+* Use `aria-*` attributes appropriately
+* Manage modal focus properly
+* Support full keyboard navigation
+* Ensure screen reader compatibility
+* Test with `axe-core`
+
+## Image Accessibility:
+
+* Always use `<Image>` with `alt` attributes
+* Never use `<img>` tags directly
+* Provide descriptive alt text for meaningful images
+* Use empty alt="" for decorative images
+
+## Form Accessibility:
+
+* Associate labels with form controls
+* Provide error messages with `aria-describedby`
+* Use proper heading hierarchy
+* Ensure sufficient color contrast (WCAG AA)
+
+## Interactive Elements:
+
+* All interactive elements require visual state
+* Touch targets ≥ 44px
+* Support keyboard navigation
+* Provide focus indicators
+
+## Testing Standards:
+
+* Unit + integration + E2E
+* Accessibility testing (`axe-core`)
+* Visual regression (Chromatic/Percy)
+* Performance testing (Lighthouse)
+* Keyboard/mouse/touch interactions
+* Cross-device + cross-browser
+# 🧠 Accessibility (MANDATORY)
+
+## Core Requirements:
+
+* Use `aria-*` attributes appropriately
+* Manage modal focus properly
+* Support full keyboard navigation
+* Ensure screen reader compatibility
+* Test with `axe-core`
+
+## Image Accessibility:
+
+* Always use `<Image>` with `alt` attributes
+* Never use `<img>` tags directly
+* Provide descriptive alt text for meaningful images
+* Use empty alt="" for decorative images
+
+## Form Accessibility:
+
+* Associate labels with form controls
+* Provide error messages with `aria-describedby`
+* Use proper heading hierarchy
+* Ensure sufficient color contrast (WCAG AA)
+
+## Interactive Elements:
+
+* All interactive elements require visual state
+* Touch targets ≥ 44px
+* Support keyboard navigation
+* Provide focus indicators
+
+## Testing Standards:
+
+* Unit + integration + E2E
+* Accessibility testing (`axe-core`)
+* Visual regression (Chromatic/Percy)
+* Performance testing (Lighthouse)
+* Keyboard/mouse/touch interactions
+* Cross-device + cross-browser

@@ -1,0 +1,29 @@
+---
+description: Motion and interaction standards using Framer Motion exclusively with animations under 300ms, consistent easing patterns, haptic-like feedback through subtle scaling, and mandatory visual feedback for all interactive elements.
+alwaysApply: false
+---
+# 💠 Motion & Interactions
+
+## Framer Motion Standards (MANDATORY)
+
+* Use Framer Motion only (no raw CSS transitions)
+* All animations: duration under 300ms
+* Use spring where appropriate
+* Smooth, subtle scaling for tap/hover
+
+## Example Implementation:
+
+```tsx
+<motion.div 
+  whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }} 
+  whileTap={{ scale: 0.98 }} 
+  transition={{ duration: 0.15, ease: "easeOut" }} 
+/>
+```
+
+## Interaction Requirements:
+
+* Use consistent easing/duration across FABs, modals
+* Haptic-like feedback through subtle scale/opacity changes
+* All interactions must include visual feedback (hover, click, tap)
+* Global hover and click animations for all openable items

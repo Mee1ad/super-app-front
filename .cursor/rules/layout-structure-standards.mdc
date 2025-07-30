@@ -1,0 +1,86 @@
+---
+description: Layout and structure standards covering mandatory form layouts with consistent spacing patterns, component architecture using Shadcn exclusively, mobile-first responsive design with iOS-first approach, and context menu/list interaction patterns with standardized icon sizing and spacing.
+alwaysApply: false
+---
+# 📐 Layout & Structure Standards
+
+## ✅ Form Layout (MANDATORY)
+
+Follow consistent layout for all dialogs/forms:
+
+```tsx
+<div className="w-full bg-white rounded-t-xl animate-in slide-in-from-bottom-2 duration-300 shadow-lg">
+  <div className="flex flex-col h-full">
+    <div className="flex flex-col gap-2 p-6 flex-1">{/* Inputs */}</div>
+    <div className="flex items-center justify-between gap-3 p-6">{/* Actions */}</div>
+  </div>
+</div>
+```
+
+* `gap-2` for inputs, `gap-3` for buttons
+* `p-6` padding, `flex-1` for scroll
+* FAB: Close left, Action right
+
+## 🧩 Component Architecture
+
+* Feature-based + atomic structure
+* All components must use Shadcn
+* No direct use of Radix or custom styles outside theme tokens
+* Standard height for inputs/buttons: `h-12` (48px); sm: `h-10`, lg: `h-14`
+* Version and document major design system changes
+* Maintain backward compatibility for shared components or document breaking changes
+
+## 📲 Responsive & Mobile-First Design
+
+* iOS-first design, responsive to tablets/desktops
+* Use `sm:`, `md:`, `lg:` breakpoints
+* Touch targets ≥ 44px
+* Fullscreen feel on mobile (`viewport-fit=cover`)
+* Scroll lock when modals/inputs open
+
+## 🖱 Context Menus & Lists
+
+* Use Shadcn ContextMenu
+* Include consistent icon sizes (`w-4 h-4 mr-2`) and spacing (`px-3 py-3`, `gap-3`)
+* List items: must support drag & drop (if needed), context menus, and edit in-place via `EditList`
+# 📐 Layout & Structure Standards
+
+## ✅ Form Layout (MANDATORY)
+
+Follow consistent layout for all dialogs/forms:
+
+```tsx
+<div className="w-full bg-white rounded-t-xl animate-in slide-in-from-bottom-2 duration-300 shadow-lg">
+  <div className="flex flex-col h-full">
+    <div className="flex flex-col gap-2 p-6 flex-1">{/* Inputs */}</div>
+    <div className="flex items-center justify-between gap-3 p-6">{/* Actions */}</div>
+  </div>
+</div>
+```
+
+* `gap-2` for inputs, `gap-3` for buttons
+* `p-6` padding, `flex-1` for scroll
+* FAB: Close left, Action right
+
+## 🧩 Component Architecture
+
+* Feature-based + atomic structure
+* All components must use Shadcn
+* No direct use of Radix or custom styles outside theme tokens
+* Standard height for inputs/buttons: `h-12` (48px); sm: `h-10`, lg: `h-14`
+* Version and document major design system changes
+* Maintain backward compatibility for shared components or document breaking changes
+
+## 📲 Responsive & Mobile-First Design
+
+* iOS-first design, responsive to tablets/desktops
+* Use `sm:`, `md:`, `lg:` breakpoints
+* Touch targets ≥ 44px
+* Fullscreen feel on mobile (`viewport-fit=cover`)
+* Scroll lock when modals/inputs open
+
+## 🖱 Context Menus & Lists
+
+* Use Shadcn ContextMenu
+* Include consistent icon sizes (`w-4 h-4 mr-2`) and spacing (`px-3 py-3`, `gap-3`)
+* List items: must support drag & drop (if needed), context menus, and edit in-place via `EditList`

@@ -1,0 +1,112 @@
+---
+description: Developer experience standards covering pnpm package management, code quality tools (ESLint/Prettier/TypeScript), comprehensive testing requirements (unit/integration/E2E/accessibility), design QA checklist, UX instrumentation guidelines, and code quality best practices.
+alwaysApply: false
+---
+# 🛠 Developer Experience
+
+## Package Management:
+
+* Use `pnpm` as the default package manager (set in `.npmrc`)
+* Prefer `pnpm install` over `npm install`
+* Configure `pnpm-workspace.yaml` for monorepo setups
+
+## Code Quality Tools:
+
+* ESLint, Prettier, strict `tsconfig`
+* CI must include `tsc`, type checks, ESLint
+* Use hook cleanup and error boundaries
+* Prefer named imports, alphabetically sorted
+
+## ✅ Testing Standards
+
+* Unit + integration + E2E
+* Accessibility testing (`axe-core`)
+* Visual regression (Chromatic/Percy)
+* Performance testing (Lighthouse)
+* Offline-first behavior tests
+* Keyboard/mouse/touch interactions
+* Cross-device + cross-browser
+* Include Design QA during test cycles
+* All components must include snapshot tests and props edge cases
+* Test UI behavior with null/empty props
+
+## Code Fixes:
+
+* Follow best practices and include proper testing
+* Verify that issues are resolved
+* Test edge cases and error scenarios
+* Document breaking changes
+
+## 🔍 Design QA Checklist
+
+* All paddings/margins match Figma (8px grid)
+* Color contrast passes WCAG AA
+* Font sizes scale correctly per breakpoint
+* Motion and haptics match prototype specs
+
+## 📊 UX Instrumentation
+
+* Track key interactions (e.g., task added, list reordered)
+* Avoid tracking personally identifiable information (PII)
+* Use event names with clear context and screen source
+* Tag flows for onboarding, success, error, and churn points
+
+## ⚠️ Miscellaneous
+
+* Icon sizing and spacing must follow design tokens
+* All interactive elements require visual state
+* Avoid using custom CSS unless in theme scope
+# 🛠 Developer Experience
+
+## Package Management:
+
+* Use `pnpm` as the default package manager (set in `.npmrc`)
+* Prefer `pnpm install` over `npm install`
+* Configure `pnpm-workspace.yaml` for monorepo setups
+
+## Code Quality Tools:
+
+* ESLint, Prettier, strict `tsconfig`
+* CI must include `tsc`, type checks, ESLint
+* Use hook cleanup and error boundaries
+* Prefer named imports, alphabetically sorted
+
+## ✅ Testing Standards
+
+* Unit + integration + E2E
+* Accessibility testing (`axe-core`)
+* Visual regression (Chromatic/Percy)
+* Performance testing (Lighthouse)
+* Offline-first behavior tests
+* Keyboard/mouse/touch interactions
+* Cross-device + cross-browser
+* Include Design QA during test cycles
+* All components must include snapshot tests and props edge cases
+* Test UI behavior with null/empty props
+
+## Code Fixes:
+
+* Follow best practices and include proper testing
+* Verify that issues are resolved
+* Test edge cases and error scenarios
+* Document breaking changes
+
+## 🔍 Design QA Checklist
+
+* All paddings/margins match Figma (8px grid)
+* Color contrast passes WCAG AA
+* Font sizes scale correctly per breakpoint
+* Motion and haptics match prototype specs
+
+## 📊 UX Instrumentation
+
+* Track key interactions (e.g., task added, list reordered)
+* Avoid tracking personally identifiable information (PII)
+* Use event names with clear context and screen source
+* Tag flows for onboarding, success, error, and churn points
+
+## ⚠️ Miscellaneous
+
+* Icon sizing and spacing must follow design tokens
+* All interactive elements require visual state
+* Avoid using custom CSS unless in theme scope

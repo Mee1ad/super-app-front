@@ -1,0 +1,60 @@
+---
+description: Mandatory build prevention rules covering unused code removal, proper image handling with Next.js Image component, TypeScript strict typing, async/await patterns, PowerShell compatibility, and comprehensive pre-commit validation requirements.
+alwaysApply: false
+---
+# 🚨 Build Prevention Rules (MANDATORY)
+
+## ❌ NEVER commit code with:
+
+* Unused variables, imports, or parameters (use `_` prefix or remove)
+* Missing `alt` attributes on images
+* Using `<img>` instead of Next.js `<Image>`
+* Unescaped quotes in JSX
+* Using `any` type
+* Missing dependencies in `useEffect`/`useCallback`
+* Async params in Next.js 15 not awaited
+
+## ✅ ALWAYS:
+
+* Use `<Image>` with `alt`
+* Remove unused code before committing
+* Use specific, strict types
+* Await all async destructured values
+* Run `pnpm run build` locally before commit
+* Fix all TypeScript errors
+* Escape JSX quotes properly
+* Format with Prettier and lint with ESLint
+
+## PowerShell Compatibility (MANDATORY)
+
+* Use `;` instead of `&&`
+* Validate CLI commands in Windows PowerShell
+* Avoid Bash-specific syntax in pnpm scripts
+# 🚨 Build Prevention Rules (MANDATORY)
+
+## ❌ NEVER commit code with:
+
+* Unused variables, imports, or parameters (use `_` prefix or remove)
+* Missing `alt` attributes on images
+* Using `<img>` instead of Next.js `<Image>`
+* Unescaped quotes in JSX
+* Using `any` type
+* Missing dependencies in `useEffect`/`useCallback`
+* Async params in Next.js 15 not awaited
+
+## ✅ ALWAYS:
+
+* Use `<Image>` with `alt`
+* Remove unused code before committing
+* Use specific, strict types
+* Await all async destructured values
+* Run `pnpm run build` locally before commit
+* Fix all TypeScript errors
+* Escape JSX quotes properly
+* Format with Prettier and lint with ESLint
+
+## PowerShell Compatibility (MANDATORY)
+
+* Use `;` instead of `&&`
+* Validate CLI commands in Windows PowerShell
+* Avoid Bash-specific syntax in pnpm scripts

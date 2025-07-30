@@ -1,0 +1,72 @@
+---
+description: Design system standards using centralized CSS tokens, Shadcn components exclusively, consistent icon sizing/spacing, standardized component heights (h-12/h-10/h-14), and light/dark mode support with semantic naming conventions.
+alwaysApply: false
+---
+# 🎨 Design Tokens & UI Style
+
+## Design System:
+
+* Centralized tokens (color, size, spacing) using CSS variables
+* Light/Dark mode support with semantic naming
+* Rounded cards, gradients, iOS-style soft shadows
+* Typography system: consistent headings, font sizes, weights
+
+## Icon Standards:
+
+* Icon sizing and spacing must follow design tokens
+* Consistent icon sizes (`w-4 h-4 mr-2`) and spacing (`px-3 py-3`, `gap-3`)
+* All interactive elements require visual state
+
+## Styling Guidelines:
+
+* Avoid using custom CSS unless in theme scope
+* Use Shadcn components exclusively
+* No direct use of Radix or custom styles outside theme tokens
+* Maintain consistent spacing and sizing across components
+
+## Component Heights:
+
+* Standard height for inputs/buttons: `h-12` (48px)
+* Small variants: `h-10`
+* Large variants: `h-14`
+* Ensure touch targets ≥ 44px
+
+## Version Management:
+
+* Version and document major design system changes
+* Maintain backward compatibility for shared components
+* Document breaking changes when necessary
+# 🎨 Design Tokens & UI Style
+
+## Design System:
+
+* Centralized tokens (color, size, spacing) using CSS variables
+* Light/Dark mode support with semantic naming
+* Rounded cards, gradients, iOS-style soft shadows
+* Typography system: consistent headings, font sizes, weights
+
+## Icon Standards:
+
+* Icon sizing and spacing must follow design tokens
+* Consistent icon sizes (`w-4 h-4 mr-2`) and spacing (`px-3 py-3`, `gap-3`)
+* All interactive elements require visual state
+
+## Styling Guidelines:
+
+* Avoid using custom CSS unless in theme scope
+* Use Shadcn components exclusively
+* No direct use of Radix or custom styles outside theme tokens
+* Maintain consistent spacing and sizing across components
+
+## Component Heights:
+
+* Standard height for inputs/buttons: `h-12` (48px)
+* Small variants: `h-10`
+* Large variants: `h-14`
+* Ensure touch targets ≥ 44px
+
+## Version Management:
+
+* Version and document major design system changes
+* Maintain backward compatibility for shared components
+* Document breaking changes when necessary

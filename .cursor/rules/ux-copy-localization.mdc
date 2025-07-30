@@ -1,0 +1,70 @@
+---
+description: UX copy and localization standards covering concise action-driven language, mandatory i18n-ready keys for all user-facing strings, proper empty state guidance, error message clarity with retry actions, Persian text support with Vazir font and RTL compatibility.
+alwaysApply: false
+---
+# 🖋 UX Copy & Microcopy
+
+## Copy Standards:
+
+* Use concise, action-driven language
+* Avoid jargon; make errors and actions clear
+* Buttons: use verbs ("Save", "Retry", "Delete")
+* Use empty state text as onboarding help
+
+## Localization Requirements (MANDATORY):
+
+* Copy must be localized and accessible
+* Use i18n-ready keys instead of inline strings
+* Avoid hardcoded dates, numbers, or currencies
+* All user-facing strings must be translatable
+* Pluralization and gender-aware phrasing must be supported where needed
+
+## Empty States:
+
+* Display empty state text in correct place with proper padding and margin
+* Provide helpful guidance and clear CTAs
+* Use empty states as onboarding opportunities
+
+## Error Messages:
+
+* Descriptive error states with retry actions or diagnostics
+* Show only error toast notifications (no success toasts)
+* Provide clear next steps for users
+
+## Persian Text Support:
+
+* Use Vazir font for Persian text instead of Iran Sans
+* Ensure proper RTL support where needed
+# 🖋 UX Copy & Microcopy
+
+## Copy Standards:
+
+* Use concise, action-driven language
+* Avoid jargon; make errors and actions clear
+* Buttons: use verbs ("Save", "Retry", "Delete")
+* Use empty state text as onboarding help
+
+## Localization Requirements (MANDATORY):
+
+* Copy must be localized and accessible
+* Use i18n-ready keys instead of inline strings
+* Avoid hardcoded dates, numbers, or currencies
+* All user-facing strings must be translatable
+* Pluralization and gender-aware phrasing must be supported where needed
+
+## Empty States:
+
+* Display empty state text in correct place with proper padding and margin
+* Provide helpful guidance and clear CTAs
+* Use empty states as onboarding opportunities
+
+## Error Messages:
+
+* Descriptive error states with retry actions or diagnostics
+* Show only error toast notifications (no success toasts)
+* Provide clear next steps for users
+
+## Persian Text Support:
+
+* Use Vazir font for Persian text instead of Iran Sans
+* Ensure proper RTL support where needed
