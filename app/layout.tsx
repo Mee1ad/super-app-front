@@ -8,6 +8,8 @@ import { ChangelogProvider } from "@/app/shared/organisms/ChangelogProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./auth/organisms/AuthProvider";
 import { DemoBanner } from "@/components/ui/demo-banner";
+import { ReplicacheTodoProvider } from "./todo/atoms/ReplicacheTodoContext";
+import TransitionLayout from "./transition-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,9 +47,13 @@ export default function RootLayout({
             <SidebarProvider>
               <DemoBanner />
               <Sidebar />
-              <main className="md:pt-0 md:ml-64 transition-all duration-300">
-                {children}
-              </main>
+              <ReplicacheTodoProvider>
+                <TransitionLayout>
+                  <main className="md:pt-0 md:ml-64 transition-all duration-300">
+                    {children}
+                  </main>
+                </TransitionLayout>
+              </ReplicacheTodoProvider>
             </SidebarProvider>
           </ChangelogProvider>
         </AuthProvider>

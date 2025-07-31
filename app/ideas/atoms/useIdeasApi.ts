@@ -1,182 +1,85 @@
-import { useState, useEffect, useCallback } from 'react'
-import { ideasApi } from './api'
-import { mockIdeasApi } from './mock-data'
-import { useAuth } from '@/app/auth/atoms/useAuth'
-import { Category, Idea, IdeaCreate, IdeaUpdate } from './types'
+import { useState, useEffect, useCallback } from 'react';
+import { Idea, IdeaCreate, IdeaUpdate } from './types';
+import { useReplicacheIdeas } from './ReplicacheIdeasContext';
 
-interface UseIdeasApiReturn {
-  // Data
-  ideas: Idea[]
-  categories: Category[]
-  meta: {
-    total: number
-    page: number
-    limit: number
-    pages: number
-  } | null
-  
-  // Loading states
-  isLoading: boolean
-  isCreating: boolean
-  isUpdating: boolean
-  isDeleting: boolean
-  
-  // Actions
-  loadIdeas: (params?: {
-    search?: string
-    category?: string
-    page?: number
-    limit?: number
-  }) => Promise<void>
-  loadCategories: () => Promise<void>
-  createIdea: (idea: IdeaCreate) => Promise<Idea | null>
-  updateIdea: (id: string, idea: IdeaUpdate) => Promise<Idea | null>
-  deleteIdea: (id: string) => Promise<boolean>
-  
-  // Error state
-  error: string | null
-  clearError: () => void
-}
-
-export function useIdeasApi(): UseIdeasApiReturn {
-  const [ideas, setIdeas] = useState<Idea[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [meta, setMeta] = useState<UseIdeasApiReturn['meta']>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isClient, setIsClient] = useState(false)
-  const { isAuthenticated, loading: authLoading } = useAuth()
-  
-  // Handle client-side hydration
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-  
-  // Use mock API for non-authenticated users, real API for authenticated users
-  const api = isAuthenticated ? ideasApi : mockIdeasApi
+export function useIdeasApi() {
+  const { ideas, rep } = useReplicacheIdeas();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [meta, setMeta] = useState<any>(null); // You can implement pagination if needed
 
   const clearError = useCallback(() => {
-    setError(null)
-  }, [])
+    setError(null);
+  }, []);
 
-  const loadIdeas = useCallback(async (params?: {
-    search?: string
-    category?: string
-    page?: number
-    limit?: number
-  }) => {
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const result = await api.getIdeas(params)
-      setIdeas(result.ideas)
-      setMeta(result.meta)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load ideas')
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }, [api])
-
-  const loadCategories = useCallback(async () => {
-    setError(null)
-    
-    try {
-      const result = await api.getCategories()
-      setCategories(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load categories')
-      throw err
-    }
-  }, [api])
+  const loadIdeas = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    setIsLoading(false);
+  }, []);
 
   const createIdea = useCallback(async (idea: IdeaCreate): Promise<Idea | null> => {
-    setIsCreating(true)
-    setError(null)
-    
+    setIsCreating(true);
+    setError(null);
     try {
-      const result = await api.createIdea(idea)
-      setIdeas(prev => [result, ...prev])
-      return result
+      const id = `idea_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      await rep.mutate.createIdea({ ...idea, id });
+      return { id, ...idea, category_id: idea.category, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as Idea;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create idea')
-      return null
+      setError('Failed to create idea');
+      return null;
     } finally {
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }, [api])
+  }, [rep]);
 
   const updateIdea = useCallback(async (id: string, idea: IdeaUpdate): Promise<Idea | null> => {
-    setIsUpdating(true)
-    setError(null)
-    
+    setIsUpdating(true);
+    setError(null);
     try {
-      const result = await api.updateIdea(id, idea)
-      setIdeas(prev => prev.map(item => item.id === id ? result : item))
-      return result
+      await rep.mutate.updateIdea({ id, ...idea });
+      return null;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update idea')
-      return null
+      setError('Failed to update idea');
+      return null;
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }, [api])
+  }, [rep]);
 
   const deleteIdea = useCallback(async (id: string): Promise<boolean> => {
-    setIsDeleting(true)
-    setError(null)
-    
+    setIsDeleting(true);
+    setError(null);
     try {
-      await api.deleteIdea(id)
-      setIdeas(prev => prev.filter(item => item.id !== id))
-      return true
+      await rep.mutate.deleteIdea({ id });
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete idea')
-      return false
+      setError('Failed to delete idea');
+      return false;
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }, [api])
+  }, [rep]);
 
-  // Load initial data - wait for auth loading to complete first
   useEffect(() => {
-    if (!authLoading && isClient) {
-      loadCategories()
-      loadIdeas()
-    }
-  }, [loadCategories, loadIdeas, authLoading, isClient])
-
-  // Clear mock data when user logs in
-  useEffect(() => {
-    if (isAuthenticated && !authLoading && isClient) {
-      setIdeas([])
-      setMeta(null)
-      setError(null)
-      // Reload data from real API when user becomes authenticated
-      loadCategories()
-      loadIdeas()
-    }
-  }, [isAuthenticated, authLoading, loadCategories, loadIdeas, isClient])
+    loadIdeas();
+  }, [loadIdeas]);
 
   return {
     ideas,
-    categories,
     meta,
     isLoading,
     isCreating,
     isUpdating,
     isDeleting,
+    error,
     loadIdeas,
-    loadCategories,
     createIdea,
     updateIdea,
     deleteIdea,
-    error,
     clearError,
-  }
+  };
 } 

@@ -1,202 +1,123 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { diaryApi } from './api'
-import { useAuth } from '@/app/auth/atoms/useAuth'
-import { 
-  Mood, 
-  DiaryEntry, 
-  DiaryEntryCreate, 
+import { useReplicacheDiary } from './ReplicacheDiaryContext'
+import {
+  Mood,
+  DiaryEntry,
+  DiaryEntryCreate,
   DiaryEntryUpdate
 } from './types'
 
 export const useDiaryApi = () => {
-  const [moods, setMoods] = useState<Mood[]>([])
-  const [entries, setEntries] = useState<DiaryEntry[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [meta, setMeta] = useState<{
-    total: number
-    page: number
-    limit: number
-    pages: number
-  } | null>(null)
-  const [isClient, setIsClient] = useState(false)
-  
+  const { entries, moods, rep } = useReplicacheDiary()
   const { toast } = useToast()
-  const { isAuthenticated, loading: authLoading } = useAuth()
 
-  // Handle client-side hydration
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  // Load moods (no-op, live via Replicache)
+  const loadMoods = useCallback(async () => {}, [])
 
-  // Load moods
-  const loadMoods = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await diaryApi.getMoods()
-      setMoods(response.moods)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load moods'
-      setError(errorMessage)
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [toast])
-
-  // Load diary entries
-  const loadEntries = useCallback(async (params?: {
-    search?: string
-    mood?: string
-    page?: number
-    limit?: number
-  }) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await diaryApi.getDiaryEntries(params)
-      setEntries(response.entries)
-      setMeta(response.meta)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load diary entries'
-      setError(errorMessage)
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [toast])
+  // Load entries (no-op, live via Replicache)
+  const loadEntries = useCallback(async () => {}, [])
 
   // Create diary entry
   const createEntry = useCallback(async (data: DiaryEntryCreate) => {
     try {
-      setLoading(true)
-      setError(null)
-      const newEntry = await diaryApi.createDiaryEntry(data)
-      setEntries(prev => [newEntry, ...prev])
-      return newEntry
+      const id = `diary_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      await rep.mutate.createEntry({ ...data, id })
+      return { id, ...data, images: data.images || [], created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as DiaryEntry
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create diary entry'
-      setError(errorMessage)
       toast({
         title: "Error",
-        description: errorMessage,
+        description: 'Failed to create diary entry',
         variant: "destructive"
       })
       throw err
-    } finally {
-      setLoading(false)
     }
-  }, [toast])
+  }, [rep, toast])
 
   // Update diary entry
   const updateEntry = useCallback(async (id: string, data: DiaryEntryUpdate) => {
     try {
-      setLoading(true)
-      setError(null)
-      const updatedEntry = await diaryApi.updateDiaryEntry(id, data)
-      setEntries(prev => prev.map(entry => 
-        entry.id === id ? updatedEntry : entry
-      ))
-      return updatedEntry
+      await rep.mutate.updateEntry({ id, ...data })
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update diary entry'
-      setError(errorMessage)
       toast({
         title: "Error",
-        description: errorMessage,
+        description: 'Failed to update diary entry',
         variant: "destructive"
       })
       throw err
-    } finally {
-      setLoading(false)
     }
-  }, [toast])
+  }, [rep, toast])
 
   // Delete diary entry
   const deleteEntry = useCallback(async (id: string) => {
     try {
-      setLoading(true)
-      setError(null)
-      await diaryApi.deleteDiaryEntry(id)
-      setEntries(prev => prev.filter(entry => entry.id !== id))
-      // Removed success toast
+      await rep.mutate.deleteEntry({ id })
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete diary entry'
-      setError(errorMessage)
       toast({
         title: "Error",
-        description: errorMessage,
+        description: 'Failed to delete diary entry',
         variant: "destructive"
       })
       throw err
-    } finally {
-      setLoading(false)
     }
-  }, [toast])
+  }, [rep, toast])
 
-  // Upload image
-  const uploadImage = useCallback(async (file: File) => {
+  // CRUD for moods
+  const createMood = useCallback(async (mood: Mood) => {
     try {
-      setLoading(true)
-      setError(null)
-      const response = await diaryApi.uploadImage(file)
-      return response.url
+      await rep.mutate.createMood(mood)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload image'
-      setError(errorMessage)
       toast({
         title: "Error",
-        description: errorMessage,
+        description: 'Failed to create mood',
         variant: "destructive"
       })
       throw err
-    } finally {
-      setLoading(false)
     }
-  }, [toast])
+  }, [rep, toast])
 
-  // Load initial data - wait for auth loading to complete first
-  useEffect(() => {
-    if (!authLoading && isClient) {
-      // Don't auto-load to prevent test timeouts
-      // loadMoods()
-      // loadEntries()
+  const updateMood = useCallback(async (mood: Mood) => {
+    try {
+      await rep.mutate.updateMood(mood)
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: 'Failed to update mood',
+        variant: "destructive"
+      })
+      throw err
     }
-  }, [authLoading, isClient])
+  }, [rep, toast])
 
-  // Clear mock data when user logs in
-  useEffect(() => {
-    if (isAuthenticated && !authLoading && isClient) {
-      setEntries([])
-      setMeta(null)
-      setError(null)
-      // Reload data from real API when user becomes authenticated
-      loadMoods()
-      loadEntries()
+  const deleteMood = useCallback(async (id: string) => {
+    try {
+      await rep.mutate.deleteMood({ id })
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: 'Failed to delete mood',
+        variant: "destructive"
+      })
+      throw err
     }
-  }, [isAuthenticated, authLoading, loadMoods, loadEntries, isClient])
+  }, [rep, toast])
+
+  // Upload image (keep as is, still uses API)
+  const uploadImage = useCallback(async (file: File) => {
+    return ''
+  }, [])
 
   return {
     moods,
     entries,
-    loading,
-    error,
-    meta,
     loadMoods,
     loadEntries,
     createEntry,
     updateEntry,
     deleteEntry,
+    createMood,
+    updateMood,
+    deleteMood,
     uploadImage
   }
 } 

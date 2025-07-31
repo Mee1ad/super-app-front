@@ -14,6 +14,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { usePageTransition } from '../atoms/usePageTransition'
 
 import { diaryApi } from '../atoms/api'
+import { useDiaryApi } from '../atoms/useDiaryApi'
 
 interface DiaryEntryFormProps {
   mode: 'create' | 'edit'
@@ -55,6 +56,8 @@ export function DiaryEntryForm({
     content?: string
     mood?: string
   }>({})
+
+  const { createEntry } = useDiaryApi()
 
   // Reset form when entry changes (for edit mode)
   useEffect(() => {
@@ -288,7 +291,7 @@ export function DiaryEntryForm({
           images,
           date: selectedDate.toISOString().split('T')[0],
         }
-        await diaryApi.createDiaryEntry(entryData)
+        await createEntry(entryData)
         navigateWithAnimation('/diary')
       } else if (mode === 'edit' && entry && onUpdate) {
         const updateData: DiaryEntryUpdate = {

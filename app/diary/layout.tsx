@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
+import { ReplicacheDiaryProvider } from './atoms/ReplicacheDiaryContext'
 
 export default function DiaryLayout({
   children,
@@ -22,43 +23,45 @@ export default function DiaryLayout({
   }, [pathname])
 
   return (
-    <div className="w-full scrollbar-hide">
-      {isNewDiaryPage || isEditPage ? (
-        // No animation for new diary page and edit pages to prevent loading issues
-        <div className="w-full">
-          {children}
-        </div>
-      ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={pathname}
-            initial={
-              isMainDiaryPage
-                ? { opacity: 0 } 
-                : { x: '100%' }
-            }
-            animate={
-              isMainDiaryPage
-                ? { opacity: 1 } 
-                : { x: 0 }
-            }
-            exit={
-              isMainDiaryPage
-                ? { opacity: 0 } 
-                : { x: '-100%' }
-            }
-            transition={{ 
-              type: "spring", 
-              damping: 25, 
-              stiffness: 300,
-              duration: 0.3
-            }}
-            className="w-full"
-          >
+    <ReplicacheDiaryProvider>
+      <div className="w-full scrollbar-hide">
+        {isNewDiaryPage || isEditPage ? (
+          // No animation for new diary page and edit pages to prevent loading issues
+          <div className="w-full">
             {children}
-          </motion.div>
-        </AnimatePresence>
-      )}
-    </div>
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={
+                isMainDiaryPage
+                  ? { opacity: 0 } 
+                  : { x: '100%' }
+              }
+              animate={
+                isMainDiaryPage
+                  ? { opacity: 1 } 
+                  : { x: 0 }
+              }
+              exit={
+                isMainDiaryPage
+                  ? { opacity: 0 } 
+                  : { x: '-100%' }
+              }
+              transition={{ 
+                type: "spring", 
+                damping: 25, 
+                stiffness: 300,
+                duration: 0.3
+              }}
+              className="w-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        )}
+      </div>
+    </ReplicacheDiaryProvider>
   )
 } 

@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Plus, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMobileKeyboardFocusWithBackGesture } from "@/hooks/use-mobile-keyboard-focus";
-import { motion } from "framer-motion";
 
 export type AddNewItemProps = {
   type: "task" | "shopping";
@@ -385,7 +384,7 @@ export function AddNewItem({ type, onCreate, onUpdate, onCancel, editItem }: Add
 
       {/* Floating Action Button - Only show when not editing and not showing input */}
       {!isEditing && !showInput && (
-        <motion.button
+        <button
           type="button"
           onClick={() => setShowInput(true)}
           className={cn(
@@ -393,21 +392,9 @@ export function AddNewItem({ type, onCreate, onUpdate, onCancel, editItem }: Add
             "flex items-center justify-center"
           )}
           aria-label={`Add ${type === 'task' ? 'task' : 'shopping item'}`}
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ 
-            duration: 0.4, 
-            ease: "easeOut",
-            delay: 0.2,
-            type: "spring", 
-            damping: 25, 
-            stiffness: 300
-          }}
         >
           <Plus className="w-6 h-6" />
-        </motion.button>
+        </button>
       )}
     </>
   );

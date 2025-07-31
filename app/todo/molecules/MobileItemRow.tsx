@@ -10,7 +10,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { motion } from "framer-motion";
 
 interface MobileItemRowProps {
   item: TaskItemProps | ShoppingItemProps;
@@ -75,12 +74,11 @@ export function MobileItemRow({
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <motion.div
+        <div
           className={cn(
             "flex items-center gap-4 py-3 bg-white border-b border-gray-100 w-full",
             isLast && "rounded-b-lg"
           )}
-          whileTap={{ scale: 0.98 }}
           onClick={(e) => {
             // Don't trigger edit if clicking on checkbox or price area
             const target = e.target as HTMLElement;
@@ -136,9 +134,8 @@ export function MobileItemRow({
             <div className="flex items-center gap-2">
               {type === "shopping" && (item as ShoppingItemProps).price && (
                 <div className="text-right">
-                  <motion.p 
+                  <p
                     className={`text-lg font-semibold ${isChecked ? 'line-through text-gray-400' : 'text-gray-900'} cursor-pointer`}
-                    whileTap={{ scale: 0.95 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (onEdit) {
@@ -147,11 +144,11 @@ export function MobileItemRow({
                     }}
                   >
                     {(item as ShoppingItemProps).price}
-                  </motion.p>
+                  </p>
                 </div>
               )}
             </div>
-        </motion.div>
+        </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="p-2">
         <ContextMenuItem onClick={handleEdit}>
