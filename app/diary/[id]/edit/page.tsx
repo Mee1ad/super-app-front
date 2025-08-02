@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import { DiaryEntryForm } from '../../organisms/DiaryEntryForm'
-import { DiaryEntryUpdate } from '../../atoms/types'
+import { DiaryEntryUpdate, DiaryEntry } from '../../atoms/types'
 import { usePageTransition } from '../../atoms/usePageTransition'
 import { useReplicacheDiary } from '../../atoms/ReplicacheDiaryContext'
 
@@ -15,7 +15,7 @@ export default function EditDiaryPage() {
   const entryId = params.id as string
   const { moods, entries, rep } = useReplicacheDiary()
 
-  const [entry, setEntry] = useState(null)
+  const [entry, setEntry] = useState<DiaryEntry | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)

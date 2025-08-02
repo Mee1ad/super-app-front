@@ -4,6 +4,7 @@ export interface Mood {
   emoji: string
   color: string
   created_at: string
+  [key: string]: any
 }
 
 export interface DiaryEntry {
@@ -15,6 +16,7 @@ export interface DiaryEntry {
   images: string[]
   created_at: string
   updated_at: string
+  [key: string]: any
 }
 
 export interface DiaryEntryCreate {

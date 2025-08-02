@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
       headers['authorization'] = authHeader
     }
 
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
     // Forward the request to the backend
-    const backendResponse = await fetch('http://localhost:8000/api/v1/food-entries/upload', {
+    const backendResponse = await fetch(`${API_BASE_URL}/food-entries/upload`, {
       method: 'POST',
       headers,
       body: backendFormData

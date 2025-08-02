@@ -24,8 +24,9 @@ describe('diaryApi', () => {
         json: async () => mockResponse
       })
       const result = await diaryApi.getMoods()
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/moods', { headers: { 'Content-Type': 'application/json' } })
+      expect(fetch).toHaveBeenCalledWith(`${API_BASE_URL}/moods`, { headers: { 'Content-Type': 'application/json' } })
     })
   })
 
@@ -106,8 +107,9 @@ describe('diaryApi', () => {
         json: async () => mockResponse
       })
       const result = await diaryApi.getDiaryEntries({ search: 'great' })
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/diary-entries?search=great', { headers: { 'Content-Type': 'application/json' } })
+      expect(fetch).toHaveBeenCalledWith(`${API_BASE_URL}/diary-entries?search=great`, { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should filter entries by mood', async () => {
@@ -180,8 +182,9 @@ describe('diaryApi', () => {
       })
 
       const result = await diaryApi.getDiaryEntries({ page: 1, limit: 1 })
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/v1/diary-entries?page=1&limit=1', { headers: { 'Content-Type': 'application/json' } })
+      expect(fetch).toHaveBeenCalledWith(`${API_BASE_URL}/diary-entries?page=1&limit=1`, { headers: { 'Content-Type': 'application/json' } })
     })
 
     it('should respect maximum limit', async () => {

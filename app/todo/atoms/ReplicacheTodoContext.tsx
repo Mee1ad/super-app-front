@@ -13,8 +13,7 @@ import {
   ShoppingItemUpdate,
   Variant,
 } from "./types";
-
-// Flat Replicache keys: list/{id}, task/{id}, item/{id}
+import { getAccessToken } from "@/lib/auth-token";
 
 interface ReplicacheTodoMutators extends MutatorDefs {
   createList: (tx: WriteTransaction, args: ListCreate & { id: string }) => Promise<void>;
@@ -30,159 +29,221 @@ interface ReplicacheTodoMutators extends MutatorDefs {
   reorderItems: (tx: WriteTransaction, args: { list_id: string; item_ids: string[] }) => Promise<void>;
 }
 
-const rep = new Replicache<ReplicacheTodoMutators>({
-  name: "todo-replicache-flat",
-  mutators: {
-    createList: async (tx, { id, ...data }) => {
-      const now = new Date().toISOString();
-      await tx.set(`list/${id}`, {
-        id,
-        ...data,
-        created_at: now,
-        updated_at: now,
-      });
-    },
-    updateList: async (tx, { id, ...data }) => {
-      const list = await tx.get<ListResponse>(`list/${id}`);
-      if (!list) return;
-      await tx.set(`list/${id}`, {
-        ...list,
-        ...data,
-        updated_at: new Date().toISOString(),
-      });
-    },
-    deleteList: async (tx, { id }) => {
-      await tx.del(`list/${id}`);
-      // Optionally, delete all tasks/items for this list
-      for await (const [k] of tx.scan({ prefix: "task/" })) {
-        const task = await tx.get<TaskResponse>(k);
-        if (task?.list_id === id) await tx.del(k);
-      }
-      for await (const [k] of tx.scan({ prefix: "item/" })) {
-        const item = await tx.get<ShoppingItemResponse>(k);
-        if (item?.list_id === id) await tx.del(k);
-      }
-    },
-    createTask: async (tx, { id, list_id, ...data }) => {
-      const now = new Date().toISOString();
-      await tx.set(`task/${id}`, {
-        id,
-        list_id,
-        ...data,
-        created_at: now,
-        updated_at: now,
-      });
-    },
-    updateTask: async (tx, { id, ...data }) => {
-      const task = await tx.get<TaskResponse>(`task/${id}`);
-      if (!task) return;
-      await tx.set(`task/${id}`, {
-        ...task,
-        ...data,
-        updated_at: new Date().toISOString(),
-      });
-    },
-    deleteTask: async (tx, { id }) => {
-      await tx.del(`task/${id}`);
-    },
-    createItem: async (tx, { id, list_id, ...data }) => {
-      const now = new Date().toISOString();
-      await tx.set(`item/${id}`, {
-        id,
-        list_id,
-        ...data,
-        created_at: now,
-        updated_at: now,
-      });
-    },
-    updateItem: async (tx, { id, ...data }) => {
-      const item = await tx.get<ShoppingItemResponse>(`item/${id}`);
-      if (!item) return;
-      await tx.set(`item/${id}`, {
-        ...item,
-        ...data,
-        updated_at: new Date().toISOString(),
-      });
-    },
-    deleteItem: async (tx, { id }) => {
-      await tx.del(`item/${id}`);
-    },
-    reorderTasks: async (tx, { list_id, task_ids }) => {
-      for (let i = 0; i < task_ids.length; i++) {
-        const id = task_ids[i];
-        const task = await tx.get<TaskResponse>(`task/${id}`);
-        if (task && task.list_id === list_id) {
-          await tx.set(`task/${id}`, { ...task, position: i });
-        }
-      }
-    },
-    reorderItems: async (tx, { list_id, item_ids }) => {
-      for (let i = 0; i < item_ids.length; i++) {
-        const id = item_ids[i];
-        const item = await tx.get<ShoppingItemResponse>(`item/${id}`);
-        if (item && item.list_id === list_id) {
-          await tx.set(`item/${id}`, { ...item, position: i });
-        }
-      }
-    },
-  },
-});
-
-// Context
 interface ReplicacheTodoContextValue {
   lists: ListResponse[];
   tasks: TaskResponse[];
   items: ShoppingItemResponse[];
-  rep: typeof rep;
+  rep: Replicache<ReplicacheTodoMutators> | null;
+  mutateWithPoke: <K extends keyof ReplicacheTodoMutators>(mutator: K, ...args: Parameters<ReplicacheTodoMutators[K]>) => Promise<any>;
 }
 
 const ReplicacheTodoContext = createContext<ReplicacheTodoContextValue | null>(null);
 
 export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
+  const [rep, setRep] = useState<Replicache<ReplicacheTodoMutators> | null>(null);
   const [lists, setLists] = useState<ListResponse[]>([]);
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
   const [items, setItems] = useState<ShoppingItemResponse[]>([]);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+
+  useEffect(() => {
+    if (!rep && typeof window !== "undefined") {
+
+      const r = new Replicache<ReplicacheTodoMutators>({
+        name: "todo-replicache-flat",
+        mutators: {
+          createList: async (tx, { id, ...data }) => {
+            const now = new Date().toISOString();
+            // @ts-ignore
+            await tx.set(`list/${id}`, {
+              id,
+              ...data,
+              created_at: now,
+              updated_at: now,
+            });
+          },
+          updateList: async (tx, { id, ...data }) => {
+            // @ts-ignore
+            const list = await tx.get(`list/${id}`);
+            if (!list) return;
+            // @ts-ignore
+            await tx.set(`list/${id}`, {
+              ...list,
+              ...data,
+              updated_at: new Date().toISOString(),
+            });
+          },
+          deleteList: async (tx, { id }) => {
+            await tx.del(`list/${id}`);
+            // Optionally, delete all tasks/items for this list
+            for await (const [k] of tx.scan({ prefix: "task/" })) {
+              // @ts-ignore
+              const task = await tx.get(k);
+              if (task?.list_id === id) await tx.del(k);
+            }
+            for await (const [k] of tx.scan({ prefix: "item/" })) {
+              // @ts-ignore
+              const item = await tx.get(k);
+              if (item?.list_id === id) await tx.del(k);
+            }
+          },
+          createTask: async (tx, { id, list_id, ...data }) => {
+            const now = new Date().toISOString();
+            // @ts-ignore
+            await tx.set(`task/${id}`, {
+              id,
+              list_id,
+              ...data,
+              created_at: now,
+              updated_at: now,
+            });
+          },
+          updateTask: async (tx, { id, ...data }) => {
+            // @ts-ignore
+            const task = await tx.get(`task/${id}`);
+            if (!task) return;
+            // @ts-ignore
+            await tx.set(`task/${id}`, {
+              ...task,
+              ...data,
+              updated_at: new Date().toISOString(),
+            });
+          },
+          deleteTask: async (tx, { id }) => {
+            await tx.del(`task/${id}`);
+          },
+          createItem: async (tx, { id, list_id, ...data }) => {
+            const now = new Date().toISOString();
+            // @ts-ignore
+            await tx.set(`item/${id}`, {
+              id,
+              list_id,
+              ...data,
+              created_at: now,
+              updated_at: now,
+            });
+          },
+          updateItem: async (tx, { id, ...data }) => {
+            // @ts-ignore
+            const item = await tx.get(`item/${id}`);
+            if (!item) return;
+            // @ts-ignore
+            await tx.set(`item/${id}`, {
+              ...item,
+              ...data,
+              updated_at: new Date().toISOString(),
+            });
+          },
+          deleteItem: async (tx, { id }) => {
+            await tx.del(`item/${id}`);
+          },
+          reorderTasks: async (tx, { list_id, task_ids }) => {
+            for (let i = 0; i < task_ids.length; i++) {
+              const id = task_ids[i];
+              // @ts-ignore
+              const task = await tx.get(`task/${id}`);
+              if (task && task.list_id === list_id) {
+                // @ts-ignore
+                await tx.set(`task/${id}`, { ...task, position: i });
+              }
+            }
+          },
+          reorderItems: async (tx, { list_id, item_ids }) => {
+            for (let i = 0; i < item_ids.length; i++) {
+              const id = item_ids[i];
+              // @ts-ignore
+              const item = await tx.get(`item/${id}`);
+              if (item && item.list_id === list_id) {
+                // @ts-ignore
+                await tx.set(`item/${id}`, { ...item, position: i });
+              }
+            }
+          },
+        },
+        pushURL: `/api/replicache/push`,
+        pullURL: `/api/replicache/pull`,
+        auth: localStorage.getItem('auth_access_token') || '',
+      });
+      setRep(r);
+    }
+  }, [rep]);
+
+  // --- Helper: call mutation and then poke ---
+  const mutateWithPoke = async <K extends keyof ReplicacheTodoMutators>(
+    mutator: K,
+    ...args: Parameters<ReplicacheTodoMutators[K]>
+  ) => {
+    if (!rep) throw new Error("Replicache not initialized");
+    // @ts-ignore
+    const result = await rep.mutate[mutator](...args);
+    fetch(`/api/replicache/poke`, { method: 'POST' });
+    return result;
+  };
 
   useEffect(() => {
     let stop = false;
-    const unsubLists = rep.subscribe(
-      async tx => {
-        const arr = await tx.scan({ prefix: "list/" }).values().toArray();
-        return arr as ListResponse[];
-      },
-      { onData: data => { if (!stop) setLists(data); } }
-    );
-    const unsubTasks = rep.subscribe(
-      async tx => {
-        const arr = await tx.scan({ prefix: "task/" }).values().toArray();
-        return arr as TaskResponse[];
-      },
-      { onData: data => { if (!stop) setTasks(data); } }
-    );
-    const unsubItems = rep.subscribe(
-      async tx => {
-        const arr = await tx.scan({ prefix: "item/" }).values().toArray();
-        return arr as ShoppingItemResponse[];
-      },
-      { onData: data => { if (!stop) setItems(data); } }
-    );
+    let unsubLists: (() => void) | undefined;
+    let unsubTasks: (() => void) | undefined;
+    let unsubItems: (() => void) | undefined;
+    
+    if (rep) {
+      unsubLists = rep.subscribe(
+        async tx => {
+          const arr = await tx.scan({ prefix: "list/" }).values().toArray();
+          return arr as unknown as ListResponse[];
+        },
+        { onData: data => { if (!stop) setLists(data); } }
+      );
+      unsubTasks = rep.subscribe(
+        async tx => {
+          const arr = await tx.scan({ prefix: "task/" }).values().toArray();
+          return arr as unknown as TaskResponse[];
+        },
+        { onData: data => { if (!stop) setTasks(data); } }
+      );
+      unsubItems = rep.subscribe(
+        async tx => {
+          const arr = await tx.scan({ prefix: "item/" }).values().toArray();
+          return arr as unknown as ShoppingItemResponse[];
+        },
+        { onData: data => { if (!stop) setItems(data); } }
+      );
+    }
+    
     return () => {
       stop = true;
-      unsubLists();
-      unsubTasks();
-      unsubItems();
+      if (unsubLists) unsubLists();
+      if (unsubTasks) unsubTasks();
+      if (unsubItems) unsubItems();
     };
-  }, []);
+  }, [rep]);
+
+  // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && rep) {
+      const es = new window.EventSource('/api/replicache/stream');
+      es.onmessage = () => {
+        rep.pull();
+      };
+      return () => {
+        es.close();
+      };
+    }
+  }, [rep]);
+
+  if (!rep) return null;
 
   return (
-    <ReplicacheTodoContext.Provider value={{ lists, tasks, items, rep }}>
+    <ReplicacheTodoContext.Provider value={{ lists, tasks, items, rep, mutateWithPoke }}>
       {children}
     </ReplicacheTodoContext.Provider>
   );
 }
 
 export function useReplicacheTodo() {
-  const ctx = useContext(ReplicacheTodoContext);
-  if (!ctx) throw new Error("useReplicacheTodo must be used within ReplicacheTodoProvider");
-  return ctx;
+  const context = useContext(ReplicacheTodoContext);
+  if (!context) {
+    throw new Error('useReplicacheTodo must be used within a ReplicacheTodoProvider');
+  }
+  return context;
 }

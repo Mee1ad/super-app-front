@@ -73,7 +73,7 @@ describe('useAuth', () => {
     mockAuthApi.getGoogleAuthUrl.mockResolvedValue({ 
       auth_url: mockAuthUrl,
       client_id: 'test-client-id',
-      redirect_uri: 'http://localhost:8000/api/v1/auth/google/callback'
+      redirect_uri: `${API_BASE_URL}/auth/google/callback`
     })
 
     const { result } = renderHook(() => useAuth())

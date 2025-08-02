@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { Replicache, MutatorDefs, WriteTransaction } from "replicache";
 import { DiaryEntry, DiaryEntryCreate, DiaryEntryUpdate, Mood } from "./types";
 import { mockMoods } from '@/app/api/diary/mock-data';
+import { getAccessToken } from "@/lib/auth-token";
 
 interface ReplicacheDiaryMutators extends MutatorDefs {
   createEntry: (tx: WriteTransaction, args: DiaryEntryCreate & { id: string }) => Promise<void>;
@@ -17,6 +18,7 @@ interface ReplicacheDiaryContextValue {
   entries: DiaryEntry[];
   moods: Mood[];
   rep: Replicache<ReplicacheDiaryMutators>;
+  mutateWithPoke: <K extends keyof ReplicacheDiaryMutators>(mutator: K, ...args: Parameters<ReplicacheDiaryMutators[K]>) => Promise<any>;
 }
 
 const ReplicacheDiaryContext = createContext<ReplicacheDiaryContextValue | null>(null);
@@ -25,9 +27,25 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   const [rep, setRep] = useState<Replicache<ReplicacheDiaryMutators> | null>(null);
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+
+  // --- Helper: call mutation and then poke ---
+  const mutateWithPoke = async <K extends keyof ReplicacheDiaryMutators>(
+    mutator: K,
+    ...args: Parameters<ReplicacheDiaryMutators[K]>
+  ) => {
+    if (!rep) throw new Error('Replicache not initialized');
+    // @ts-ignore
+    const result = await rep.mutate[mutator](...args);
+    const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
+    fetch(`${BASE_API_URL}/api/poke`, { method: 'POST' });
+    return result;
+  };
 
   useEffect(() => {
     if (!rep && typeof window !== 'undefined') {
+      const pushURL = `/api/replicache/push`;
+      const pullURL = `/api/replicache/pull`;
       const r = new Replicache<ReplicacheDiaryMutators>({
         name: "diary-replicache",
         mutators: {
@@ -49,7 +67,7 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
             if (!entry) return;
             await tx.set(`diary/${id}`, {
               ...entry,
-              ...data,
+              ...data as any,
               updated_at: new Date().toISOString(),
             });
           },
@@ -66,8 +84,30 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
             await tx.del(`mood/${id}`);
           },
         },
+        pushURL,
+        pullURL,
+        auth: localStorage.getItem('auth_access_token') || '',
       });
       setRep(r);
+    }
+  }, [rep]);
+
+  useEffect(() => {
+    if (!rep) return;
+    // Note: Replicache v15+ uses different event handling
+    // These properties may not exist in the current version
+  }, [rep]);
+
+  // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && rep) {
+      const es = new window.EventSource('/api/replicache/stream');
+      es.onmessage = () => {
+        rep.pull();
+      };
+      return () => {
+        es.close();
+      };
     }
   }, [rep]);
 
@@ -93,14 +133,14 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     const unsubEntries = rep.subscribe(
       async tx => {
         const arr = await tx.scan({ prefix: "diary/" }).values().toArray();
-        return arr as DiaryEntry[];
+        return arr as unknown as DiaryEntry[];
       },
       { onData: data => { if (!stop) setEntries(data); } }
     );
     const unsubMoods = rep.subscribe(
       async tx => {
         const arr = await tx.scan({ prefix: "mood/" }).values().toArray();
-        return arr as Mood[];
+        return arr as unknown as Mood[];
       },
       { onData: data => { if (!stop) setMoods(data); } }
     );
@@ -114,7 +154,7 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   if (!rep) return null;
 
   return (
-    <ReplicacheDiaryContext.Provider value={{ entries, moods, rep }}>
+    <ReplicacheDiaryContext.Provider value={{ entries, moods, rep, mutateWithPoke }}>
       {children}
     </ReplicacheDiaryContext.Provider>
   );

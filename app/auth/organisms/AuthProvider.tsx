@@ -4,6 +4,7 @@ import { createContext, useContext, ReactNode, useEffect } from 'react'
 import { useAuth } from '../atoms/useAuth'
 import { AuthState } from '../atoms/types'
 
+
 interface AuthContextType extends AuthState {
   getGoogleAuthUrl: () => Promise<string>
   loginWithGoogle: (code: string) => Promise<import('../atoms/types').GoogleLoginResponse>

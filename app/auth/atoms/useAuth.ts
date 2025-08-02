@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast'
 import { authApi } from './api'
 import { AuthState, GoogleLoginResponse } from './types'
 import { hasPermission, hasRole, setupTokenExpiration, logout as logoutUser, checkAndClearExpiredTokens, clearAuthData } from '@/lib/permissions'
+import { clearAuthTokenCookie } from '@/lib/auth-token'
 
 // Storage keys matching backend documentation
 const STORAGE_KEYS = {
@@ -24,6 +25,9 @@ export function useAuth() {
 
   // Load auth state from localStorage on mount
   useEffect(() => {
+    // Clear any existing auth token cookie (cleanup)
+    clearAuthTokenCookie()
+    
     const loadAuthState = () => {
       try {
         // First, check and clear any expired tokens
@@ -37,6 +41,7 @@ export function useAuth() {
           const user = JSON.parse(userStr)
           console.log('Loaded user from storage:', user) // Debug log
           console.log('Setting auth state with user:', user) // Debug log
+          
           setAuthState({
             isAuthenticated: true,
             user,
@@ -82,11 +87,14 @@ export function useAuth() {
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, response.tokens.access_token)
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, response.tokens.refresh_token)
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.user))
+    
+    console.log('🔐 Auth token saved')
   }, [])
 
   // Clear auth state from localStorage
   const clearAuthState = useCallback(() => {
     clearAuthData()
+    clearAuthTokenCookie()
   }, [])
 
   // Get Google OAuth URL

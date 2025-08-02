@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Replicache, MutatorDefs, WriteTransaction } from "replicache";
+import { getAccessToken } from "@/lib/auth-token";
 
 // Types
 export type Todo = {
@@ -18,29 +19,41 @@ interface TodoMutators extends MutatorDefs {
   deleteTodo: (tx: WriteTransaction, args: DeleteTodoArgs) => Promise<void>;
 }
 
-// Replicache instance (singleton)
-const rep = new Replicache<TodoMutators>({
-  name: "test-replicache-todo",
-  mutators: {
-    addTodo: async (tx, { id, text }) => {
-      await tx.set(id, { text });
-    },
-    updateTodo: async (tx, { id, text }) => {
-      await tx.set(id, { text });
-    },
-    deleteTodo: async (tx, { id }) => {
-      await tx.del(id);
-    },
-  },
-});
-
-// Context
-const ReplicacheTodosContext = createContext<{
+interface ReplicacheTodosContextValue {
   todos: Todo[];
-  rep: typeof rep;
-} | null>(null);
+  rep: Replicache<TodoMutators> | null;
+  mutateWithPoke: <K extends keyof TodoMutators>(mutator: K, ...args: Parameters<TodoMutators[K]>) => Promise<any>;
+}
+
+const ReplicacheTodosContext = createContext<ReplicacheTodosContextValue | null>(null);
 
 export function ReplicacheTodosProvider({ children }: { children: ReactNode }) {
+  const [rep, setRep] = useState<Replicache<TodoMutators> | null>(null);
+  useEffect(() => {
+    if (!rep && typeof window !== "undefined") {
+      const pushURL = `/api/replicache/push`;
+      const pullURL = `/api/replicache/pull`;
+      const r = new Replicache<TodoMutators>({
+        name: "test-replicache-todo",
+        mutators: {
+          addTodo: async (tx, { id, text }) => {
+            await tx.set(id, { text });
+          },
+          updateTodo: async (tx, { id, text }) => {
+            await tx.set(id, { text });
+          },
+          deleteTodo: async (tx, { id }) => {
+            await tx.del(id);
+          },
+        },
+        pushURL,
+        pullURL,
+        auth: localStorage.getItem('auth_access_token') || '',
+      });
+      setRep(r);
+    }
+  }, [rep]);
+
   const [todos, setTodos] = useState<Todo[]>(() => {
     try {
       return JSON.parse(localStorage.getItem("lastTodos") ?? "[]");
@@ -48,30 +61,65 @@ export function ReplicacheTodosProvider({ children }: { children: ReactNode }) {
       return [];
     }
   });
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+
+  // --- Helper: call mutation and then poke ---
+  const mutateWithPoke = async <K extends keyof TodoMutators>(
+    mutator: K,
+    ...args: Parameters<TodoMutators[K]>
+  ) => {
+    if (!rep) throw new Error("Replicache not initialized");
+    // @ts-ignore
+    const result = await rep.mutate[mutator](...args);
+    fetch(`/api/replicache/poke`, { method: 'POST' });
+    return result;
+  };
+
+  useEffect(() => {
+    if (rep) {
+      // Note: Replicache v15+ uses different event handling
+      // These properties may not exist in the current version
+    }
+  }, [rep]);
 
   useEffect(() => {
     let stop = false;
     let unsub: (() => void) | undefined;
-    unsub = rep.subscribe(
-      async tx => {
-        const list = await tx.scan({ prefix: "todo/" }).entries().toArray();
-        return list.map(([k, v]) => ({ id: k as string, ...(v as { text: string }) }));
-      },
-      {
-        onData: (data: Todo[]) => {
-          if (!stop) setTodos(data);
-          localStorage.setItem("lastTodos", JSON.stringify(data));
+    if (rep) {
+      unsub = rep.subscribe(
+        async tx => {
+          const list = await tx.scan({ prefix: "todo/" }).entries().toArray();
+          return list.map(([k, v]) => ({ id: k as string, ...(v as { text: string }) }));
         },
-      }
-    );
+        {
+          onData: (data: Todo[]) => {
+            if (!stop) setTodos(data);
+            localStorage.setItem("lastTodos", JSON.stringify(data));
+          },
+        }
+      );
+    }
     return () => {
       stop = true;
       if (unsub) unsub();
     };
-  }, []);
+  }, [rep]);
+
+  // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && rep) {
+      const es = new window.EventSource('/api/replicache/stream');
+      es.onmessage = () => {
+        rep.pull();
+      };
+      return () => {
+        es.close();
+      };
+    }
+  }, [rep]);
 
   return (
-    <ReplicacheTodosContext.Provider value={{ todos, rep }}>
+    <ReplicacheTodosContext.Provider value={{ todos, rep, mutateWithPoke }}>
       {children}
     </ReplicacheTodosContext.Provider>
   );
