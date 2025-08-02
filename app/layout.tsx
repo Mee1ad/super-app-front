@@ -4,7 +4,6 @@ import { Vazirmatn } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "./shared/organisms/Sidebar";
 import { SidebarProvider } from "./shared/organisms/SidebarContext";
-import { ChangelogProvider } from "@/app/shared/organisms/ChangelogProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./auth/organisms/AuthProvider";
 import { DemoBanner } from "@/components/ui/demo-banner";
@@ -43,19 +42,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${vazirmatn.variable} antialiased`}
       >
         <AuthProvider>
-          <ChangelogProvider>
-            <SidebarProvider>
-              <DemoBanner />
-              <Sidebar />
-              <ReplicacheTodoProvider>
-                <TransitionLayout>
-                  <main className="md:pt-0 md:ml-64 transition-all duration-300">
-                    {children}
-                  </main>
-                </TransitionLayout>
-              </ReplicacheTodoProvider>
-            </SidebarProvider>
-          </ChangelogProvider>
+          <SidebarProvider>
+            <DemoBanner />
+            <Sidebar />
+            <ReplicacheTodoProvider>
+              <TransitionLayout>
+                <main className="md:pt-0 md:ml-64 transition-all duration-300">
+                  {children}
+                </main>
+              </TransitionLayout>
+            </ReplicacheTodoProvider>
+          </SidebarProvider>
         </AuthProvider>
         <Toaster />
       </body>
