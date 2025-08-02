@@ -4,10 +4,12 @@ import { ReplicacheFoodProvider } from '../atoms/ReplicacheFoodContext';
 import { useFoodApi } from '../atoms/useFoodApi';
 import { NewFoodEntry } from '../molecules/NewFoodEntry';
 import { Plus, Trash2, Edit } from 'lucide-react';
+import { FoodTrackerHeader } from './FoodTrackerHeader';
 
 export default function FoodTrackerPage() {
   return (
     <ReplicacheFoodProvider>
+      <FoodTrackerHeader onMenu={() => {}} />
       <FoodTrackerPageInner />
     </ReplicacheFoodProvider>
   );
