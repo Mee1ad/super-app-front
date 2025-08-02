@@ -160,9 +160,9 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
             }
           },
         },
-        pushURL: `/api/replicache/push`,
-        pullURL: `/api/replicache/pull`,
-        auth: localStorage.getItem('auth_access_token') || '',
+        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
+        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
+        auth: localStorage.getItem('auth_access_token') ? `Bearer ${localStorage.getItem('auth_access_token')}` : '',
       });
       setRep(r);
     }

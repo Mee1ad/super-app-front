@@ -31,8 +31,8 @@ export function ReplicacheTodosProvider({ children }: { children: ReactNode }) {
   const [rep, setRep] = useState<Replicache<TodoMutators> | null>(null);
   useEffect(() => {
     if (!rep && typeof window !== "undefined") {
-      const pushURL = `/api/replicache/push`;
-      const pullURL = `/api/replicache/pull`;
+      const pushURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`;
+      const pullURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`;
       const r = new Replicache<TodoMutators>({
         name: "test-replicache-todo",
         mutators: {
@@ -48,7 +48,7 @@ export function ReplicacheTodosProvider({ children }: { children: ReactNode }) {
         },
         pushURL,
         pullURL,
-        auth: localStorage.getItem('auth_access_token') || '',
+        auth: localStorage.getItem('auth_access_token') ? `Bearer ${localStorage.getItem('auth_access_token')}` : '',
       });
       setRep(r);
     }
