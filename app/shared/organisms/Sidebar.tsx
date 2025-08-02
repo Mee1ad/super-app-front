@@ -31,7 +31,6 @@ const navItems: NavItem[] = [
   { label: "Food Tracker", icon: Utensils, href: "/food-tracker" },
   { label: "Ideas", icon: Lightbulb, href: "/ideas" },
   { label: "Diary", icon: Notebook, href: "/diary" },
-  { label: "Habit", icon: CheckSquare, href: "/habit" },
   { label: "Changelog", icon: GitCommit, href: "/changelog", requiresPermission: PERMISSIONS.CHANGELOG_VIEW },
 ];
 

@@ -61,18 +61,6 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-
-            <Link href="/habit">
-              <div className="group p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700">
-                <div className="flex flex-col items-center text-center">
-                  <Heart className="h-8 w-8 md:h-12 md:w-12 text-red-500 mb-3 md:mb-4 group-hover:scale-110 transition-transform" />
-                  <h3 className="text-base md:text-lg font-semibold mb-2">Habit Tracker</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    Build and track healthy habits
-                  </p>
-                </div>
-              </div>
-            </Link>
           </div>
         </main>
       </div>
