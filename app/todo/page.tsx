@@ -19,7 +19,6 @@ import { TaskItemProps } from "./atoms/TaskItem";
 import { ShoppingItemProps } from "./atoms/ShoppingItem";
 import { AppLayout } from "../shared/organisms/AppLayout";
 import { ListPageLayout } from "../shared/organisms/ListPageLayout";
-import { motion } from "framer-motion";
 
 export default function TodoPage() {
   const [isClient, setIsClient] = useState(false);
@@ -146,13 +145,7 @@ export default function TodoPage() {
     <ErrorBoundary>
       <AppLayout title="Todo" className="!container !max-w-none min-h-screen todo-page">
         <ListPageLayout>
-          <motion.div
-            initial={{ x: 0, opacity: 1 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: "-100vw", opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="flex flex-col todo-page"
-          >
+          <div className="flex flex-col todo-page">
             {/* Mobile View */}
             <div className="block md:hidden">
               <MobileListView
@@ -216,7 +209,7 @@ export default function TodoPage() {
                 ))
               )}
             </div>
-          </motion.div>
+          </div>
         </ListPageLayout>
       </AppLayout>
       {/* FAB positioned outside the layout containers */}

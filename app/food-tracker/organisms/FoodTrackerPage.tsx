@@ -5,11 +5,13 @@ import { useFoodApi } from '../atoms/useFoodApi';
 import { NewFoodEntry } from '../molecules/NewFoodEntry';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { FoodTrackerHeader } from './FoodTrackerHeader';
+import { useSidebar } from '../../shared/organisms/SidebarContext';
 
 export default function FoodTrackerPage() {
+  const { toggleMobileMenu } = useSidebar();
   return (
     <ReplicacheFoodProvider>
-      <FoodTrackerHeader onMenu={() => {}} />
+      <FoodTrackerHeader onMenu={toggleMobileMenu} />
       <FoodTrackerPageInner />
     </ReplicacheFoodProvider>
   );
