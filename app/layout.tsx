@@ -8,6 +8,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./auth/organisms/AuthProvider";
 import { DemoBanner } from "@/components/ui/demo-banner";
 import { ReplicacheTodoProvider } from "./todo/atoms/ReplicacheTodoContext";
+import { ReplicacheFoodProvider } from "./food-tracker/atoms/ReplicacheFoodContext";
+import { ReplicacheDiaryProvider } from "./diary/atoms/ReplicacheDiaryContext";
+import { ReplicacheIdeasProvider } from "./ideas/atoms/ReplicacheIdeasContext";
 import TransitionLayout from "./transition-layout";
 
 const geistSans = Geist({
@@ -46,11 +49,17 @@ export default function RootLayout({
             <DemoBanner />
             <Sidebar />
             <ReplicacheTodoProvider>
-              <TransitionLayout>
-                <main className="md:pt-0 md:ml-64 transition-all duration-300">
-                  {children}
-                </main>
-              </TransitionLayout>
+              <ReplicacheFoodProvider>
+                <ReplicacheDiaryProvider>
+                  <ReplicacheIdeasProvider>
+                    <TransitionLayout>
+                      <main className="md:pt-0 md:ml-64 transition-all duration-300">
+                        {children}
+                      </main>
+                    </TransitionLayout>
+                  </ReplicacheIdeasProvider>
+                </ReplicacheDiaryProvider>
+              </ReplicacheFoodProvider>
             </ReplicacheTodoProvider>
           </SidebarProvider>
         </AuthProvider>

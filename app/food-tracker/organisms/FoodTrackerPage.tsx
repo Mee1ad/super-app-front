@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { ReplicacheFoodProvider } from '../atoms/ReplicacheFoodContext';
 import { useFoodApi } from '../atoms/useFoodApi';
 import { NewFoodEntry } from '../molecules/NewFoodEntry';
 import { Plus, Trash2, Edit } from 'lucide-react';
@@ -10,10 +9,10 @@ import { useSidebar } from '../../shared/organisms/SidebarContext';
 export default function FoodTrackerPage() {
   const { toggleMobileMenu } = useSidebar();
   return (
-    <ReplicacheFoodProvider>
+    <>
       <FoodTrackerHeader onMenu={toggleMobileMenu} />
       <FoodTrackerPageInner />
-    </ReplicacheFoodProvider>
+    </>
   );
 }
 
