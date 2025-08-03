@@ -108,9 +108,28 @@ export function ReplicacheTodosProvider({ children }: { children: ReactNode }) {
   // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
   useEffect(() => {
     if (typeof window !== 'undefined' && rep) {
-      const es = new window.EventSource('/api/replicache/stream');
-      es.onmessage = () => {
-        rep.pull();
+      // Get user ID from auth system or fallback to anonymous
+      let userId = 'anonymous';
+      
+      // Try to get user ID from auth system
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userId = user.id || user.user_id || 'anonymous';
+          console.log('Using authenticated user ID:', userId);
+        } catch (error) {
+          console.log('Could not parse auth user, using anonymous');
+        }
+      }
+      
+      const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+      const es = new window.EventSource(`${backendUrl}/replicache/stream?userId=${userId}`);
+      es.onmessage = (event) => {
+        // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
+        if (event.data === 'sync') {
+          rep.pull();
+        }
       };
       return () => {
         es.close();

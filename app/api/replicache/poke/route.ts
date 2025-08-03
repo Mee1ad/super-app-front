@@ -1,16 +1,25 @@
 import { NextResponse } from 'next/server';
 import { sseManager } from '../sse-manager';
+import { NextRequest } from 'next/server';
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    // Notify all connected SSE clients to trigger immediate sync
-    sseManager.notifyAll('sync');
+    // Get userId from query params
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId') || 'anonymous';
     
-    console.log(`Poke triggered sync for ${sseManager.getClientCount()} connected clients`);
+    console.log('Poke endpoint called for user:', userId);
+    console.log(`Current connected clients: ${sseManager.getClientCount()}`);
+    
+    // Notify only the specific user
+    sseManager.notifyUser(userId, 'sync');
+    
+    console.log(`Poke triggered sync for user: ${userId}`);
     
     return NextResponse.json({ 
       success: true, 
-      clientsNotified: sseManager.getClientCount() 
+      userId,
+      clientsNotified: sseManager.getUserClientCount(userId)
     });
   } catch (error) {
     console.error('Replicache poke error:', error);
