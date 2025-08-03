@@ -2,8 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Replicache, MutatorDefs, WriteTransaction } from "replicache";
 import { DiaryEntry, DiaryEntryCreate, DiaryEntryUpdate, Mood } from "./types";
-import { mockMoods } from '@/app/api/diary/mock-data';
-import { getAccessToken } from "@/lib/auth-token";
+import { useSharedSSE } from "@/app/shared/ReplicacheProviders";
 
 interface ReplicacheDiaryMutators extends MutatorDefs {
   createEntry: (tx: WriteTransaction, args: DiaryEntryCreate & { id: string }) => Promise<void>;
@@ -27,14 +26,15 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   const [rep, setRep] = useState<Replicache<ReplicacheDiaryMutators> | null>(null);
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+  const sharedSSE = useSharedSSE();
 
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheDiaryMutators>(
     mutator: K,
     ...args: Parameters<ReplicacheDiaryMutators[K]>
   ) => {
-    if (!rep) throw new Error('Replicache not initialized');
+    if (!rep) throw new Error("Replicache not initialized");
+    console.log('[Replicache] Mutator called:', mutator, args);
     // @ts-ignore
     const result = await rep.mutate[mutator](...args);
     
@@ -122,81 +122,37 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     // These properties may not exist in the current version
   }, [rep]);
 
-  // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
+  // --- Use shared SSE instead of creating our own connection ---
   useEffect(() => {
-    if (typeof window !== 'undefined' && rep) {
-      // Get user ID from auth system or fallback to anonymous
-      let userId = 'anonymous';
+    if (rep) {
+      console.log('[Replicache] Setting up shared SSE listener for diary');
       
-      // Try to get user ID from auth system
-      const userStr = localStorage.getItem('auth_user');
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          userId = user.id || user.user_id || 'anonymous';
-          console.log('Using authenticated user ID:', userId);
-        } catch (error) {
-          console.log('Could not parse auth user, using anonymous');
-        }
-      }
-      
-      const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-      const es = new window.EventSource(`${backendUrl}/replicache/stream?userId=${userId}`);
-      es.onmessage = (event) => {
+      const cleanup = sharedSSE.addListener((event) => {
+        console.log('[Replicache] Shared SSE message received:', event);
         // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
-        if (event.data === 'sync') {
+        if (event === 'sync') {
+          console.log('[Replicache] Triggering pull due to sync message');
           rep.pull();
         }
-      };
-      return () => {
-        es.close();
-      };
-    }
-  }, [rep]);
-
-  // Seed moods on first mount if not present
-  useEffect(() => {
-    if (!rep) return;
-    
-    // Only seed if we haven't seeded before (check localStorage flag)
-    const hasSeededMoods = localStorage.getItem('diary-moods-seeded');
-    if (hasSeededMoods) return;
-    
-    (async () => {
-      let needsSeeding = false;
-      
-      // Check if any moods exist
-      const existingMoods = await rep.query(async tx => {
-        const moods = await tx.scan({ prefix: "mood/" }).values().toArray();
-        return moods;
       });
       
-      if (existingMoods.length === 0) {
-        needsSeeding = true;
-        for (const mood of mockMoods) {
-          await rep.mutate.createMood(mood);
-        }
-        localStorage.setItem('diary-moods-seeded', 'true');
-        console.log('[Diary] Seeded default moods');
-      } else {
-        localStorage.setItem('diary-moods-seeded', 'true');
-      }
-    })();
-  }, [rep]);
+      return cleanup;
+    }
+  }, [rep, sharedSSE]);
 
   useEffect(() => {
     if (!rep) return;
     let stop = false;
     const unsubEntries = rep.subscribe(
       async tx => {
-        const arr = await tx.scan({ prefix: "diary/" }).values().toArray();
+        const arr = await tx.scan({ prefix: 'diary/' }).values().toArray();
         return arr as unknown as DiaryEntry[];
       },
       { onData: data => { if (!stop) setEntries(data); } }
     );
     const unsubMoods = rep.subscribe(
       async tx => {
-        const arr = await tx.scan({ prefix: "mood/" }).values().toArray();
+        const arr = await tx.scan({ prefix: 'mood/' }).values().toArray();
         return arr as unknown as Mood[];
       },
       { onData: data => { if (!stop) setMoods(data); } }
@@ -218,7 +174,9 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
 }
 
 export function useReplicacheDiary() {
-  const ctx = useContext(ReplicacheDiaryContext);
-  if (!ctx) throw new Error("useReplicacheDiary must be used within ReplicacheDiaryProvider");
-  return ctx;
+  const context = useContext(ReplicacheDiaryContext);
+  if (!context) {
+    throw new Error("useReplicacheDiary must be used within a ReplicacheDiaryProvider");
+  }
+  return context;
 }

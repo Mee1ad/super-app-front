@@ -14,6 +14,7 @@ import {
   Variant,
 } from "./types";
 import { getAccessToken } from "@/lib/auth-token";
+import { useSharedSSE } from "@/app/shared/ReplicacheProviders";
 
 interface ReplicacheTodoMutators extends MutatorDefs {
   createList: (tx: WriteTransaction, args: ListCreate & { id: string }) => Promise<void>;
@@ -45,6 +46,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
   const [items, setItems] = useState<ShoppingItemResponse[]>([]);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+  const sharedSSE = useSharedSSE();
 
   useEffect(() => {
     if (!rep && typeof window !== "undefined") {
@@ -246,67 +248,23 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
     };
   }, [rep]);
 
-  // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
+  // --- Use shared SSE instead of creating our own connection ---
   useEffect(() => {
-    if (typeof window !== 'undefined' && rep) {
-      const setupSSE = () => {
-        // Get user ID from auth system or fallback to anonymous
-        let userId = 'anonymous';
-        
-        // Try to get user ID from auth system
-        const userStr = localStorage.getItem('auth_user');
-        if (userStr) {
-          try {
-            const user = JSON.parse(userStr);
-            userId = user.id || user.user_id || 'anonymous';
-            console.log('Using authenticated user ID:', userId);
-          } catch (error) {
-            console.log('Could not parse auth user, using anonymous');
-          }
+    if (rep) {
+      console.log('[Replicache] Setting up shared SSE listener for todo');
+      
+      const cleanup = sharedSSE.addListener((event) => {
+        console.log('[Replicache] Shared SSE message received:', event);
+        // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
+        if (event === 'sync') {
+          console.log('[Replicache] Triggering pull due to sync message');
+          rep.pull();
         }
-        
-        const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-        const es = new window.EventSource(`${backendUrl}/replicache/stream?userId=${userId}`);
-        
-        es.onopen = () => {
-          console.log('SSE connection opened for user:', userId);
-        };
-        
-        es.onmessage = (event) => {
-          console.log('SSE message received:', event.data);
-          // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
-          if (event.data === 'sync') {
-            console.log('Triggering pull due to sync message');
-            rep.pull();
-          }
-        };
-        
-        es.onerror = (error) => {
-          console.error('SSE error:', error);
-        };
-        
-        return es;
-      };
+      });
       
-      // Initial setup
-      let es = setupSSE();
-      
-      // Listen for auth data updates
-      const handleAuthDataUpdate = () => {
-        console.log('🔄 Auth data updated, reconnecting SSE with new user ID');
-        es.close();
-        es = setupSSE();
-      };
-      
-      window.addEventListener('authDataUpdated', handleAuthDataUpdate as EventListener);
-      
-      return () => {
-        console.log('Closing SSE connection');
-        es.close();
-        window.removeEventListener('authDataUpdated', handleAuthDataUpdate as EventListener);
-      };
+      return cleanup;
     }
-  }, [rep]);
+  }, [rep, sharedSSE]);
 
   if (!rep) return null;
 
@@ -320,7 +278,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
 export function useReplicacheTodo() {
   const context = useContext(ReplicacheTodoContext);
   if (!context) {
-    throw new Error('useReplicacheTodo must be used within a ReplicacheTodoProvider');
+    throw new Error("useReplicacheTodo must be used within a ReplicacheTodoProvider");
   }
   return context;
 }

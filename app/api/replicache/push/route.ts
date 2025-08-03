@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Simple in-memory mutation tracking for development
+// In production, this would be stored in a database
+const mutationTracking = new Map<string, number>();
+
 // Helper: Validate the push request schema
 function validatePushSchema(body: any) {
   if (
@@ -37,58 +41,58 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid push schema' }, { status: 400 });
     }
 
-    const { mutations, clientID, cookie } = body;
-    console.log(`[Replicache /push] clientID: ${clientID}, mutations: ${mutations.length}`);
-    console.log('Push request - clientID:', clientID, 'cookie:', cookie, 'with', mutations.length, 'mutations');
+    const { mutations, clientID, clientGroupID, profileID, cookie } = body;
+    console.log(`[Replicache /push] clientID: ${clientID}, clientGroupID: ${clientGroupID}, profileID: ${profileID}, mutations: ${mutations.length}`);
+    console.log('Push request - clientID:', clientID, 'clientGroupID:', clientGroupID, 'profileID:', profileID, 'cookie:', cookie, 'with', mutations.length, 'mutations');
 
-    // Route mutations by their names since we can't rely on cookies
+    // For development, we'll use a simple user ID
+    // In production, this would come from the authenticated user
+    const userId = 'development-user';
+    const trackingKey = `${userId}-${clientGroupID}`;
+    
+    // Get current last mutation ID
+    const currentLastMutationID = mutationTracking.get(trackingKey) || 0;
+    let newLastMutationID = currentLastMutationID;
+
+    // Route mutations by clientGroupID instead of mutation names
     for (const mutation of mutations) {
-      const { name, args, timestamp } = mutation;
+      const { name, args, timestamp, id } = mutation;
       if (typeof timestamp !== 'number') {
         console.warn('Mutation missing valid timestamp:', mutation);
         continue;
       }
-      console.log(`Processing mutation: ${name} with args:`, args, 'timestamp:', timestamp);
-      // Route by mutation name to identify data type
-      switch (name) {
-        // Food mutations
-        case 'createEntry':
-        case 'updateEntry':
-        case 'deleteEntry':
-          console.log(`Processing food mutation: ${name}`);
-          // await process_food_mutation(mutation, user_id);
-          break;
-        // Todo mutations  
-        case 'createItem':
-        case 'updateItem':
-        case 'deleteItem':
-        case 'createList':
-        case 'updateList':
-        case 'deleteList':
-        case 'createTask':
-        case 'updateTask':
-        case 'deleteTask':
-        case 'reorderTasks':
-        case 'reorderItems':
-          console.log(`Processing todo mutation: ${name}`);
-          // await process_todo_mutation(mutation, user_id);
-          break;
-        // Ideas mutations
-        case 'createIdea':
-        case 'updateIdea':
-        case 'deleteIdea':
-          console.log(`Processing ideas mutation: ${name}`);
-          // await process_ideas_mutation(mutation, user_id);
-          break;
-        default:
-          console.warn(`Unknown mutation: ${name}`);
+      console.log(`Processing mutation: ${name} with args:`, args, 'timestamp:', timestamp, 'id:', id);
+      
+      // Route by clientGroupID to identify data type
+      if (clientGroupID === 'todo-replicache-flat') {
+        console.log(`Processing todo mutation: ${name}`);
+        // await process_todo_mutation(mutation, user_id);
+      } else if (clientGroupID === 'food-tracker-replicache') {
+        console.log(`Processing food mutation: ${name}`);
+        // await process_food_mutation(mutation, user_id);
+      } else if (clientGroupID === 'diary-replicache') {
+        console.log(`Processing diary mutation: ${name}`);
+        // await process_diary_mutation(mutation, user_id);
+      } else if (clientGroupID === 'ideas-replicache') {
+        console.log(`Processing ideas mutation: ${name}`);
+        // await process_ideas_mutation(mutation, user_id);
+      } else {
+        console.warn(`Unknown clientGroupID: ${clientGroupID}`);
+      }
+      
+      // Update the last mutation ID to the highest one we've seen
+      if (id && typeof id === 'number' && id > newLastMutationID) {
+        newLastMutationID = id;
       }
     }
 
-    // For now, just acknowledge the mutations
-    // In a real implementation, this would process mutations and sync with your backend
+    // Update the tracking
+    mutationTracking.set(trackingKey, newLastMutationID);
+    console.log(`Updated lastMutationID from ${currentLastMutationID} to ${newLastMutationID} for client group: ${clientGroupID}`);
+
+    // Return the last mutation ID we processed
     const response = {
-      lastMutationID: mutations.length > 0 ? mutations[mutations.length - 1].id : 0
+      lastMutationID: newLastMutationID
     };
     console.log('[Replicache /push] Responding with lastMutationID:', response.lastMutationID);
     return NextResponse.json(response);

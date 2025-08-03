@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Simple in-memory mutation tracking for development
+// In production, this would be stored in a database
+const mutationTracking = new Map<string, number>();
+
 // JWT token validation function
 function isTokenValid(token: string): boolean {
   if (!token) return false;
@@ -30,9 +34,9 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { clientID, cookie } = body;
+    const { clientID, clientGroupID, profileID, cookie } = body;
     
-    console.log('Pull request - clientID:', clientID, 'cookie:', cookie);
+    console.log('Pull request - clientID:', clientID, 'clientGroupID:', clientGroupID, 'profileID:', profileID, 'cookie:', cookie);
     
     // Parse cookie to get app info
     let appInfo = {};
@@ -51,21 +55,38 @@ export async function POST(req: NextRequest) {
     
     console.log('User ID from token:', userId);
     
-    // Return all relevant data for this user/app combination
-    // The server decides what data to return based on user and app context
-    const patch = [];
+    // Route data based on clientGroupID
+    let patch: any[] = [];
     
-    // TODO: Implement data fetching based on userId and appInfo
-    // Example:
-    // if (appInfo.app === 'todo') {
-    //   patch.push(...await getTodoData(userId));
-    // } else if (appInfo.app === 'food') {
-    //   patch.push(...await getFoodData(userId));
-    // }
+    if (clientGroupID === 'todo-replicache-flat') {
+      console.log('Processing todo pull request');
+      // TODO: Implement todo data fetching
+      // patch = await getTodoPatch(userId);
+    } else if (clientGroupID === 'food-tracker-replicache') {
+      console.log('Processing food pull request');
+      // TODO: Implement food data fetching
+      // patch = await getFoodPatch(userId);
+    } else if (clientGroupID === 'diary-replicache') {
+      console.log('Processing diary pull request');
+      // TODO: Implement diary data fetching
+      // patch = await getDiaryPatch(userId);
+    } else if (clientGroupID === 'ideas-replicache') {
+      console.log('Processing ideas pull request');
+      // TODO: Implement ideas data fetching
+      // patch = await getIdeasPatch(userId);
+    } else {
+      console.warn(`Unknown clientGroupID: ${clientGroupID}`);
+    }
     
-    // For now, return empty patch
+    // Get the last mutation ID for this client group
+    const trackingKey = `${userId}-${clientGroupID}`;
+    const lastMutationID = mutationTracking.get(trackingKey) || 0;
+    
+    console.log(`Returning lastMutationID: ${lastMutationID} for client group: ${clientGroupID}`);
+    
+    // Return the correct Replicache pull response format
     const response = {
-      lastMutationID: 0,
+      lastMutationID,
       cookie: null,
       patch
     };

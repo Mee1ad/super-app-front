@@ -1,15 +1,12 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Replicache, MutatorDefs, WriteTransaction } from "replicache";
-import {
-  Idea,
-  IdeaCreate,
-  IdeaUpdate,
-} from "./types";
+import { Idea } from "./types";
+import { useSharedSSE } from "@/app/shared/ReplicacheProviders";
 
 interface ReplicacheIdeasMutators extends MutatorDefs {
-  createIdea: (tx: WriteTransaction, args: IdeaCreate & { id: string }) => Promise<void>;
-  updateIdea: (tx: WriteTransaction, args: { id: string } & IdeaUpdate) => Promise<void>;
+  createIdea: (tx: WriteTransaction, args: { id: string; title: string; description: string; category: string; tags: string[] }) => Promise<void>;
+  updateIdea: (tx: WriteTransaction, args: { id: string; title?: string; description?: string; category?: string; tags?: string[] }) => Promise<void>;
   deleteIdea: (tx: WriteTransaction, args: { id: string }) => Promise<void>;
 }
 
@@ -24,7 +21,7 @@ const ReplicacheIdeasContext = createContext<ReplicacheIdeasContextValue | null>
 export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
   const [rep, setRep] = useState<Replicache<ReplicacheIdeasMutators> | null>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+  const sharedSSE = useSharedSSE();
 
   useEffect(() => {
     if (!rep && typeof window !== "undefined") {
@@ -79,6 +76,7 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
     ...args: Parameters<ReplicacheIdeasMutators[K]>
   ) => {
     if (!rep) throw new Error("Replicache not initialized");
+    console.log('[Replicache] Mutator called:', mutator, args);
     // @ts-ignore
     const result = await rep.mutate[mutator](...args);
     
@@ -111,56 +109,38 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (!rep) return;
     let stop = false;
-    let unsubIdeas: (() => void) | undefined;
-    
-    if (rep) {
-      unsubIdeas = rep.subscribe(
-        async tx => {
-          const arr = await tx.scan({ prefix: "idea/" }).values().toArray();
-          return arr as unknown as Idea[];
-        },
-        { onData: data => { if (!stop) setIdeas(data); } }
-      );
-    }
-    
+    const unsub = rep.subscribe(
+      async tx => {
+        const arr = await tx.scan({ prefix: 'idea/' }).values().toArray();
+        return arr as unknown as Idea[];
+      },
+      { onData: data => { if (!stop) setIdeas(data); } }
+    );
     return () => {
       stop = true;
-      if (unsubIdeas) unsubIdeas();
+      unsub();
     };
   }, [rep]);
 
-  // --- SSE logic: listen for /api/replicache/stream and trigger pull ---
+  // --- Use shared SSE instead of creating our own connection ---
   useEffect(() => {
-    if (typeof window !== 'undefined' && rep) {
-      // Get user ID from auth system or fallback to anonymous
-      let userId = 'anonymous';
+    if (rep) {
+      console.log('[Replicache] Setting up shared SSE listener for ideas');
       
-      // Try to get user ID from auth system
-      const userStr = localStorage.getItem('auth_user');
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          userId = user.id || user.user_id || 'anonymous';
-          console.log('Using authenticated user ID:', userId);
-        } catch (error) {
-          console.log('Could not parse auth user, using anonymous');
-        }
-      }
-      
-      const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-      const es = new window.EventSource(`${backendUrl}/replicache/stream?userId=${userId}`);
-      es.onmessage = (event) => {
+      const cleanup = sharedSSE.addListener((event) => {
+        console.log('[Replicache] Shared SSE message received:', event);
         // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
-        if (event.data === 'sync') {
+        if (event === 'sync') {
+          console.log('[Replicache] Triggering pull due to sync message');
           rep.pull();
         }
-      };
-      return () => {
-        es.close();
-      };
+      });
+      
+      return cleanup;
     }
-  }, [rep]);
+  }, [rep, sharedSSE]);
 
   if (!rep) return null;
 
@@ -174,7 +154,7 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
 export function useReplicacheIdeas() {
   const context = useContext(ReplicacheIdeasContext);
   if (!context) {
-    throw new Error("useReplicacheIdeas must be used within ReplicacheIdeasProvider");
+    throw new Error("useReplicacheIdeas must be used within a ReplicacheIdeasProvider");
   }
   return context;
 }
