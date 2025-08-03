@@ -3,37 +3,40 @@ import { act } from 'react-dom/test-utils';
 import TodoPage from './page';
 
 // Mock the dependencies
-jest.mock('./atoms/useTodoApi', () => ({
-  useTodoApi: () => ({
+jest.mock('./atoms/ReplicacheTodoContext', () => ({
+  useReplicacheTodo: () => ({
     lists: [
       {
         id: '1',
         title: 'My Tasks',
         type: 'task',
         variant: 'default',
-        tasks: []
       },
       {
         id: '2',
         title: 'Shopping List',
         type: 'shopping',
         variant: 'default',
-        items: []
       }
     ],
-    loading: false,
-    createList: jest.fn(),
-    updateList: jest.fn(),
-    deleteList: jest.fn(),
-    createTask: jest.fn(),
-    updateTask: jest.fn(),
-    deleteTask: jest.fn(),
-    toggleTask: jest.fn(),
-    reorderTasks: jest.fn(),
-    createItem: jest.fn(),
-    updateItem: jest.fn(),
-    deleteItem: jest.fn(),
-    reorderItems: jest.fn(),
+    tasks: [],
+    items: [],
+    rep: {
+      mutate: {
+        createList: jest.fn(),
+        updateList: jest.fn(),
+        deleteList: jest.fn(),
+        createTask: jest.fn(),
+        updateTask: jest.fn(),
+        deleteTask: jest.fn(),
+        createItem: jest.fn(),
+        updateItem: jest.fn(),
+        deleteItem: jest.fn(),
+        reorderTasks: jest.fn(),
+        reorderItems: jest.fn(),
+      }
+    },
+    mutateWithPoke: jest.fn(),
   })
 }));
 
@@ -169,22 +172,28 @@ describe('TodoPage', () => {
 
   it('should show header and loading spinner during loading', () => {
     // Mock loading state
-    jest.doMock('./atoms/useTodoApi', () => ({
-      useTodoApi: () => ({
+    jest.doMock('./atoms/ReplicacheTodoContext', () => ({
+      useReplicacheTodo: () => ({
         lists: [],
         loading: true,
-        createList: jest.fn(),
-        updateList: jest.fn(),
-        deleteList: jest.fn(),
-        createTask: jest.fn(),
-        updateTask: jest.fn(),
-        deleteTask: jest.fn(),
-        toggleTask: jest.fn(),
-        reorderTasks: jest.fn(),
-        createItem: jest.fn(),
-        updateItem: jest.fn(),
-        deleteItem: jest.fn(),
-        reorderItems: jest.fn(),
+        tasks: [],
+        items: [],
+        rep: {
+          mutate: {
+            createList: jest.fn(),
+            updateList: jest.fn(),
+            deleteList: jest.fn(),
+            createTask: jest.fn(),
+            updateTask: jest.fn(),
+            deleteTask: jest.fn(),
+            createItem: jest.fn(),
+            updateItem: jest.fn(),
+            deleteItem: jest.fn(),
+            reorderTasks: jest.fn(),
+            reorderItems: jest.fn(),
+          }
+        },
+        mutateWithPoke: jest.fn(),
       })
     }));
 
@@ -199,22 +208,28 @@ describe('TodoPage', () => {
 
   it('should always show header even when not loading', () => {
     // Mock non-loading state
-    jest.doMock('./atoms/useTodoApi', () => ({
-      useTodoApi: () => ({
+    jest.doMock('./atoms/ReplicacheTodoContext', () => ({
+      useReplicacheTodo: () => ({
         lists: [],
         loading: false,
-        createList: jest.fn(),
-        updateList: jest.fn(),
-        deleteList: jest.fn(),
-        createTask: jest.fn(),
-        updateTask: jest.fn(),
-        deleteTask: jest.fn(),
-        toggleTask: jest.fn(),
-        reorderTasks: jest.fn(),
-        createItem: jest.fn(),
-        updateItem: jest.fn(),
-        deleteItem: jest.fn(),
-        reorderItems: jest.fn(),
+        tasks: [],
+        items: [],
+        rep: {
+          mutate: {
+            createList: jest.fn(),
+            updateList: jest.fn(),
+            deleteList: jest.fn(),
+            createTask: jest.fn(),
+            updateTask: jest.fn(),
+            deleteTask: jest.fn(),
+            createItem: jest.fn(),
+            updateItem: jest.fn(),
+            deleteItem: jest.fn(),
+            reorderTasks: jest.fn(),
+            reorderItems: jest.fn(),
+          }
+        },
+        mutateWithPoke: jest.fn(),
       })
     }));
 

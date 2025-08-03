@@ -1,54 +1,42 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import TodoListDetailPage from './page';
 
+// Mock Next.js navigation
+jest.mock('next/navigation', () => ({
+  useParams: jest.fn(),
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
+
 // Mock the dependencies
-jest.mock('../atoms/useTodoApi', () => ({
-  useTodoApi: () => ({
+jest.mock('../atoms/ReplicacheTodoContext', () => ({
+  useReplicacheTodo: () => ({
     lists: [
       {
-        id: 'list-1',
-        title: 'Task List 1',
+        id: '1',
+        title: 'My Tasks',
         type: 'task',
-        tasks: [{ 
-          id: 'task-1', 
-          title: 'Task 1',
-          description: 'Description 1',
-          checked: false,
-          variant: 'default'
-        }],
         variant: 'default',
-      },
-      {
-        id: 'list-2',
-        title: 'Shopping List 1',
-        type: 'shopping',
-        items: [{ 
-          id: 'item-1', 
-          title: 'Item 1',
-          url: 'https://example.com',
-          price: '29.99',
-          source: 'Amazon',
-          checked: false,
-          variant: 'default'
-        }],
-        variant: 'default',
-      },
+      }
     ],
-    loading: false,
-    createList: jest.fn(),
-    updateList: jest.fn(),
-    deleteList: jest.fn(),
-    createTask: jest.fn(),
-    updateTask: jest.fn(),
-    deleteTask: jest.fn(),
-    toggleTask: jest.fn(),
-    reorderTasks: jest.fn(),
-    createItem: jest.fn(),
-    updateItem: jest.fn(),
-    deleteItem: jest.fn(),
-    reorderItems: jest.fn(),
-  }),
+    tasks: [],
+    items: [],
+    rep: {
+      mutate: {
+        createTask: jest.fn(),
+        updateTask: jest.fn(),
+        deleteTask: jest.fn(),
+        createItem: jest.fn(),
+        updateItem: jest.fn(),
+        deleteItem: jest.fn(),
+        reorderTasks: jest.fn(),
+        reorderItems: jest.fn(),
+      }
+    },
+    mutateWithPoke: jest.fn(),
+  })
 }));
 
 jest.mock('../atoms/adapters', () => ({
@@ -68,13 +56,6 @@ jest.mock('../atoms/LoadingSpinner', () => ({
 
 jest.mock('../../shared/organisms/AppLayout', () => ({
   AppLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
-jest.mock('next/navigation', () => ({
-  useParams: () => ({ listId: 'list-1' }),
-  useRouter: () => ({
-    push: jest.fn(),
-  }),
 }));
 
 describe('TodoListDetailPage', () => {

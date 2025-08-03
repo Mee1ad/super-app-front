@@ -34,7 +34,7 @@ export default function TodoListDetailPage() {
     source?: string;
   } | null>(null);
 
-  const { lists, tasks, items, rep } = useReplicacheTodo();
+  const { lists, tasks, items, rep, mutateWithPoke } = useReplicacheTodo();
 
   // Get list data from URL search params to avoid refetching
   const listTitle = searchParams.get('title') || "Todo List";
@@ -58,7 +58,7 @@ export default function TodoListDetailPage() {
   // Task handlers
   const handleTaskUpdate = async (task: TaskItemProps) => {
     if (task.id && task.id.trim() !== '') {
-      await rep.mutate.updateTask({
+      await mutateWithPoke('updateTask', {
         id: task.id,
         title: task.title,
         description: task.description,
@@ -68,7 +68,7 @@ export default function TodoListDetailPage() {
     } else {
       const id = `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const taskCreate = taskItemPropsToTaskCreate(task);
-      await rep.mutate.createTask({
+      await mutateWithPoke('createTask', {
         ...taskCreate,
         id,
         list_id: listId,
@@ -77,20 +77,20 @@ export default function TodoListDetailPage() {
   };
 
   const handleTaskDelete = async (taskId: string) => {
-    await rep.mutate.deleteTask({ id: taskId });
+    await mutateWithPoke('deleteTask', { id: taskId });
   };
 
   const handleTaskToggle = async (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      await rep.mutate.updateTask({ id: taskId, checked: !task.checked });
+      await mutateWithPoke('updateTask', { id: taskId, checked: !task.checked });
     }
   };
 
   // Shopping handlers
   const handleShoppingUpdate = async (item: ShoppingItemProps) => {
     if (item.id && item.id.trim() !== '') {
-      await rep.mutate.updateItem({
+      await mutateWithPoke('updateItem', {
         id: item.id,
         title: item.title,
         url: item.url,
@@ -102,7 +102,7 @@ export default function TodoListDetailPage() {
     } else {
       const id = `item_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const itemCreate = shoppingItemPropsToShoppingItemCreate(item);
-      await rep.mutate.createItem({
+      await mutateWithPoke('createItem', {
         ...itemCreate,
         id,
         list_id: listId,
@@ -111,17 +111,17 @@ export default function TodoListDetailPage() {
   };
 
   const handleShoppingDelete = async (itemId: string) => {
-    await rep.mutate.deleteItem({ id: itemId });
+    await mutateWithPoke('deleteItem', { id: itemId });
   };
 
   // Reorder handlers (not implemented in UI, but available)
   const handleTaskReorder = async (newTasks: TaskItemProps[]) => {
     const taskIds = newTasks.map(task => task.id);
-    await rep.mutate.reorderTasks({ list_id: listId, task_ids: taskIds });
+    await mutateWithPoke('reorderTasks', { list_id: listId, task_ids: taskIds });
   };
   const handleShoppingReorder = async (newItems: ShoppingItemProps[]) => {
     const itemIds = newItems.map(item => item.id);
-    await rep.mutate.reorderItems({ list_id: listId, item_ids: itemIds });
+    await mutateWithPoke('reorderItems', { list_id: listId, item_ids: itemIds });
   };
 
   // Unified handler for both task and shopping items
