@@ -189,8 +189,18 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
       }
     }
     
+    // Get auth token for authorization header
+    const authToken = localStorage.getItem('auth_access_token');
+    const headers: HeadersInit = {};
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+    
     const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { method: 'POST' });
+    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
+      method: 'POST',
+      headers
+    });
     
     return result;
   };

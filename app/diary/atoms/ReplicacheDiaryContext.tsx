@@ -38,10 +38,30 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     // @ts-ignore
     const result = await rep.mutate[mutator](...args);
     
-    // Get user ID for personal notifications
-    const userId = localStorage.getItem('user_id') || 'anonymous';
+    // Get user ID from auth system for personal notifications
+    let userId = 'anonymous';
+    const userStr = localStorage.getItem('auth_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        userId = user.id || user.user_id || 'anonymous';
+      } catch (error) {
+        console.log('Could not parse auth user for poke');
+      }
+    }
+    
+    // Get auth token for authorization header
+    const authToken = localStorage.getItem('auth_access_token');
+    const headers: HeadersInit = {};
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+    
     const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { method: 'POST' });
+    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
+      method: 'POST',
+      headers
+    });
     
     return result;
   };
