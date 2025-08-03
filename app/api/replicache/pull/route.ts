@@ -38,17 +38,6 @@ export async function POST(req: NextRequest) {
     
     console.log('Pull request - clientID:', clientID, 'clientGroupID:', clientGroupID, 'profileID:', profileID, 'cookie:', cookie);
     
-    // Parse cookie to get app info
-    let appInfo = {};
-    if (cookie) {
-      try {
-        appInfo = JSON.parse(cookie);
-        console.log('App info from cookie:', appInfo);
-      } catch (error) {
-        console.warn('Could not parse cookie:', error);
-      }
-    }
-    
     // Extract user ID from JWT token
     const payload = JSON.parse(atob(token.split('.')[1]));
     const userId = payload.sub || payload.user_id || payload.id;
@@ -84,10 +73,19 @@ export async function POST(req: NextRequest) {
     
     console.log(`Returning lastMutationID: ${lastMutationID} for client group: ${clientGroupID}`);
     
+    // Create a simple cookie that represents the current state
+    // This ensures Replicache can track changes properly
+    const currentCookie = JSON.stringify({
+      lastMutationID,
+      timestamp: Date.now(),
+      userId,
+      clientGroupID
+    });
+    
     // Return the correct Replicache pull response format
     const response = {
       lastMutationID,
-      cookie: null,
+      cookie: currentCookie,
       patch
     };
 

@@ -9,7 +9,6 @@ function validatePushSchema(body: any) {
   if (
     typeof body !== 'object' ||
     typeof body.clientID !== 'string' ||
-    typeof body.cookie !== 'string' ||
     !Array.isArray(body.mutations)
   ) {
     return false;
@@ -44,6 +43,17 @@ export async function POST(req: NextRequest) {
     const { mutations, clientID, clientGroupID, profileID, cookie } = body;
     console.log(`[Replicache /push] clientID: ${clientID}, clientGroupID: ${clientGroupID}, profileID: ${profileID}, mutations: ${mutations.length}`);
     console.log('Push request - clientID:', clientID, 'clientGroupID:', clientGroupID, 'profileID:', profileID, 'cookie:', cookie, 'with', mutations.length, 'mutations');
+
+    // Parse cookie to get current state info
+    let currentCookieInfo = null;
+    if (cookie) {
+      try {
+        currentCookieInfo = JSON.parse(cookie);
+        console.log('Current cookie info:', currentCookieInfo);
+      } catch (error) {
+        console.warn('Could not parse cookie:', error);
+      }
+    }
 
     // For development, we'll use a simple user ID
     // In production, this would come from the authenticated user
