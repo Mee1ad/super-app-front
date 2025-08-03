@@ -3,7 +3,7 @@ import { Idea, IdeaCreate, IdeaUpdate } from './types';
 import { useReplicacheIdeas } from './ReplicacheIdeasContext';
 
 export function useIdeasApi() {
-  const { ideas, rep } = useReplicacheIdeas();
+  const { ideas, mutateWithPoke } = useReplicacheIdeas();
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -26,7 +26,7 @@ export function useIdeasApi() {
     setError(null);
     try {
       const id = `idea_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      await rep.mutate.createIdea({ ...idea, id });
+      await mutateWithPoke('createIdea', { ...idea, id });
       return { id, ...idea, category_id: idea.category, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as Idea;
     } catch (err) {
       setError('Failed to create idea');
@@ -34,13 +34,13 @@ export function useIdeasApi() {
     } finally {
       setIsCreating(false);
     }
-  }, [rep]);
+  }, [mutateWithPoke]);
 
   const updateIdea = useCallback(async (id: string, idea: IdeaUpdate): Promise<Idea | null> => {
     setIsUpdating(true);
     setError(null);
     try {
-      await rep.mutate.updateIdea({ id, ...idea });
+      await mutateWithPoke('updateIdea', { id, ...idea });
       return null;
     } catch (err) {
       setError('Failed to update idea');
@@ -48,13 +48,13 @@ export function useIdeasApi() {
     } finally {
       setIsUpdating(false);
     }
-  }, [rep]);
+  }, [mutateWithPoke]);
 
   const deleteIdea = useCallback(async (id: string): Promise<boolean> => {
     setIsDeleting(true);
     setError(null);
     try {
-      await rep.mutate.deleteIdea({ id });
+      await mutateWithPoke('deleteIdea', { id });
       return true;
     } catch (err) {
       setError('Failed to delete idea');
@@ -62,7 +62,7 @@ export function useIdeasApi() {
     } finally {
       setIsDeleting(false);
     }
-  }, [rep]);
+  }, [mutateWithPoke]);
 
   useEffect(() => {
     loadIdeas();
