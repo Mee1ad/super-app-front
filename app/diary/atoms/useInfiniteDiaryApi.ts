@@ -9,7 +9,7 @@ import {
 } from './types'
 
 export const useInfiniteDiaryApi = () => {
-  const { moods, entries, rep } = useReplicacheDiary()
+  const { moods, entries, mutateWithPoke } = useReplicacheDiary()
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +70,7 @@ export const useInfiniteDiaryApi = () => {
   const createEntry = useCallback(async (data: DiaryEntryCreate) => {
     try {
       const id = `diary_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-      await rep.mutate.createEntry({ ...data, id })
+      await mutateWithPoke('createEntry', { ...data, id })
       return { id, ...data, images: data.images || [], created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as DiaryEntry
     } catch (err) {
       toast({
@@ -80,12 +80,12 @@ export const useInfiniteDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // Update diary entry
   const updateEntry = useCallback(async (id: string, data: DiaryEntryUpdate) => {
     try {
-      await rep.mutate.updateEntry({ id, ...data })
+      await mutateWithPoke('updateEntry', { id, ...data })
     } catch (err) {
       toast({
         title: "Error",
@@ -94,12 +94,12 @@ export const useInfiniteDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // Delete diary entry
   const deleteEntry = useCallback(async (id: string) => {
     try {
-      await rep.mutate.deleteEntry({ id })
+      await mutateWithPoke('deleteEntry', { id })
     } catch (err) {
       toast({
         title: "Error",
@@ -108,7 +108,7 @@ export const useInfiniteDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // Upload image (keep as is, still uses API)
   const uploadImage = useCallback(async (file: File) => {

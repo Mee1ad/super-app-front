@@ -37,8 +37,7 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     if (!rep) throw new Error('Replicache not initialized');
     // @ts-ignore
     const result = await rep.mutate[mutator](...args);
-    const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL;
-    fetch(`${BASE_API_URL}/api/poke`, { method: 'POST' });
+    fetch(`/api/replicache/poke`, { method: 'POST' });
     return result;
   };
 

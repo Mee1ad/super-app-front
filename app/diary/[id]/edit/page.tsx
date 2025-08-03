@@ -13,7 +13,7 @@ export default function EditDiaryPage() {
   const params = useParams()
   const { navigateWithAnimation } = usePageTransition()
   const entryId = params.id as string
-  const { moods, entries, rep } = useReplicacheDiary()
+  const { moods, entries, mutateWithPoke } = useReplicacheDiary()
 
   const [entry, setEntry] = useState<DiaryEntry | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,7 +40,7 @@ export default function EditDiaryPage() {
 
   const handleUpdate = async (id: string, updatedEntry: DiaryEntryUpdate) => {
     try {
-      await rep.mutate.updateEntry({ id, ...updatedEntry })
+      await mutateWithPoke('updateEntry', { id, ...updatedEntry })
       navigateWithAnimation('/diary')
     } catch (error) {
       console.error('Failed to update entry:', error)

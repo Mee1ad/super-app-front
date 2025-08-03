@@ -9,7 +9,7 @@ import {
 } from './types'
 
 export const useDiaryApi = () => {
-  const { entries, moods, rep } = useReplicacheDiary()
+  const { entries, moods, mutateWithPoke } = useReplicacheDiary()
   const { toast } = useToast()
 
   // Load moods (no-op, live via Replicache)
@@ -22,7 +22,7 @@ export const useDiaryApi = () => {
   const createEntry = useCallback(async (data: DiaryEntryCreate) => {
     try {
       const id = `diary_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-      await rep.mutate.createEntry({ ...data, id })
+      await mutateWithPoke('createEntry', { ...data, id })
       return { id, ...data, images: data.images || [], created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as DiaryEntry
     } catch (err) {
       toast({
@@ -32,12 +32,12 @@ export const useDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // Update diary entry
   const updateEntry = useCallback(async (id: string, data: DiaryEntryUpdate) => {
     try {
-      await rep.mutate.updateEntry({ id, ...data })
+      await mutateWithPoke('updateEntry', { id, ...data })
     } catch (err) {
       toast({
         title: "Error",
@@ -46,12 +46,12 @@ export const useDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // Delete diary entry
   const deleteEntry = useCallback(async (id: string) => {
     try {
-      await rep.mutate.deleteEntry({ id })
+      await mutateWithPoke('deleteEntry', { id })
     } catch (err) {
       toast({
         title: "Error",
@@ -60,12 +60,12 @@ export const useDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // CRUD for moods
   const createMood = useCallback(async (mood: Mood) => {
     try {
-      await rep.mutate.createMood(mood)
+      await mutateWithPoke('createMood', mood)
     } catch (err) {
       toast({
         title: "Error",
@@ -74,11 +74,11 @@ export const useDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   const updateMood = useCallback(async (mood: Mood) => {
     try {
-      await rep.mutate.updateMood(mood)
+      await mutateWithPoke('updateMood', mood)
     } catch (err) {
       toast({
         title: "Error",
@@ -87,11 +87,11 @@ export const useDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   const deleteMood = useCallback(async (id: string) => {
     try {
-      await rep.mutate.deleteMood({ id })
+      await mutateWithPoke('deleteMood', { id })
     } catch (err) {
       toast({
         title: "Error",
@@ -100,7 +100,7 @@ export const useDiaryApi = () => {
       })
       throw err
     }
-  }, [rep, toast])
+  }, [mutateWithPoke, toast])
 
   // Upload image (keep as is, still uses API)
   const uploadImage = useCallback(async (file: File) => {
