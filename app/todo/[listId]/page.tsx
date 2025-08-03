@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { useReplicacheTodo } from "../atoms/ReplicacheTodoContext";
 import {
@@ -66,7 +67,7 @@ export default function TodoListDetailPage() {
         variant: task.variant,
       });
     } else {
-      const id = `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const id = uuidv4();
       const taskCreate = taskItemPropsToTaskCreate(task);
       await mutateWithPoke('createTask', {
         ...taskCreate,
@@ -100,7 +101,7 @@ export default function TodoListDetailPage() {
         variant: item.variant,
       });
     } else {
-      const id = `item_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const id = uuidv4();
       const itemCreate = shoppingItemPropsToShoppingItemCreate(item);
       await mutateWithPoke('createItem', {
         ...itemCreate,

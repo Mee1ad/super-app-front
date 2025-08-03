@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from 'uuid';
 import { AddNewList } from "./molecules/AddNewList";
 import { TaskList } from "./organisms/TaskList";
 import { ShoppingList } from "./organisms/ShoppingList";
@@ -47,7 +48,7 @@ export default function TodoPage() {
 
   // CRUD handlers using Replicache
   const handleCreateList = async (type: "task" | "shopping", title?: string) => {
-    const id = `list_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const id = uuidv4();
     const listTitle = title || (type === "task" ? "New Task List" : "New Shopping List");
     await mutateWithPoke('createList', {
       id,
@@ -76,7 +77,7 @@ export default function TodoPage() {
         variant: task.variant,
       });
     } else {
-      const id = `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const id = uuidv4();
       const taskCreate = taskItemPropsToTaskCreate(task);
       await mutateWithPoke('createTask', {
         ...taskCreate,
@@ -115,7 +116,7 @@ export default function TodoPage() {
         variant: item.variant,
       });
     } else {
-      const id = `item_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const id = uuidv4();
       const itemCreate = shoppingItemPropsToShoppingItemCreate(item);
       await mutateWithPoke('createItem', {
         ...itemCreate,

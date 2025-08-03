@@ -50,7 +50,7 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
     
-    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL || '';
     fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
       method: 'POST',
       headers
@@ -102,8 +102,8 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
             await tx.del(`food/${id}`);
           },
         },
-        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
-        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
+        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL || ''}/replicache/push`,
+        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL || ''}/replicache/pull`,
         auth: localStorage.getItem('auth_access_token') ? `Bearer ${localStorage.getItem('auth_access_token')}` : '',
       });
       setRep(r);
@@ -145,44 +145,99 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
           }
         }
         
-        const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-        const es = new window.EventSource(`${backendUrl}/replicache/stream?userId=${userId}`);
+        const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL || '';
+        const authToken = localStorage.getItem('auth_access_token');
         
-        es.onopen = () => {
-          console.log('SSE connection opened for user:', userId);
+        // Create headers with Authorization
+        const headers: HeadersInit = {
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
         };
         
-        es.onmessage = (event) => {
-          console.log('SSE message received:', event.data);
-          // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
-          if (event.data === 'sync') {
-            console.log('Triggering pull due to sync message');
-            rep.pull();
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`;
+        }
+        
+        // Use fetch with streaming instead of EventSource to support custom headers
+        const controller = new AbortController();
+        
+        fetch(`${backendUrl}/replicache/stream?userId=${userId}`, {
+          method: 'GET',
+          headers,
+          signal: controller.signal,
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`SSE connection failed: ${response.status}`);
           }
-        };
+          
+          console.log('SSE connection opened for user:', userId);
+          
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+          
+          if (!reader) {
+            throw new Error('No response body');
+          }
+          
+          const processStream = () => {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                console.log('SSE stream ended');
+                return;
+              }
+              
+              const chunk = decoder.decode(value, { stream: true });
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6); // Remove 'data: ' prefix
+                  console.log('SSE message received:', data);
+                  
+                  // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
+                  if (data === 'sync') {
+                    console.log('Triggering pull due to sync message');
+                    rep.pull();
+                  }
+                }
+              }
+              
+              // Continue reading
+              processStream();
+            }).catch(error => {
+              console.error('SSE stream error:', error);
+            });
+          };
+          
+          processStream();
+          
+          // Return cleanup function
+          return () => {
+            controller.abort();
+            reader.cancel();
+          };
+        }).catch(error => {
+          console.error('SSE connection error:', error);
+        });
         
-        es.onerror = (error) => {
-          console.error('SSE error:', error);
-        };
-        
-        return es;
+        return controller;
       };
       
       // Initial setup
-      let es = setupSSE();
+      let cleanup = setupSSE();
       
       // Listen for auth data updates
       const handleAuthDataUpdate = () => {
         console.log('🔄 Auth data updated, reconnecting SSE with new user ID');
-        es.close();
-        es = setupSSE();
+        if (cleanup) cleanup.abort();
+        cleanup = setupSSE();
       };
       
       window.addEventListener('authDataUpdated', handleAuthDataUpdate as EventListener);
       
       return () => {
         console.log('Closing SSE connection');
-        es.close();
+        if (cleanup) cleanup.abort();
         window.removeEventListener('authDataUpdated', handleAuthDataUpdate as EventListener);
       };
     }

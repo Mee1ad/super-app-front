@@ -157,15 +157,29 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   // Seed moods on first mount if not present
   useEffect(() => {
     if (!rep) return;
+    
+    // Only seed if we haven't seeded before (check localStorage flag)
+    const hasSeededMoods = localStorage.getItem('diary-moods-seeded');
+    if (hasSeededMoods) return;
+    
     (async () => {
-      for (const mood of mockMoods) {
-        // Try to get the mood from Replicache
-        const moodsArr = await rep.query(async tx => {
-          return await tx.get(`mood/${mood.id}`);
-        });
-        if (!moodsArr) {
+      let needsSeeding = false;
+      
+      // Check if any moods exist
+      const existingMoods = await rep.query(async tx => {
+        const moods = await tx.scan({ prefix: "mood/" }).values().toArray();
+        return moods;
+      });
+      
+      if (existingMoods.length === 0) {
+        needsSeeding = true;
+        for (const mood of mockMoods) {
           await rep.mutate.createMood(mood);
         }
+        localStorage.setItem('diary-moods-seeded', 'true');
+        console.log('[Diary] Seeded default moods');
+      } else {
+        localStorage.setItem('diary-moods-seeded', 'true');
       }
     })();
   }, [rep]);

@@ -164,6 +164,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
         auth: localStorage.getItem('auth_access_token') ? `Bearer ${localStorage.getItem('auth_access_token')}` : '',
       });
+      console.log('[Replicache] Instance created: todo-replicache-flat');
       setRep(r);
     }
   }, [rep]);
@@ -174,6 +175,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
     ...args: Parameters<ReplicacheTodoMutators[K]>
   ) => {
     if (!rep) throw new Error("Replicache not initialized");
+    console.log('[Replicache] Mutator called:', mutator, args);
     // @ts-ignore
     const result = await rep.mutate[mutator](...args);
     
@@ -212,26 +214,27 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
     let unsubItems: (() => void) | undefined;
     
     if (rep) {
+      console.log('[Replicache] Setting up subscriptions');
       unsubLists = rep.subscribe(
         async tx => {
           const arr = await tx.scan({ prefix: "list/" }).values().toArray();
           return arr as unknown as ListResponse[];
         },
-        { onData: data => { if (!stop) setLists(data); } }
+        { onData: data => { if (!stop) { setLists(data); console.log('[Replicache] lists onData', data.length); } } }
       );
       unsubTasks = rep.subscribe(
         async tx => {
           const arr = await tx.scan({ prefix: "task/" }).values().toArray();
           return arr as unknown as TaskResponse[];
         },
-        { onData: data => { if (!stop) setTasks(data); } }
+        { onData: data => { if (!stop) { setTasks(data); console.log('[Replicache] tasks onData', data.length); } } }
       );
       unsubItems = rep.subscribe(
         async tx => {
           const arr = await tx.scan({ prefix: "item/" }).values().toArray();
           return arr as unknown as ShoppingItemResponse[];
         },
-        { onData: data => { if (!stop) setItems(data); } }
+        { onData: data => { if (!stop) { setItems(data); console.log('[Replicache] items onData', data.length); } } }
       );
     }
     

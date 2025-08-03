@@ -30,14 +30,44 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    // const { lastPulledVersion = 0 } = body; // TODO: Use this when implementing real backend sync
-
-    // For now, return empty data structure
-    // In a real implementation, this would fetch data from your backend
+    const { clientID, cookie } = body;
+    
+    console.log('Pull request - clientID:', clientID, 'cookie:', cookie);
+    
+    // Parse cookie to get app info
+    let appInfo = {};
+    if (cookie) {
+      try {
+        appInfo = JSON.parse(cookie);
+        console.log('App info from cookie:', appInfo);
+      } catch (error) {
+        console.warn('Could not parse cookie:', error);
+      }
+    }
+    
+    // Extract user ID from JWT token
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const userId = payload.sub || payload.user_id || payload.id;
+    
+    console.log('User ID from token:', userId);
+    
+    // Return all relevant data for this user/app combination
+    // The server decides what data to return based on user and app context
+    const patch = [];
+    
+    // TODO: Implement data fetching based on userId and appInfo
+    // Example:
+    // if (appInfo.app === 'todo') {
+    //   patch.push(...await getTodoData(userId));
+    // } else if (appInfo.app === 'food') {
+    //   patch.push(...await getFoodData(userId));
+    // }
+    
+    // For now, return empty patch
     const response = {
       lastMutationID: 0,
       cookie: null,
-      patch: []
+      patch
     };
 
     return NextResponse.json(response);

@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { useReplicacheDiary } from './ReplicacheDiaryContext'
+import { v4 as uuidv4 } from 'uuid'
 import {
   Mood,
   DiaryEntry,
@@ -21,7 +22,7 @@ export const useDiaryApi = () => {
   // Create diary entry
   const createEntry = useCallback(async (data: DiaryEntryCreate) => {
     try {
-      const id = `diary_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      const id = uuidv4()
       await mutateWithPoke('createEntry', { ...data, id })
       return { id, ...data, images: data.images || [], created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as DiaryEntry
     } catch (err) {
