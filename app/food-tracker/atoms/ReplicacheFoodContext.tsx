@@ -178,9 +178,22 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
     if (rep) {
       console.log('[Replicache] Resetting food tracker data');
       try {
-        // Clear all local data
-        await rep.mutate.deleteEntry({ id: 'clear-all' });
-        console.log('[Replicache] Food tracker data cleared');
+        // Close current instance
+        rep.close();
+        
+        // Clear localStorage for this Replicache instance
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('replicache-food-tracker-replicache')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Reset state
+        setRep(null);
+        setEntries([]);
+        
+        console.log('[Replicache] Food tracker data cleared and instance reset');
       } catch (error) {
         console.log('[Replicache] Error clearing data:', error);
       }
