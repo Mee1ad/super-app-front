@@ -23,8 +23,32 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<FoodEntry[]>([]);
   const sharedSSE = useSharedSSE();
 
+  // Get auth token from localStorage
+  const [authToken, setAuthToken] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!rep && typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem('auth_access_token');
+      setAuthToken(token);
+      
+      // Listen for auth token changes
+      const handleStorageChange = () => {
+        const newToken = localStorage.getItem('auth_access_token');
+        setAuthToken(newToken);
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('authDataUpdated', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('authDataUpdated', handleStorageChange);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!rep && typeof window !== 'undefined' && authToken) {
       const r = new Replicache<ReplicacheFoodMutators>({
         name: 'food-tracker-replicache',
         mutators: {
@@ -52,11 +76,11 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
         },
         pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
         pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
-        auth: localStorage.getItem('auth_access_token') ? `Bearer ${localStorage.getItem('auth_access_token')}` : '',
+        auth: authToken ? `Bearer ${authToken}` : '',
       });
       setRep(r);
     }
-  }, [rep]);
+  }, [rep, authToken]);
 
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheFoodMutators>(

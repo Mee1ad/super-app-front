@@ -28,48 +28,35 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   const [moods, setMoods] = useState<Mood[]>([]);
   const sharedSSE = useSharedSSE();
 
-  // --- Helper: call mutation and then poke ---
-  const mutateWithPoke = async <K extends keyof ReplicacheDiaryMutators>(
-    mutator: K,
-    ...args: Parameters<ReplicacheDiaryMutators[K]>
-  ) => {
-    if (!rep) throw new Error("Replicache not initialized");
-    console.log('[Replicache] Mutator called:', mutator, args);
-    // @ts-ignore
-    const result = await rep.mutate[mutator](...args);
-    
-    // Get user ID from auth system for personal notifications
-    let userId = 'anonymous';
-    const userStr = localStorage.getItem('auth_user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        userId = user.id || user.user_id || 'anonymous';
-      } catch (error) {
-        console.log('Could not parse auth user for poke');
-      }
-    }
-    
-    // Get auth token for authorization header
-    const authToken = localStorage.getItem('auth_access_token');
-    const headers: HeadersInit = {};
-    if (authToken) {
-      headers['Authorization'] = `Bearer ${authToken}`;
-    }
-    
-    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
-      method: 'POST',
-      headers
-    });
-    
-    return result;
-  };
+  // Get auth token from localStorage
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!rep && typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem('auth_access_token');
+      setAuthToken(token);
+      
+      // Listen for auth token changes
+      const handleStorageChange = () => {
+        const newToken = localStorage.getItem('auth_access_token');
+        setAuthToken(newToken);
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('authDataUpdated', handleStorageChange);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('authDataUpdated', handleStorageChange);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!rep && typeof window !== "undefined" && authToken) {
       const pushURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`;
       const pullURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`;
+      
       const r = new Replicache<ReplicacheDiaryMutators>({
         name: "diary-replicache",
         mutators: {
@@ -110,11 +97,49 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
         },
         pushURL,
         pullURL,
-        auth: localStorage.getItem('auth_access_token') ? `Bearer ${localStorage.getItem('auth_access_token')}` : '',
+        auth: authToken ? `Bearer ${authToken}` : '',
       });
       setRep(r);
     }
-  }, [rep]);
+  }, [rep, authToken]);
+
+  // --- Helper: call mutation and then poke ---
+  const mutateWithPoke = async <K extends keyof ReplicacheDiaryMutators>(
+    mutator: K,
+    ...args: Parameters<ReplicacheDiaryMutators[K]>
+  ) => {
+    if (!rep) throw new Error("Replicache not initialized");
+    console.log('[Replicache] Mutator called:', mutator, args);
+    // @ts-ignore
+    const result = await rep.mutate[mutator](...args);
+    
+    // Get user ID from auth system for personal notifications
+    let userId = 'anonymous';
+    const userStr = localStorage.getItem('auth_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        userId = user.id || user.user_id || 'anonymous';
+      } catch (error) {
+        console.log('Could not parse auth user for poke');
+      }
+    }
+    
+    // Get auth token for authorization header
+    const authToken = localStorage.getItem('auth_access_token');
+    const headers: HeadersInit = {};
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+    
+    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
+      method: 'POST',
+      headers
+    });
+    
+    return result;
+  };
 
   useEffect(() => {
     if (!rep) return;
