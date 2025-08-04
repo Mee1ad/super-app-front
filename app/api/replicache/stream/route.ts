@@ -1,12 +1,55 @@
 import { NextRequest } from 'next/server';
 import { sseManager } from '../sse-manager';
 
+// JWT token validation function
+function isTokenValid(token: string): boolean {
+  if (!token) return false;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const now = Math.floor(Date.now() / 1000);
+    
+    return payload.exp > now;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
   console.log('SSE stream request received');
   
-  // Get userId from query params
+  // Check for auth token in Authorization header
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.replace('Bearer ', '');
+  
+  if (!token) {
+    console.log('SSE stream request rejected: No token provided');
+    return new Response('Unauthorized - No token provided', { status: 401 });
+  }
+
+  // Validate JWT token
+  if (!isTokenValid(token)) {
+    console.log('SSE stream request rejected: Invalid or expired token');
+    return new Response('Unauthorized - Invalid or expired token', { status: 401 });
+  }
+
+  // Extract user ID from JWT token
+  let userId = 'anonymous';
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    userId = payload.sub || payload.user_id || payload.id || 'anonymous';
+    console.log('SSE stream user ID from token:', userId);
+  } catch (error) {
+    console.error('Error extracting user ID from token:', error);
+    userId = 'anonymous';
+  }
+  
+  // Get userId from query params as fallback or override
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get('userId') || 'anonymous';
+  const queryUserId = searchParams.get('userId');
+  if (queryUserId && queryUserId !== 'anonymous') {
+    userId = queryUserId;
+  }
   
   const encoder = new TextEncoder();
   

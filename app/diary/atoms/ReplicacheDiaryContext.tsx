@@ -16,7 +16,7 @@ interface ReplicacheDiaryMutators extends MutatorDefs {
 interface ReplicacheDiaryContextValue {
   entries: DiaryEntry[];
   moods: Mood[];
-  rep: Replicache<ReplicacheDiaryMutators>;
+  rep: Replicache<ReplicacheDiaryMutators> | null;
   mutateWithPoke: <K extends keyof ReplicacheDiaryMutators>(mutator: K, ...args: Parameters<ReplicacheDiaryMutators[K]>) => Promise<any>;
 }
 
@@ -189,7 +189,21 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     };
   }, [rep]);
 
-  if (!rep) return null;
+  if (!rep) {
+    // For unauthenticated users, provide a fallback context
+    return (
+      <ReplicacheDiaryContext.Provider value={{ 
+        entries: [], 
+        moods: [], 
+        rep: null, 
+        mutateWithPoke: async () => {
+          throw new Error("Replicache not initialized - user not authenticated");
+        }
+      }}>
+        {children}
+      </ReplicacheDiaryContext.Provider>
+    );
+  }
 
   return (
     <ReplicacheDiaryContext.Provider value={{ entries, moods, rep, mutateWithPoke }}>

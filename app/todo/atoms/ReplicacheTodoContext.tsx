@@ -289,7 +289,22 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
     }
   }, [rep, sharedSSE]);
 
-  if (!rep) return null;
+  if (!rep) {
+    // For unauthenticated users, provide a fallback context
+    return (
+      <ReplicacheTodoContext.Provider value={{ 
+        lists: [], 
+        tasks: [], 
+        items: [], 
+        rep: null, 
+        mutateWithPoke: async () => {
+          throw new Error("Replicache not initialized - user not authenticated");
+        }
+      }}>
+        {children}
+      </ReplicacheTodoContext.Provider>
+    );
+  }
 
   return (
     <ReplicacheTodoContext.Provider value={{ lists, tasks, items, rep, mutateWithPoke }}>

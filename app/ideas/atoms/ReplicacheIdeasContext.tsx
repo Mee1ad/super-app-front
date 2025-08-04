@@ -166,7 +166,20 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
     }
   }, [rep, sharedSSE]);
 
-  if (!rep) return null;
+  if (!rep) {
+    // For unauthenticated users, provide a fallback context
+    return (
+      <ReplicacheIdeasContext.Provider value={{ 
+        ideas: [], 
+        rep: null, 
+        mutateWithPoke: async () => {
+          throw new Error("Replicache not initialized - user not authenticated");
+        }
+      }}>
+        {children}
+      </ReplicacheIdeasContext.Provider>
+    );
+  }
 
   return (
     <ReplicacheIdeasContext.Provider value={{ ideas, rep, mutateWithPoke }}>

@@ -153,7 +153,20 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
     }
   }, [rep, sharedSSE]);
 
-  if (!rep) return null;
+  if (!rep) {
+    // For unauthenticated users, provide a fallback context
+    return (
+      <ReplicacheFoodContext.Provider value={{ 
+        entries: [], 
+        rep: null, 
+        mutateWithPoke: async () => {
+          throw new Error("Replicache not initialized - user not authenticated");
+        }
+      }}>
+        {children}
+      </ReplicacheFoodContext.Provider>
+    );
+  }
 
   return (
     <ReplicacheFoodContext.Provider value={{ entries, rep, mutateWithPoke }}>
