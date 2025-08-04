@@ -12,9 +12,19 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
   const controllerRef = useRef<AbortController | null>(null);
   const listenersRef = useRef<Set<(event: string) => void>>(new Set());
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectingRef = useRef(false);
+  const lastSyncTimeRef = useRef(0);
 
   const setupSSE = () => {
     if (typeof window === 'undefined') return;
+    
+    // Prevent multiple simultaneous connections
+    if (isConnectingRef.current) {
+      console.log('[SharedSSE] Connection already in progress, skipping');
+      return;
+    }
+    
+    isConnectingRef.current = true;
 
     // Get user ID from auth system or fallback to anonymous
     let userId = 'anonymous';
@@ -32,11 +42,13 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
     const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
     if (!backendUrl) {
       console.error('[SharedSSE] No backend URL configured');
+      isConnectingRef.current = false;
       return;
     }
 
     // Close existing connection if any
     if (controllerRef.current) {
+      console.log('[SharedSSE] Closing existing connection');
       controllerRef.current.abort();
     }
 
@@ -67,6 +79,7 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
       }
       
       console.log('[SharedSSE] Connection opened for user:', userId);
+      isConnectingRef.current = false;
       
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -79,6 +92,7 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
         reader.read().then(({ done, value }) => {
           if (done) {
             console.log('[SharedSSE] Stream ended');
+            isConnectingRef.current = false;
             return;
           }
           
@@ -90,14 +104,34 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
               const data = line.slice(6); // Remove 'data: ' prefix
               console.log('[SharedSSE] Message received:', data);
               
-              // Notify all listeners
-              listenersRef.current.forEach(callback => {
-                try {
-                  callback(data);
-                } catch (error) {
-                  console.error('[SharedSSE] Error in listener callback:', error);
+              // Debounce sync messages to prevent excessive pulls
+              if (data === 'sync') {
+                const now = Date.now();
+                if (now - lastSyncTimeRef.current > 1000) { // Only allow sync every 1 second
+                  lastSyncTimeRef.current = now;
+                  console.log('[SharedSSE] Debounced sync message, notifying listeners');
+                  
+                  // Notify all listeners
+                  listenersRef.current.forEach(callback => {
+                    try {
+                      callback(data);
+                    } catch (error) {
+                      console.error('[SharedSSE] Error in listener callback:', error);
+                    }
+                  });
+                } else {
+                  console.log('[SharedSSE] Sync message ignored (too frequent)');
                 }
-              });
+              } else {
+                // For non-sync messages, notify immediately
+                listenersRef.current.forEach(callback => {
+                  try {
+                    callback(data);
+                  } catch (error) {
+                    console.error('[SharedSSE] Error in listener callback:', error);
+                  }
+                });
+              }
             }
           }
           
@@ -105,6 +139,7 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
           processStream();
         }).catch(error => {
           console.error('[SharedSSE] Stream error:', error);
+          isConnectingRef.current = false;
         });
       };
       
@@ -112,8 +147,10 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
       
     }).catch(error => {
       console.error('[SharedSSE] Connection error:', error);
-      // Attempt to reconnect after a delay
-      if (reconnectTimeoutRef.current) {
+      isConnectingRef.current = false;
+      
+      // Only attempt to reconnect if we're not already trying to connect
+      if (!isConnectingRef.current && reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
       reconnectTimeoutRef.current = setTimeout(() => {

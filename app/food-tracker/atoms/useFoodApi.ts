@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useReplicacheFood } from './ReplicacheFoodContext';
 import { FoodEntry, FoodEntryCreate, FoodEntryUpdate } from './types';
 
@@ -10,19 +11,22 @@ export const useFoodApi = () => {
 
   // Create food entry
   const createEntry = useCallback(async (data: FoodEntryCreate) => {
-    const id = `food_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    await mutateWithPoke('createEntry', { ...data, id });
+    const id = uuidv4();
+    const entryData = { id, ...data };
+    await mutateWithPoke('createEntry', entryData);
     return { id, ...data, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as FoodEntry;
   }, [mutateWithPoke]);
 
   // Update food entry
   const updateEntry = useCallback(async (id: string, data: FoodEntryUpdate) => {
-    await mutateWithPoke('updateEntry', { id, ...data });
+    const updateData = { id, ...data };
+    await mutateWithPoke('updateEntry', updateData);
   }, [mutateWithPoke]);
 
   // Delete food entry
   const deleteEntry = useCallback(async (id: string) => {
-    await mutateWithPoke('deleteEntry', { id });
+    const deleteData = { id };
+    await mutateWithPoke('deleteEntry', deleteData);
   }, [mutateWithPoke]);
 
   return {

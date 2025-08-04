@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { Replicache, MutatorDefs, WriteTransaction } from "replicache";
 import { DiaryEntry, DiaryEntryCreate, DiaryEntryUpdate, Mood } from "./types";
 import { useSharedSSE } from "@/app/shared/ReplicacheProviders";
@@ -27,25 +27,40 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
   const sharedSSE = useSharedSSE();
+  const allowPullsRef = useRef(false);
 
   // Get auth token from localStorage
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const authTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem('auth_access_token');
+      authTokenRef.current = token;
       setAuthToken(token);
       
-      // Listen for auth token changes
+      // Listen for auth token changes with debouncing
+      let debounceTimeout: NodeJS.Timeout;
       const handleStorageChange = () => {
         const newToken = localStorage.getItem('auth_access_token');
-        setAuthToken(newToken);
+        
+        // Only update if token actually changed
+        if (newToken !== authTokenRef.current) {
+          authTokenRef.current = newToken;
+          
+          // Debounce the update to prevent rapid changes
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+            setAuthToken(newToken);
+          }, 100);
+        }
       };
       
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('authDataUpdated', handleStorageChange);
       
       return () => {
+        clearTimeout(debounceTimeout);
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('authDataUpdated', handleStorageChange);
       };
@@ -54,6 +69,8 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!rep && typeof window !== "undefined" && authToken) {
+      console.log('[Replicache] Creating new Replicache instance for diary');
+      
       const pushURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`;
       const pullURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`;
       
@@ -98,10 +115,38 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
         pushURL,
         pullURL,
         auth: authToken ? `Bearer ${authToken}` : '',
+        // Prevent auto-sync on initialization
+        pullInterval: null,
       });
+      
+      // Override pull method to control when pulls are allowed
+      const originalPull = r.pull.bind(r);
+      r.pull = async () => {
+        if (!allowPullsRef.current) {
+          console.log('[Replicache] Diary pull blocked (not ready)');
+          return;
+        }
+        console.log('[Replicache] Diary pull requested');
+        return originalPull();
+      };
+      
       setRep(r);
+      
+      // Allow pulls after a short delay to prevent initialization pulls
+      setTimeout(() => {
+        allowPullsRef.current = true;
+        console.log('[Replicache] Diary pulls enabled');
+      }, 2000);
     }
-  }, [rep, authToken]);
+    
+    // Cleanup function
+    return () => {
+      if (rep) {
+        console.log('[Replicache] Cleaning up Replicache instance for diary');
+        rep.close();
+      }
+    };
+  }, [authToken]); // Only depend on authToken, not rep
 
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheDiaryMutators>(

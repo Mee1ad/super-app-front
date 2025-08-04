@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { Replicache, MutatorDefs, WriteTransaction } from 'replicache';
 import { FoodEntry } from './types';
 import { useSharedSSE } from '@/app/shared/ReplicacheProviders';
@@ -14,6 +14,7 @@ interface ReplicacheFoodContextValue {
   entries: FoodEntry[];
   rep: Replicache<ReplicacheFoodMutators> | null;
   mutateWithPoke: <K extends keyof ReplicacheFoodMutators>(mutator: K, ...args: Parameters<ReplicacheFoodMutators[K]>) => Promise<any>;
+  resetReplicache: () => Promise<void>;
 }
 
 const ReplicacheFoodContext = createContext<ReplicacheFoodContextValue | null>(null);
@@ -22,25 +23,40 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
   const [rep, setRep] = useState<Replicache<ReplicacheFoodMutators> | null>(null);
   const [entries, setEntries] = useState<FoodEntry[]>([]);
   const sharedSSE = useSharedSSE();
+  const allowPullsRef = useRef(false);
 
   // Get auth token from localStorage
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const authTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem('auth_access_token');
+      authTokenRef.current = token;
       setAuthToken(token);
       
-      // Listen for auth token changes
+      // Listen for auth token changes with debouncing
+      let debounceTimeout: NodeJS.Timeout;
       const handleStorageChange = () => {
         const newToken = localStorage.getItem('auth_access_token');
-        setAuthToken(newToken);
+        
+        // Only update if token actually changed
+        if (newToken !== authTokenRef.current) {
+          authTokenRef.current = newToken;
+          
+          // Debounce the update to prevent rapid changes
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+            setAuthToken(newToken);
+          }, 100);
+        }
       };
       
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('authDataUpdated', handleStorageChange);
       
       return () => {
+        clearTimeout(debounceTimeout);
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('authDataUpdated', handleStorageChange);
       };
@@ -49,6 +65,8 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!rep && typeof window !== 'undefined' && authToken) {
+      console.log('[Replicache] Creating new Replicache instance for food');
+      
       const r = new Replicache<ReplicacheFoodMutators>({
         name: 'food-tracker-replicache',
         mutators: {
@@ -77,10 +95,46 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
         pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
         pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
         auth: authToken ? `Bearer ${authToken}` : '',
+        // Completely disable auto-sync
+        pullInterval: null,
       });
+      
+      // Override pull method to completely control when pulls happen
+      const originalPull = r.pull.bind(r);
+      r.pull = async () => {
+        if (!allowPullsRef.current) {
+          console.log('[Replicache] Food tracker pull BLOCKED (not ready)');
+          return Promise.resolve();
+        }
+        console.log('[Replicache] Food tracker pull ALLOWED');
+        return originalPull();
+      };
+      
+      // Disable onSync callback to prevent automatic sync triggers
+      r.onSync = () => {
+        console.log('[Replicache] Food tracker sync completed (but pulls still blocked)');
+        // Don't enable pulls here - let the timeout handle it
+      };
+      
       setRep(r);
+      
+      // Only enable pulls after a longer delay and manual trigger
+      setTimeout(() => {
+        allowPullsRef.current = true;
+        console.log('[Replicache] Food tracker pulls ENABLED');
+        // Manually trigger one pull after enabling
+        r.pull();
+      }, 3000);
     }
-  }, [rep, authToken]);
+    
+    // Cleanup function
+    return () => {
+      if (rep) {
+        console.log('[Replicache] Cleaning up Replicache instance for food');
+        rep.close();
+      }
+    };
+  }, [authToken]); // Only depend on authToken, not rep
 
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheFoodMutators>(
@@ -119,6 +173,20 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
     return result;
   };
 
+  // Reset function to clear local data
+  const resetReplicache = async () => {
+    if (rep) {
+      console.log('[Replicache] Resetting food tracker data');
+      try {
+        // Clear all local data
+        await rep.mutate.deleteEntry({ id: 'clear-all' });
+        console.log('[Replicache] Food tracker data cleared');
+      } catch (error) {
+        console.log('[Replicache] Error clearing data:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!rep) return;
     let stop = false;
@@ -144,8 +212,14 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
         console.log('[Replicache] Shared SSE message received:', event);
         // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
         if (event === 'sync') {
-          console.log('[Replicache] Triggering pull due to sync message');
-          rep.pull();
+          if (allowPullsRef.current) {
+            console.log('[Replicache] Triggering pull due to sync message (ALLOWED)');
+            rep.pull();
+          } else {
+            console.log('[Replicache] Sync message received but pulls BLOCKED');
+          }
+        } else {
+          console.log('[Replicache] Non-sync message ignored:', event);
         }
       });
       
@@ -161,6 +235,9 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
         rep: null, 
         mutateWithPoke: async () => {
           throw new Error("Replicache not initialized - user not authenticated");
+        },
+        resetReplicache: async () => {
+          throw new Error("Replicache not initialized - user not authenticated");
         }
       }}>
         {children}
@@ -169,7 +246,7 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ReplicacheFoodContext.Provider value={{ entries, rep, mutateWithPoke }}>
+    <ReplicacheFoodContext.Provider value={{ entries, rep, mutateWithPoke, resetReplicache }}>
       {children}
     </ReplicacheFoodContext.Provider>
   );

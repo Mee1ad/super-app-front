@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { Replicache, MutatorDefs, WriteTransaction } from "replicache";
 import {
   ListResponse,
@@ -47,25 +47,40 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ShoppingItemResponse[]>([]);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
   const sharedSSE = useSharedSSE();
+  const allowPullsRef = useRef(false);
 
   // Get auth token from localStorage
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const authTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem('auth_access_token');
+      authTokenRef.current = token;
       setAuthToken(token);
       
-      // Listen for auth token changes
+      // Listen for auth token changes with debouncing
+      let debounceTimeout: NodeJS.Timeout;
       const handleStorageChange = () => {
         const newToken = localStorage.getItem('auth_access_token');
-        setAuthToken(newToken);
+        
+        // Only update if token actually changed
+        if (newToken !== authTokenRef.current) {
+          authTokenRef.current = newToken;
+          
+          // Debounce the update to prevent rapid changes
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+            setAuthToken(newToken);
+          }, 100);
+        }
       };
       
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('authDataUpdated', handleStorageChange);
       
       return () => {
+        clearTimeout(debounceTimeout);
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('authDataUpdated', handleStorageChange);
       };
@@ -74,6 +89,8 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!rep && typeof window !== "undefined" && authToken) {
+      console.log('[Replicache] Creating new Replicache instance for todo');
+      
       const r = new Replicache<ReplicacheTodoMutators>({
         name: "todo-replicache-flat",
         mutators: {
@@ -188,11 +205,40 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
         pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
         auth: authToken ? `Bearer ${authToken}` : '',
+        // Prevent auto-sync on initialization
+        pullInterval: null,
       });
-      console.log('[Replicache] Instance created: todo-replicache-flat');
+      
+      // Override pull method to control when pulls are allowed
+      const originalPull = r.pull.bind(r);
+      r.pull = async () => {
+        if (!allowPullsRef.current) {
+          console.log('[Replicache] Todo pull BLOCKED (not ready)');
+          return Promise.resolve();
+        }
+        console.log('[Replicache] Todo pull ALLOWED');
+        return originalPull();
+      };
+      
       setRep(r);
+      
+      // Only enable pulls after a longer delay and manual trigger
+      setTimeout(() => {
+        allowPullsRef.current = true;
+        console.log('[Replicache] Todo pulls ENABLED');
+        // Manually trigger one pull after enabling
+        r.pull();
+      }, 3000);
     }
-  }, [rep, authToken]);
+    
+    // Cleanup function
+    return () => {
+      if (rep) {
+        console.log('[Replicache] Cleaning up Replicache instance for todo');
+        rep.close();
+      }
+    };
+  }, [authToken]); // Only depend on authToken, not rep
 
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheTodoMutators>(
@@ -280,8 +326,14 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         console.log('[Replicache] Shared SSE message received:', event);
         // Only trigger pull on 'sync' messages, not on 'ping' or 'connected'
         if (event === 'sync') {
-          console.log('[Replicache] Triggering pull due to sync message');
-          rep.pull();
+          if (allowPullsRef.current) {
+            console.log('[Replicache] Triggering pull due to sync message (ALLOWED)');
+            rep.pull();
+          } else {
+            console.log('[Replicache] Sync message received but pulls BLOCKED');
+          }
+        } else {
+          console.log('[Replicache] Non-sync message ignored:', event);
         }
       });
       

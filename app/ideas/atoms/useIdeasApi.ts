@@ -1,85 +1,36 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Idea, IdeaCreate, IdeaUpdate } from './types';
+import { useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useReplicacheIdeas } from './ReplicacheIdeasContext';
+import { Idea, IdeaCreate, IdeaUpdate } from './types';
 
-export function useIdeasApi() {
+export const useIdeasApi = () => {
   const { ideas, mutateWithPoke } = useReplicacheIdeas();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [meta, setMeta] = useState<any>(null); // You can implement pagination if needed
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  // Load ideas (no-op, live via Replicache)
+  const loadIdeas = useCallback(async () => {}, []);
 
-  const loadIdeas = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setIsLoading(false);
-  }, []);
-
-  const createIdea = useCallback(async (idea: IdeaCreate): Promise<Idea | null> => {
-    setIsCreating(true);
-    setError(null);
-    try {
-      const id = `idea_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      await mutateWithPoke('createIdea', { ...idea, id });
-      return { id, ...idea, category_id: idea.category, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as Idea;
-    } catch (err) {
-      setError('Failed to create idea');
-      return null;
-    } finally {
-      setIsCreating(false);
-    }
+  // Create idea
+  const createIdea = useCallback(async (data: IdeaCreate) => {
+    const id = uuidv4();
+    await mutateWithPoke('createIdea', { ...data, id });
+    return { id, ...data, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as Idea;
   }, [mutateWithPoke]);
 
-  const updateIdea = useCallback(async (id: string, idea: IdeaUpdate): Promise<Idea | null> => {
-    setIsUpdating(true);
-    setError(null);
-    try {
-      await mutateWithPoke('updateIdea', { id, ...idea });
-      return null;
-    } catch (err) {
-      setError('Failed to update idea');
-      return null;
-    } finally {
-      setIsUpdating(false);
-    }
+  // Update idea
+  const updateIdea = useCallback(async (id: string, data: IdeaUpdate) => {
+    await mutateWithPoke('updateIdea', { id, ...data });
   }, [mutateWithPoke]);
 
-  const deleteIdea = useCallback(async (id: string): Promise<boolean> => {
-    setIsDeleting(true);
-    setError(null);
-    try {
-      await mutateWithPoke('deleteIdea', { id });
-      return true;
-    } catch (err) {
-      setError('Failed to delete idea');
-      return false;
-    } finally {
-      setIsDeleting(false);
-    }
+  // Delete idea
+  const deleteIdea = useCallback(async (id: string) => {
+    await mutateWithPoke('deleteIdea', { id });
   }, [mutateWithPoke]);
-
-  useEffect(() => {
-    loadIdeas();
-  }, [loadIdeas]);
 
   return {
     ideas,
-    meta,
-    isLoading,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    error,
     loadIdeas,
     createIdea,
     updateIdea,
     deleteIdea,
-    clearError,
   };
-} 
+}; 
