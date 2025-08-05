@@ -37,6 +37,7 @@ interface ReplicacheTodoContextValue {
   items: ShoppingItemResponse[];
   rep: Replicache<ReplicacheTodoMutators> | null;
   mutateWithPoke: <K extends keyof ReplicacheTodoMutators>(mutator: K, ...args: Parameters<ReplicacheTodoMutators[K]>) => Promise<any>;
+  resetReplicache: () => Promise<void>;
 }
 
 const ReplicacheTodoContext = createContext<ReplicacheTodoContextValue | null>(null);
@@ -296,6 +297,35 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Reset function to clear local data
+  const resetReplicache = async () => {
+    if (rep) {
+      console.log('[Replicache] Resetting todo data');
+      try {
+        // Close current instance
+        rep.close();
+        
+        // Clear localStorage for this Replicache instance
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('replicache-todo-replicache-flat')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Reset state
+        setRep(null);
+        setLists([]);
+        setTasks([]);
+        setItems([]);
+        
+        console.log('[Replicache] Todo data cleared and instance reset');
+      } catch (error) {
+        console.log('[Replicache] Error clearing todo data:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     let stop = false;
     let unsubLists: (() => void) | undefined;
@@ -369,6 +399,16 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         rep: null, 
         mutateWithPoke: async () => {
           throw new Error("Replicache not initialized - user not authenticated");
+        },
+        resetReplicache: async () => {
+          console.log('[Replicache] Todo context not initialized, clearing localStorage only');
+          // Clear localStorage for this Replicache instance even when not authenticated
+          const keys = Object.keys(localStorage);
+          keys.forEach(key => {
+            if (key.startsWith('replicache-todo-replicache-flat')) {
+              localStorage.removeItem(key);
+            }
+          });
         }
       }}>
         {children}
@@ -377,7 +417,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ReplicacheTodoContext.Provider value={{ lists, tasks, items, rep, mutateWithPoke }}>
+    <ReplicacheTodoContext.Provider value={{ lists, tasks, items, rep, mutateWithPoke, resetReplicache }}>
       {children}
     </ReplicacheTodoContext.Provider>
   );

@@ -19,6 +19,7 @@ interface ReplicacheDiaryContextValue {
   moods: Mood[];
   rep: Replicache<ReplicacheDiaryMutators> | null;
   mutateWithPoke: <K extends keyof ReplicacheDiaryMutators>(mutator: K, ...args: Parameters<ReplicacheDiaryMutators[K]>) => Promise<any>;
+  resetReplicache: () => Promise<void>;
 }
 
 const ReplicacheDiaryContext = createContext<ReplicacheDiaryContextValue | null>(null);
@@ -205,6 +206,34 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Reset function to clear local data
+  const resetReplicache = async () => {
+    if (rep) {
+      console.log('[Replicache] Resetting diary data');
+      try {
+        // Close current instance
+        rep.close();
+        
+        // Clear localStorage for this Replicache instance
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('replicache-diary-replicache')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Reset state
+        setRep(null);
+        setEntries([]);
+        setMoods([]);
+        
+        console.log('[Replicache] Diary data cleared and instance reset');
+      } catch (error) {
+        console.log('[Replicache] Error clearing diary data:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!rep) return;
     // Note: Replicache v15+ uses different event handling
@@ -262,6 +291,16 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
         rep: null, 
         mutateWithPoke: async () => {
           throw new Error("Replicache not initialized - user not authenticated");
+        },
+        resetReplicache: async () => {
+          console.log('[Replicache] Diary context not initialized, clearing localStorage only');
+          // Clear localStorage for this Replicache instance even when not authenticated
+          const keys = Object.keys(localStorage);
+          keys.forEach(key => {
+            if (key.startsWith('replicache-diary-replicache')) {
+              localStorage.removeItem(key);
+            }
+          });
         }
       }}>
         {children}
@@ -270,7 +309,7 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ReplicacheDiaryContext.Provider value={{ entries, moods, rep, mutateWithPoke }}>
+    <ReplicacheDiaryContext.Provider value={{ entries, moods, rep, mutateWithPoke, resetReplicache }}>
       {children}
     </ReplicacheDiaryContext.Provider>
   );

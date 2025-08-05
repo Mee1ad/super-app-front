@@ -15,6 +15,7 @@ interface ReplicacheIdeasContextValue {
   ideas: Idea[];
   rep: Replicache<ReplicacheIdeasMutators> | null;
   mutateWithPoke: <K extends keyof ReplicacheIdeasMutators>(mutator: K, ...args: Parameters<ReplicacheIdeasMutators[K]>) => Promise<any>;
+  resetReplicache: () => Promise<void>;
 }
 
 const ReplicacheIdeasContext = createContext<ReplicacheIdeasContextValue | null>(null);
@@ -196,6 +197,33 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Reset function to clear local data
+  const resetReplicache = async () => {
+    if (rep) {
+      console.log('[Replicache] Resetting ideas data');
+      try {
+        // Close current instance
+        rep.close();
+        
+        // Clear localStorage for this Replicache instance
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('replicache-ideas-replicache')) {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Reset state
+        setRep(null);
+        setIdeas([]);
+        
+        console.log('[Replicache] Ideas data cleared and instance reset');
+      } catch (error) {
+        console.log('[Replicache] Error clearing ideas data:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!rep) return;
     let stop = false;
@@ -238,6 +266,16 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
         rep: null, 
         mutateWithPoke: async () => {
           throw new Error("Replicache not initialized - user not authenticated");
+        },
+        resetReplicache: async () => {
+          console.log('[Replicache] Ideas context not initialized, clearing localStorage only');
+          // Clear localStorage for this Replicache instance even when not authenticated
+          const keys = Object.keys(localStorage);
+          keys.forEach(key => {
+            if (key.startsWith('replicache-ideas-replicache')) {
+              localStorage.removeItem(key);
+            }
+          });
         }
       }}>
         {children}
@@ -246,7 +284,7 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ReplicacheIdeasContext.Provider value={{ ideas, rep, mutateWithPoke }}>
+    <ReplicacheIdeasContext.Provider value={{ ideas, rep, mutateWithPoke, resetReplicache }}>
       {children}
     </ReplicacheIdeasContext.Provider>
   );

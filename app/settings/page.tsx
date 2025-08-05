@@ -1,12 +1,17 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ChangelogDialog } from '@/components/ui/changelog-dialog';
 import { ErrorDemo } from '@/components/ui/error-demo';
+import { useReplicacheTodo } from '../todo/atoms/ReplicacheTodoContext';
+import { useReplicacheFood } from '../food-tracker/atoms/ReplicacheFoodContext';
+import { useReplicacheDiary } from '../diary/atoms/ReplicacheDiaryContext';
+import { useReplicacheIdeas } from '../ideas/atoms/ReplicacheIdeasContext';
+import { clearAllReplicacheStorage, getReplicacheStorageSize, formatStorageSize } from '@/lib/replicache-utils';
 import { 
   Settings, 
   CheckSquare, 
@@ -26,6 +31,95 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+  const [isClearingData, setIsClearingData] = useState(false);
+  const [storageSize, setStorageSize] = useState<string>('0 B');
+
+  // Get Replicache contexts
+  const { resetReplicache: resetTodo } = useReplicacheTodo();
+  const { resetReplicache: resetFood } = useReplicacheFood();
+  const { resetReplicache: resetDiary } = useReplicacheDiary();
+  const { resetReplicache: resetIdeas } = useReplicacheIdeas();
+
+  // Calculate storage size on mount
+  useEffect(() => {
+    const size = getReplicacheStorageSize();
+    setStorageSize(formatStorageSize(size));
+  }, []);
+
+  const handleClearAllData = async () => {
+    console.log('[Settings] Clear All Data button clicked');
+    
+    // Simple test to verify button click is working
+    alert('Button clicked! Testing clear data functionality...');
+    
+    if (!confirm('Are you sure you want to clear all data? This will permanently delete all your todos, food entries, diary entries, and ideas. This action cannot be undone.')) {
+      console.log('[Settings] User cancelled the clear operation');
+      return;
+    }
+
+    console.log('[Settings] User confirmed clear operation, starting...');
+    setIsClearingData(true);
+    
+    try {
+      console.log('[Settings] Clearing all Replicache data...');
+      
+      // Try to clear all Replicache instances, but don't fail if they're not initialized
+      const clearPromises = [];
+      
+      try {
+        console.log('[Settings] Attempting to clear Todo data...');
+        clearPromises.push(resetTodo());
+      } catch (error) {
+        console.log('[Settings] Todo context not initialized, skipping...', error);
+      }
+      
+      try {
+        console.log('[Settings] Attempting to clear Food data...');
+        clearPromises.push(resetFood());
+      } catch (error) {
+        console.log('[Settings] Food context not initialized, skipping...', error);
+      }
+      
+      try {
+        console.log('[Settings] Attempting to clear Diary data...');
+        clearPromises.push(resetDiary());
+      } catch (error) {
+        console.log('[Settings] Diary context not initialized, skipping...', error);
+      }
+      
+      try {
+        console.log('[Settings] Attempting to clear Ideas data...');
+        clearPromises.push(resetIdeas());
+      } catch (error) {
+        console.log('[Settings] Ideas context not initialized, skipping...', error);
+      }
+
+      // Wait for any successful clears
+      if (clearPromises.length > 0) {
+        console.log('[Settings] Waiting for Replicache clears to complete...');
+        await Promise.allSettled(clearPromises);
+      }
+
+      // Always use the comprehensive utility function to clear localStorage
+      console.log('[Settings] Running comprehensive storage clear...');
+      await clearAllReplicacheStorage();
+
+      console.log('[Settings] All data cleared successfully');
+      
+      // Show success message
+      alert('All data has been cleared successfully. The app will now reload to ensure a clean state.');
+      
+      // Reload the page to ensure clean state
+      console.log('[Settings] Reloading page...');
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('[Settings] Error clearing data:', error);
+      alert('There was an error clearing the data. Please try again.');
+    } finally {
+      setIsClearingData(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -291,6 +385,10 @@ export default function SettingsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                  <span>Storage Used:</span>
+                  <span className="font-medium">{storageSize}</span>
+                </div>
                 <Button variant="outline" className="w-full justify-start">
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
@@ -299,10 +397,20 @@ export default function SettingsPage() {
                   <Upload className="h-4 w-4 mr-2" />
                   Import Data
                 </Button>
-                <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" 
+                  onClick={handleClearAllData} 
+                  disabled={isClearingData}
+                >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Clear All Data
+                  {isClearingData ? 'Clearing All Data...' : 'Clear All Data'}
                 </Button>
+                {isClearingData && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    This may take a moment...
+                  </p>
+                )}
               </CardContent>
             </Card>
 

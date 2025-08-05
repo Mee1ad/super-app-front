@@ -250,7 +250,14 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
           throw new Error("Replicache not initialized - user not authenticated");
         },
         resetReplicache: async () => {
-          throw new Error("Replicache not initialized - user not authenticated");
+          console.log('[Replicache] Food context not initialized, clearing localStorage only');
+          // Clear localStorage for this Replicache instance even when not authenticated
+          const keys = Object.keys(localStorage);
+          keys.forEach(key => {
+            if (key.startsWith('replicache-food-tracker-replicache')) {
+              localStorage.removeItem(key);
+            }
+          });
         }
       }}>
         {children}
