@@ -15,6 +15,7 @@ import {
 } from "./types";
 import { getAccessToken } from "@/lib/auth-token";
 import { useSharedSSE } from "@/app/shared/ReplicacheProviders";
+import { useSyncStatus } from "@/app/shared/atoms/SyncStatusContext";
 
 interface ReplicacheTodoMutators extends MutatorDefs {
   createList: (tx: WriteTransaction, args: ListCreate & { id: string }) => Promise<void>;
@@ -45,8 +46,8 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   const [lists, setLists] = useState<ListResponse[]>([]);
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
   const [items, setItems] = useState<ShoppingItemResponse[]>([]);
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
   const sharedSSE = useSharedSSE();
+  const { reportOperationStart, reportOperationComplete, reportOperationFailure } = useSyncStatus();
   const allowPullsRef = useRef(false);
 
   // Get auth token from localStorage
@@ -247,35 +248,52 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   ) => {
     if (!rep) throw new Error("Replicache not initialized");
     console.log('[Replicache] Mutator called:', mutator, args);
-    // @ts-ignore
-    const result = await rep.mutate[mutator](...args);
     
-    // Get user ID from auth system for personal notifications
-    let userId = 'anonymous';
-    const userStr = localStorage.getItem('auth_user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        userId = user.id || user.user_id || 'anonymous';
-      } catch (error) {
-        console.log('Could not parse auth user for poke');
+    // Report operation start
+    reportOperationStart();
+    
+    try {
+      // @ts-ignore
+      const result = await rep.mutate[mutator](...args);
+      
+      // Get user ID from auth system for personal notifications
+      let userId = 'anonymous';
+      const userStr = localStorage.getItem('auth_user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userId = user.id || user.user_id || 'anonymous';
+        } catch (error) {
+          console.log('Could not parse auth user for poke');
+        }
       }
+      
+      // Get auth token for authorization header
+      const authToken = localStorage.getItem('auth_access_token');
+      const headers: HeadersInit = {};
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
+      const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+      
+      try {
+        await fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
+          method: 'POST',
+          headers
+        });
+        reportOperationComplete();
+      } catch (error) {
+        console.error('[Replicache] Poke failed:', error);
+        reportOperationFailure();
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('[Replicache] Mutation failed:', error);
+      reportOperationFailure();
+      throw error;
     }
-    
-    // Get auth token for authorization header
-    const authToken = localStorage.getItem('auth_access_token');
-    const headers: HeadersInit = {};
-    if (authToken) {
-      headers['Authorization'] = `Bearer ${authToken}`;
-    }
-    
-    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
-    fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
-      method: 'POST',
-      headers
-    });
-    
-    return result;
   };
 
   useEffect(() => {

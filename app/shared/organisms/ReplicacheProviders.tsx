@@ -6,6 +6,7 @@ import { ReplicacheFoodProvider } from "../../food-tracker/atoms/ReplicacheFoodC
 import { ReplicacheDiaryProvider } from "../../diary/atoms/ReplicacheDiaryContext";
 import { ReplicacheIdeasProvider } from "../../ideas/atoms/ReplicacheIdeasContext";
 import { SharedSSEManagerProvider } from "../ReplicacheProviders";
+import { SyncStatusProvider } from "../atoms/SyncStatusContext";
 
 interface ReplicacheProvidersProps {
   children: ReactNode;
@@ -14,15 +15,17 @@ interface ReplicacheProvidersProps {
 export function ReplicacheProviders({ children }: ReplicacheProvidersProps) {
   return (
     <SharedSSEManagerProvider>
-      <ReplicacheTodoProvider>
-        <ReplicacheFoodProvider>
-          <ReplicacheDiaryProvider>
-            <ReplicacheIdeasProvider>
-              {children}
-            </ReplicacheIdeasProvider>
-          </ReplicacheDiaryProvider>
-        </ReplicacheFoodProvider>
-      </ReplicacheTodoProvider>
+      <SyncStatusProvider>
+        <ReplicacheTodoProvider>
+          <ReplicacheFoodProvider>
+            <ReplicacheDiaryProvider>
+              <ReplicacheIdeasProvider>
+                {children}
+              </ReplicacheIdeasProvider>
+            </ReplicacheDiaryProvider>
+          </ReplicacheFoodProvider>
+        </ReplicacheTodoProvider>
+      </SyncStatusProvider>
     </SharedSSEManagerProvider>
   );
 } 

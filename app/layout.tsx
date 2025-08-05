@@ -9,6 +9,7 @@ import { AuthProvider } from "./auth/organisms/AuthProvider";
 import { DemoBanner } from "@/components/ui/demo-banner";
 import TransitionLayout from "./transition-layout";
 import { ReplicacheProviders } from "./shared/organisms/ReplicacheProviders";
+import { SyncStatus } from "./shared/molecules/SyncStatus";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,10 @@ export default function RootLayout({
                 <main className="md:pt-0 md:ml-64 transition-all duration-300">
                   {children}
                 </main>
+                {/* Global Sync Status - Fixed Position */}
+                <div className="fixed top-4 right-4 z-50">
+                  <SyncStatus />
+                </div>
               </TransitionLayout>
             </ReplicacheProviders>
           </SidebarProvider>

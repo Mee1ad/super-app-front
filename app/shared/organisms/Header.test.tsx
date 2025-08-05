@@ -27,6 +27,6 @@ describe('Header', () => {
   it('has correct styling classes', () => {
     render(<Header title="Test Title" />);
     const header = screen.getByRole('banner');
-    expect(header).toHaveClass('fixed', 'top-0', 'left-0', 'right-0', 'z-40', 'bg-white', 'dark:bg-gray-900');
+    expect(header).toHaveClass('sticky', 'top-0', 'z-40', 'bg-white', 'dark:bg-gray-900');
   });
 }); 
