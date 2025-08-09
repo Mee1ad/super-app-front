@@ -50,6 +50,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   const sharedSSE = useSharedSSE();
   const { reportOperationStart, reportOperationComplete, reportOperationFailure } = useSyncStatus();
   const allowPullsRef = useRef(false);
+  const delayedPullTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get auth token from localStorage
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -265,10 +266,18 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
           method: 'POST',
           headers
         });
-        
-        // Pull after successful push to get updated state
-        console.log('[Replicache] Pulling after push to update state');
-        await rep.pull();
+
+        // Delay post-push pull slightly to avoid racing server commit
+        if (delayedPullTimerRef.current) clearTimeout(delayedPullTimerRef.current);
+        delayedPullTimerRef.current = setTimeout(async () => {
+          if (!allowPullsRef.current) return;
+          console.log('[Replicache] Delayed pull after push (1s)');
+          try {
+            await rep.pull();
+          } catch (e) {
+            console.error('[Replicache] Delayed pull failed', e);
+          }
+        }, 1000);
         
         reportOperationComplete();
       } catch (error) {
@@ -349,6 +358,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
       if (unsubLists) unsubLists();
       if (unsubTasks) unsubTasks();
       if (unsubItems) unsubItems();
+      if (delayedPullTimerRef.current) clearTimeout(delayedPullTimerRef.current);
     };
   }, [rep]);
 
@@ -363,6 +373,11 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         if (event === 'sync') {
           if (allowPullsRef.current) {
             console.log('[Replicache] Triggering pull due to sync message (ALLOWED)');
+            // Cancel any pending delayed pull and pull immediately
+            if (delayedPullTimerRef.current) {
+              clearTimeout(delayedPullTimerRef.current);
+              delayedPullTimerRef.current = null;
+            }
             rep.pull();
           } else {
             console.log('[Replicache] Sync message received but pulls BLOCKED');
