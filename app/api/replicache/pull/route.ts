@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Simple in-memory mutation tracking for development
-// In production, this would be stored in a database
-const mutationTracking = new Map<string, number>();
+import { getLastMutationID } from '../state';
 
 // JWT token validation function
 function isTokenValid(token: string): boolean {
@@ -67,19 +64,20 @@ export async function POST(req: NextRequest) {
       console.warn(`Unknown clientGroupID: ${clientGroupID}`);
     }
     
-    // Get the last mutation ID for this client group
-    const trackingKey = `${userId}-${clientGroupID}`;
-    const lastMutationID = mutationTracking.get(trackingKey) || 0;
+    // Per Replicache spec, lastMutationID is per-client (clientID)
+    const trackingKey = clientID as string;
+    const lastMutationID = getLastMutationID(trackingKey);
     
     console.log(`Returning lastMutationID: ${lastMutationID} for client group: ${clientGroupID}`);
     
-    // Create a simple cookie that represents the current state
-    // This ensures Replicache can track changes properly
+    // Create a cookie that represents the current state
+    // Changing when lastMutationID (or other state) changes
     const currentCookie = JSON.stringify({
       lastMutationID,
-      timestamp: Date.now(),
-      userId,
-      clientGroupID
+      ts: Date.now(),
+      uid: userId,
+      clientGroupID,
+      clientID,
     });
     
     // Return the correct Replicache pull response format

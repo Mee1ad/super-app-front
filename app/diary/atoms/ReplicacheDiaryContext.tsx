@@ -74,8 +74,8 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
     if (!rep && typeof window !== "undefined" && authToken) {
       console.log('[Replicache] Creating new Replicache instance for diary');
       
-      const pushURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`;
-      const pullURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`;
+      const pushURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push?ns=diary`;
+      const pullURL = `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull?ns=diary`;
       
       const r = new Replicache<ReplicacheDiaryMutators>({
         name: "diary-replicache",

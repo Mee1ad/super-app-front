@@ -106,8 +106,8 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
             await tx.del(`idea/${id}`);
           },
         },
-        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
-        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
+        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push?ns=ideas`,
+        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull?ns=ideas`,
         auth: authToken ? `Bearer ${authToken}` : '',
         // Prevent auto-sync on initialization
         pullInterval: null,

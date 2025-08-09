@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Simple in-memory mutation tracking for development
-// In production, this would be stored in a database
-const mutationTracking = new Map<string, number>();
+import { getLastMutationID, setLastMutationID } from '../state';
 
 // Helper: Validate the push request schema
 function validatePushSchema(body: any) {
@@ -55,13 +52,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // For development, we'll use a simple user ID
-    // In production, this would come from the authenticated user
-    const userId = 'development-user';
-    const trackingKey = `${userId}-${clientGroupID}`;
-    
-    // Get current last mutation ID
-    const currentLastMutationID = mutationTracking.get(trackingKey) || 0;
+    // Per Replicache spec, lastMutationID is per-client (clientID), not per profile/group
+    const trackingKey = clientID as string;
+    const currentLastMutationID = getLastMutationID(trackingKey);
     let newLastMutationID = currentLastMutationID;
 
     // Route mutations by clientGroupID instead of mutation names
@@ -97,7 +90,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Update the tracking
-    mutationTracking.set(trackingKey, newLastMutationID);
+    setLastMutationID(trackingKey, newLastMutationID);
     console.log(`Updated lastMutationID from ${currentLastMutationID} to ${newLastMutationID} for client group: ${clientGroupID}`);
 
     // Return the last mutation ID we processed

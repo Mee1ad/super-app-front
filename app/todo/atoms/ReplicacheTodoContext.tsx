@@ -98,58 +98,50 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         mutators: {
           createList: async (tx, { id, ...data }) => {
             const now = new Date().toISOString();
-            // @ts-ignore
             await tx.set(`list/${id}`, {
               id,
-              ...data,
+              ...(data as any),
               created_at: now,
               updated_at: now,
             });
           },
           updateList: async (tx, { id, ...data }) => {
-            // @ts-ignore
             const list = await tx.get(`list/${id}`);
             if (!list) return;
-            // @ts-ignore
             await tx.set(`list/${id}`, {
-              ...list,
-              ...data,
+              ...(list as any),
+              ...(data as any),
               updated_at: new Date().toISOString(),
             });
           },
           deleteList: async (tx, { id }) => {
             await tx.del(`list/${id}`);
             // Optionally, delete all tasks/items for this list
-            for await (const [k] of tx.scan({ prefix: "task/" })) {
-              // @ts-ignore
+            for await (const [k] of tx.scan({ prefix: "task/" }) as any) {
               const task = await tx.get(k);
-              if (task?.list_id === id) await tx.del(k);
+              if (task && (task as any).list_id === id) await tx.del(k);
             }
-            for await (const [k] of tx.scan({ prefix: "item/" })) {
-              // @ts-ignore
+            for await (const [k] of tx.scan({ prefix: "item/" }) as any) {
               const item = await tx.get(k);
-              if (item?.list_id === id) await tx.del(k);
+              if (item && (item as any).list_id === id) await tx.del(k);
             }
           },
           createTask: async (tx, { id, list_id, ...data }) => {
             const now = new Date().toISOString();
-            // @ts-ignore
             await tx.set(`task/${id}`, {
               id,
               list_id,
-              ...data,
+              ...(data as any),
               created_at: now,
               updated_at: now,
             });
           },
           updateTask: async (tx, { id, ...data }) => {
-            // @ts-ignore
             const task = await tx.get(`task/${id}`);
             if (!task) return;
-            // @ts-ignore
             await tx.set(`task/${id}`, {
-              ...task,
-              ...data,
+              ...(task as any),
+              ...(data as any),
               updated_at: new Date().toISOString(),
             });
           },
@@ -158,23 +150,20 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
           },
           createItem: async (tx, { id, list_id, ...data }) => {
             const now = new Date().toISOString();
-            // @ts-ignore
             await tx.set(`item/${id}`, {
               id,
               list_id,
-              ...data,
+              ...(data as any),
               created_at: now,
               updated_at: now,
             });
           },
           updateItem: async (tx, { id, ...data }) => {
-            // @ts-ignore
             const item = await tx.get(`item/${id}`);
             if (!item) return;
-            // @ts-ignore
             await tx.set(`item/${id}`, {
-              ...item,
-              ...data,
+              ...(item as any),
+              ...(data as any),
               updated_at: new Date().toISOString(),
             });
           },
@@ -184,30 +173,26 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
           reorderTasks: async (tx, { list_id, task_ids }) => {
             for (let i = 0; i < task_ids.length; i++) {
               const id = task_ids[i];
-              // @ts-ignore
               const task = await tx.get(`task/${id}`);
-              if (task && task.list_id === list_id) {
-                // @ts-ignore
-                await tx.set(`task/${id}`, { ...task, position: i });
+              if (task && (task as any).list_id === list_id) {
+                await tx.set(`task/${id}`, { ...(task as any), position: i });
               }
             }
           },
           reorderItems: async (tx, { list_id, item_ids }) => {
             for (let i = 0; i < item_ids.length; i++) {
               const id = item_ids[i];
-              // @ts-ignore
               const item = await tx.get(`item/${id}`);
-              if (item && item.list_id === list_id) {
-                // @ts-ignore
-                await tx.set(`item/${id}`, { ...item, position: i });
+              if (item && (item as any).list_id === list_id) {
+                await tx.set(`item/${id}`, { ...(item as any), position: i });
               }
             }
           },
         },
-        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push`,
-        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull`,
+        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push?ns=todo`,
+        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull?ns=todo`,
         auth: authToken ? `Bearer ${authToken}` : '',
-        // Prevent auto-sync on initialization
+        // Keep manual control of pulls but allow immediate first pull
         pullInterval: null,
       });
       
@@ -224,13 +209,10 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
       
       setRep(r);
       
-      // Only enable pulls after a longer delay and manual trigger
-      setTimeout(() => {
-        allowPullsRef.current = true;
-        console.log('[Replicache] Todo pulls ENABLED');
-        // Manually trigger one pull after enabling
-        r.pull();
-      }, 3000);
+      // Enable pulls immediately and perform an initial pull
+      allowPullsRef.current = true;
+      console.log('[Replicache] Todo pulls ENABLED (immediate)');
+      r.pull();
     }
     
     // Cleanup function
@@ -283,6 +265,11 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
           method: 'POST',
           headers
         });
+        
+        // Pull after successful push to get updated state
+        console.log('[Replicache] Pulling after push to update state');
+        await rep.pull();
+        
         reportOperationComplete();
       } catch (error) {
         console.error('[Replicache] Poke failed:', error);
@@ -409,7 +396,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
               localStorage.removeItem(key);
             }
           });
-        }
+        },
       }}>
         {children}
       </ReplicacheTodoContext.Provider>
