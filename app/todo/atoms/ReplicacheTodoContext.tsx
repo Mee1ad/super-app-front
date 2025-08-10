@@ -235,13 +235,29 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
   ) => {
     if (!rep) throw new Error("Replicache not initialized");
     console.log('[Replicache] Mutator called:', mutator, args);
+
+    // Normalize variant casing to match server expectations
+    const normalizeVariantValue = (value: unknown): Variant => {
+      const s = String(value ?? '').toLowerCase();
+      if (s === 'outlined' || s === 'filled' || s === 'default') return s as Variant;
+      return 'default';
+    };
+    const normalizeArgs = (input: any) => {
+      if (!input || typeof input !== 'object') return input;
+      const copy: any = { ...input };
+      if ('variant' in copy) {
+        copy.variant = normalizeVariantValue(copy.variant);
+      }
+      return copy;
+    };
+    const normalizedArgs = (args as any[]).map(normalizeArgs) as Parameters<ReplicacheTodoMutators[K]>;
     
     // Report operation start
     reportOperationStart();
     
     try {
       // @ts-ignore
-      const result = await rep.mutate[mutator](...args);
+      const result = await rep.mutate[mutator](...normalizedArgs);
       
       // Get user ID from auth system for personal notifications
       let userId = 'anonymous';

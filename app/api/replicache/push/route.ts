@@ -59,7 +59,19 @@ export async function POST(req: NextRequest) {
 
     // Route mutations by clientGroupID instead of mutation names
     for (const mutation of mutations) {
-      const { name, args, timestamp, id } = mutation;
+      const { name, timestamp, id } = mutation;
+      // Normalize args.variant to lowercase strings expected by backend
+      const rawArgs = (mutation as any).args;
+      let args = rawArgs;
+      if (rawArgs && typeof rawArgs === 'object') {
+        args = { ...rawArgs };
+        if ('variant' in args && typeof args.variant === 'string') {
+          const v = args.variant.toLowerCase();
+          if (v === 'default' || v === 'outlined' || v === 'filled') {
+            args.variant = v;
+          }
+        }
+      }
       if (typeof timestamp !== 'number') {
         console.warn('Mutation missing valid timestamp:', mutation);
         continue;
