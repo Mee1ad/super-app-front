@@ -109,9 +109,12 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
           updateList: async (tx, { id, ...data }) => {
             const list = await tx.get(`list/${id}`);
             if (!list) return;
+            const current = list as any;
+            const preservedType = current.type; // never allow type to drift via updates
             await tx.set(`list/${id}`, {
-              ...(list as any),
+              ...current,
               ...(data as any),
+              type: preservedType,
               updated_at: new Date().toISOString(),
             });
           },
@@ -330,13 +333,18 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
     
     if (rep) {
       console.log('[Replicache] Setting up subscriptions');
-      unsubLists = rep.subscribe(
-        async tx => {
-          const arr = await tx.scan({ prefix: "list/" }).values().toArray();
-          return arr as unknown as ListResponse[];
-        },
-        { onData: data => { if (!stop) { setLists(data); console.log('[Replicache] lists onData', data.length); } } }
-      );
+       unsubLists = rep.subscribe(
+         async tx => {
+           const arr = await tx.scan({ prefix: "list/" }).values().toArray();
+           // Sanitize lists to ensure type is either 'task' or 'shopping'
+           const sanitized = (arr as any[]).map((l) => ({
+             ...l,
+             type: l.type === 'shopping' || l.type === 'task' ? l.type : 'task',
+           }));
+           return sanitized as unknown as ListResponse[];
+         },
+         { onData: data => { if (!stop) { setLists(data); console.log('[Replicache] lists onData', data.length); } } }
+       );
       unsubTasks = rep.subscribe(
         async tx => {
           const arr = await tx.scan({ prefix: "task/" }).values().toArray();

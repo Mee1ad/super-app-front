@@ -31,7 +31,13 @@ export function NewTask({ onCreate, onClose }: NewTaskProps) {
       document.body.style.top = ''
       document.body.style.width = ''
       if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+        const y = parseInt(scrollY || '0') * -1
+        if (typeof window.scrollTo === 'function') {
+          window.scrollTo(0, y)
+        } else {
+          // In test environments without scrollTo, update scrollY directly
+          try { (window as any).scrollY = y } catch {}
+        }
       }
     }
   }, [])
@@ -95,7 +101,7 @@ export function NewTask({ onCreate, onClose }: NewTaskProps) {
       {/* Keyboard-attached form */}
       <div className="fixed inset-0 z-[9999] flex items-end" onClick={handleClose}>
         <div 
-          className="w-full bg-white rounded-t-xl p-6 animate-in slide-in-from-bottom-2 duration-300 shadow-lg" 
+          className="w-full bg-white rounded-t-xl p-6 animate-in slide-in-from-bottom-2 duration-300 shadow-lg relative" 
           onClick={(e) => e.stopPropagation()}
           style={{
             transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : 'none',
@@ -166,7 +172,7 @@ export function NewTask({ onCreate, onClose }: NewTaskProps) {
                   ? "bg-primary hover:bg-primary/90 text-white" 
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               )}
-              aria-label="Submit form"
+              aria-label="Add task"
             >
               <Check className="w-6 h-6" />
             </button>

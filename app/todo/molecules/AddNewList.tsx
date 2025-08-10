@@ -32,7 +32,12 @@ export function AddNewList({ onCreate }: AddNewListProps) {
       document.body.style.top = ''
       document.body.style.width = ''
       if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+        const y = parseInt(scrollY || '0') * -1
+        if (typeof window.scrollTo === 'function') {
+          window.scrollTo(0, y)
+        } else {
+          try { (window as any).scrollY = y } catch {}
+        }
       }
     }
     
@@ -44,7 +49,12 @@ export function AddNewList({ onCreate }: AddNewListProps) {
       document.body.style.top = ''
       document.body.style.width = ''
       if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+        const y = parseInt(scrollY || '0') * -1
+        if (typeof window.scrollTo === 'function') {
+          window.scrollTo(0, y)
+        } else {
+          try { (window as any).scrollY = y } catch {}
+        }
       }
     }
   }, [showInput, isOpen])
@@ -157,6 +167,7 @@ export function AddNewList({ onCreate }: AddNewListProps) {
                         ? "bg-primary hover:bg-primary/90 text-white" 
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     )}
+                    aria-label="Submit form"
                   >
                     <Check className="w-6 h-6" />
                   </button>

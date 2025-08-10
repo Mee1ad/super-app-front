@@ -22,9 +22,10 @@ export async function PUT(
     if (shouldUseMockData(request)) {
       // Return mock response for non-authenticated users
       const now = new Date().toISOString()
+      // Preserve existing type when mocking update to avoid flipping list type
       const updatedList = {
         id: listId,
-        type: 'task',
+        type: (data as any).type ?? 'task',
         title: data.title || 'Updated List',
         variant: data.variant || 'default',
         created_at: '2024-12-01T10:00:00Z',

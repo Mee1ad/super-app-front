@@ -100,31 +100,45 @@ export function useConditionalMobileKeyboardFocus(condition: boolean) {
  */
 export function useMobileKeyboardDetection() {
   const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const initialInnerHeightRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const handleResize = () => {
-      // On mobile, when keyboard appears, viewport height decreases
-      const viewportHeight = window.visualViewport?.height || window.innerHeight
-      const windowHeight = window.innerHeight
-      const keyboardHeight = windowHeight - viewportHeight
-      
-      // Only apply keyboard offset on mobile devices
-      if (window.innerWidth <= 768 && keyboardHeight > 150) {
-        setKeyboardHeight(keyboardHeight)
-      } else {
-        setKeyboardHeight(0)
-      }
+    // Capture the baseline height when the hook mounts (before keyboard opens)
+    if (initialInnerHeightRef.current == null) {
+      initialInnerHeightRef.current = window.innerHeight
     }
 
-    // Use visualViewport API if available (better for mobile keyboard detection)
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize)
-      return () => window.visualViewport?.removeEventListener('resize', handleResize)
-    } else {
-      // Fallback to window resize
-      window.addEventListener('resize', handleResize)
-      return () => window.removeEventListener('resize', handleResize)
+    const computeKeyboardHeight = () => {
+      const isMobile = window.innerWidth <= 768
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+      const viewportOffsetTop = window.visualViewport?.offsetTop ?? 0
+      const baselineHeight = initialInnerHeightRef.current ?? window.innerHeight
+
+      // On Android Chrome, innerHeight often shrinks with the keyboard, making
+      // (window.innerHeight - visualViewport.height) ≈ 0. Use the initial
+      // baseline height captured on mount to compute the difference.
+      let height = Math.max(0, baselineHeight - viewportHeight - viewportOffsetTop)
+
+      // Ignore tiny fluctuations and only consider realistic keyboard sizes
+      if (!isMobile || height < 80) {
+        height = 0
+      }
+
+      setKeyboardHeight(height)
     }
+
+    // Use visualViewport when available for more accurate results
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', computeKeyboardHeight)
+      // Initial computation
+      computeKeyboardHeight()
+      return () => window.visualViewport?.removeEventListener('resize', computeKeyboardHeight)
+    }
+
+    // Fallback to window resize
+    window.addEventListener('resize', computeKeyboardHeight)
+    computeKeyboardHeight()
+    return () => window.removeEventListener('resize', computeKeyboardHeight)
   }, [])
 
   return keyboardHeight
