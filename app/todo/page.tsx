@@ -66,6 +66,11 @@ export default function TodoPage() {
     await mutateWithPoke('deleteList', { id });
   };
 
+  // Helpers to read possibly different backend field names
+  const getTaskListId = (t: any) => (t.list_id ?? t.listId);
+  const getItemListId = (i: any) => (i.list_id ?? i.listId);
+  const getPosition = (x: any) => (typeof x.position === 'number' ? x.position : (typeof x.order === 'number' ? x.order : undefined));
+
   // Task handlers
   const handleTaskUpdate = async (listId: string, task: TaskItemProps) => {
     if (task.id && task.id.trim() !== '') {
@@ -78,7 +83,17 @@ export default function TodoPage() {
       });
     } else {
       const id = uuidv4();
-      const taskCreate = taskItemPropsToTaskCreate(task);
+      // Determine next position based on current tasks in this list, supporting listId/order fallbacks
+      const tasksForList = tasks.filter(t => getTaskListId(t) === listId);
+      // If existing tasks don't have a known position/order yet, use the current count
+      let nextPosition: number;
+      const positions = tasksForList.map(getPosition).filter((p: any) => typeof p === 'number') as number[];
+      if (positions.length === 0) {
+        nextPosition = tasksForList.length; // fallback to list length
+      } else {
+        nextPosition = Math.max(...positions) + 1;
+      }
+      const taskCreate = taskItemPropsToTaskCreate(task, nextPosition);
       await mutateWithPoke('createTask', {
         ...taskCreate,
         id,
@@ -138,8 +153,20 @@ export default function TodoPage() {
   // Compose lists with their tasks/items for UI
   const listsWithItems = lists.map(list => ({
     ...list,
-    tasks: list.type === "task" ? tasks.filter(t => t.list_id === list.id).sort((a, b) => a.position - b.position) : [],
-    items: list.type === "shopping" ? items.filter(i => i.list_id === list.id).sort((a, b) => a.position - b.position) : [],
+    tasks: list.type === "task" ? tasks
+      .filter(t => getTaskListId(t) === list.id)
+      .sort((a: any, b: any) => {
+        const pa = getPosition(a);
+        const pb = getPosition(b);
+        return pa - pb;
+      }) : [],
+    items: list.type === "shopping" ? items
+      .filter(i => getItemListId(i) === list.id)
+      .sort((a: any, b: any) => {
+        const pa = getPosition(a);
+        const pb = getPosition(b);
+        return pa - pb;
+      }) : [],
   }));
 
   return (
