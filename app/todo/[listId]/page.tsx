@@ -21,10 +21,10 @@ import { AddNewItem } from "../molecules/AddNewItem";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TodoListDetailPage() {
-  const params = useParams();
+  const params = useParams() as { listId?: string };
   const router = useRouter();
   const searchParams = useSearchParams();
-  const listId = params.listId as string;
+  const listId = params?.listId ?? '';
   const [isClient, setIsClient] = useState(false);
   const [editItem, setEditItem] = useState<{
     id: string;

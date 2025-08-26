@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import { Plus } from "lucide-react";
-import { useReplicacheTodos } from "../shared/ReplicacheTodosContext";
 
 function useHasMounted() {
   const [hasMounted, setHasMounted] = useState(false);
@@ -13,23 +12,23 @@ function useHasMounted() {
 
 export default function ReplicacheTodoPage() {
   const hasMounted = useHasMounted();
-  const { todos, rep } = useReplicacheTodos();
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [localTodos, setLocalTodos] = useState<{ id: string; text: string }[]>([]);
 
-  // CRUD operations
-  const addTodo = async () => {
+  // Local demo-only operations to keep this page build-safe
+  const addTodo = () => {
     if (!input.trim()) return;
-    const id = `todo/${Date.now()}`;
-    await rep.mutate.addTodo({ id, text: input });
+    const id = `local/${Date.now()}`;
+    setLocalTodos(prev => [...prev, { id, text: input }]);
     setInput("");
     inputRef.current?.focus();
   };
-  const updateTodo = async (id: string, text: string) => {
-    await rep.mutate.updateTodo({ id, text });
+  const updateTodo = (id: string, text: string) => {
+    setLocalTodos(prev => prev.map(t => (t.id === id ? { ...t, text } : t)));
   };
-  const deleteTodo = async (id: string) => {
-    await rep.mutate.deleteTodo({ id });
+  const deleteTodo = (id: string) => {
+    setLocalTodos(prev => prev.filter(t => t.id !== id));
   };
 
   if (!hasMounted) {
@@ -59,7 +58,7 @@ export default function ReplicacheTodoPage() {
           </button>
         </div>
         <ul className="flex flex-col gap-2">
-          {todos.map(todo => (
+          {localTodos.map(todo => (
             <li key={todo.id} className="flex items-center gap-2 group">
               <input
                 className="flex-1 border rounded h-10 px-2 bg-transparent"

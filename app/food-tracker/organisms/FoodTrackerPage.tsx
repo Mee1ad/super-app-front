@@ -5,6 +5,7 @@ import { NewFoodEntry } from '../molecules/NewFoodEntry';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { FoodTrackerHeader } from './FoodTrackerHeader';
 import { useSidebar } from '../../shared/organisms/SidebarContext';
+import type { FoodEntry } from '../atoms/types';
 
 export default function FoodTrackerPage() {
   const { toggleMobileMenu } = useSidebar();
@@ -19,7 +20,7 @@ export default function FoodTrackerPage() {
 function FoodTrackerPageInner() {
   const { entries, createEntry, updateEntry, deleteEntry } = useFoodApi();
   const [showAdd, setShowAdd] = useState(false);
-  const [editEntry, setEditEntry] = useState(null);
+  const [editEntry, setEditEntry] = useState<FoodEntry | null>(null);
 
   // Sort by date/time desc
   const sorted = [...entries].sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
@@ -76,7 +77,7 @@ function FoodTrackerPageInner() {
   );
 }
 
-function FoodEntryRow({ entry, onEdit, onDelete }) {
+function FoodEntryRow({ entry, onEdit, onDelete }: { entry: FoodEntry; onEdit: () => void; onDelete: () => void }) {
   return (
     <div
       className="flex items-center gap-2 px-3 py-3 rounded-lg bg-card shadow-sm border border-border hover:bg-accent cursor-pointer group"

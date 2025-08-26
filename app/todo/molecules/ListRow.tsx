@@ -82,7 +82,7 @@ export function ListRow({
         
         <ContextMenuContent>
           <ContextMenuItem onClick={handleEdit}>
-            <Edit className="w-4 h-4 mr-2" />
+            <Edit data-testid="edit-icon" className="w-4 h-4 mr-2" />
             Edit
           </ContextMenuItem>
           <ContextMenuSeparator />
@@ -92,7 +92,7 @@ export function ListRow({
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onClick={handleDelete} variant="destructive">
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 data-testid="delete-icon" className="w-4 h-4 mr-2" />
             Delete
           </ContextMenuItem>
         </ContextMenuContent>

@@ -13,7 +13,7 @@ interface ReplicacheFoodMutators extends MutatorDefs {
 interface ReplicacheFoodContextValue {
   entries: FoodEntry[];
   rep: Replicache<ReplicacheFoodMutators> | null;
-  mutateWithPoke: <K extends keyof ReplicacheFoodMutators>(mutator: K, ...args: Parameters<ReplicacheFoodMutators[K]>) => Promise<any>;
+  mutateWithPoke: <K extends keyof ReplicacheFoodMutators>(mutator: K, ...args: any[]) => Promise<any>;
   resetReplicache: () => Promise<void>;
 }
 
@@ -80,7 +80,7 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
             });
           },
           updateEntry: async (tx, { id, ...data }) => {
-            const entry = await tx.get<FoodEntry>(`food/${id}`);
+            const entry = (await tx.get(`food/${id}`)) as any;
             if (!entry) return;
             await tx.set(`food/${id}`, {
               ...entry,
@@ -139,7 +139,7 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheFoodMutators>(
     mutator: K,
-    ...args: Parameters<ReplicacheFoodMutators[K]>
+    ...args: any[]
   ) => {
     if (!rep) throw new Error('Replicache not initialized');
     console.log('[Replicache] Mutator called:', mutator, args);

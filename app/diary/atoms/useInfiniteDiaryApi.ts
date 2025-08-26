@@ -1,13 +1,21 @@
 import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useReplicacheDiary } from './ReplicacheDiaryContext';
-import { DiaryEntry, DiaryEntryCreate, DiaryEntryUpdate } from './types';
+import { DiaryEntry, DiaryEntryCreate, DiaryEntryUpdate, Mood } from './types';
 
 export const useInfiniteDiaryApi = () => {
-  const { entries, mutateWithPoke } = useReplicacheDiary();
+  const { entries, moods, mutateWithPoke } = useReplicacheDiary();
 
   // Load entries (no-op, live via Replicache)
   const loadEntries = useCallback(async () => {}, []);
+  const loadMoods = useCallback(async () => {}, []);
+  const loadMoreEntries = useCallback(async (_opts?: { mood?: string }) => {}, []);
+
+  // Replicache provides live data; expose static loading flags and pagination shape
+  const loading = false;
+  const loadingMore = false;
+  const error: string | null = null;
+  const hasMore = false;
 
   // Create diary entry
   const createEntry = useCallback(async (data: DiaryEntryCreate) => {
@@ -33,7 +41,14 @@ export const useInfiniteDiaryApi = () => {
 
   return {
     entries,
+    moods,
+    loading,
+    loadingMore,
+    error,
+    hasMore,
+    loadMoods,
     loadEntries,
+    loadMoreEntries,
     createEntry,
     updateEntry,
     deleteEntry,

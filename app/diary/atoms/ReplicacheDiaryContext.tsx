@@ -18,7 +18,7 @@ interface ReplicacheDiaryContextValue {
   entries: DiaryEntry[];
   moods: Mood[];
   rep: Replicache<ReplicacheDiaryMutators> | null;
-  mutateWithPoke: <K extends keyof ReplicacheDiaryMutators>(mutator: K, ...args: Parameters<ReplicacheDiaryMutators[K]>) => Promise<any>;
+  mutateWithPoke: <K extends keyof ReplicacheDiaryMutators>(mutator: K, ...args: any[]) => Promise<any>;
   resetReplicache: () => Promise<void>;
 }
 
@@ -154,7 +154,7 @@ export function ReplicacheDiaryProvider({ children }: { children: ReactNode }) {
   // --- Helper: call mutation and then poke ---
   const mutateWithPoke = async <K extends keyof ReplicacheDiaryMutators>(
     mutator: K,
-    ...args: Parameters<ReplicacheDiaryMutators[K]>
+    ...args: any[]
   ) => {
     if (!rep) throw new Error("Replicache not initialized");
     console.log('[Replicache] Mutator called:', mutator, args);

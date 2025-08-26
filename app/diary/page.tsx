@@ -107,9 +107,7 @@ export default function DiaryPage() {
       await createEntry(newEntry)
       setIsAddDialogOpen(false)
       // Reload entries to get updated list
-      loadEntries({
-        mood: selectedMood !== 'all' ? selectedMood : undefined
-      })
+      loadEntries()
     } catch {
       // Error is already handled in the hook
     }
@@ -198,6 +196,7 @@ export default function DiaryPage() {
 
           {/* Floating Action Button */}
           <button
+            aria-label="Add"
             onClick={() => {
               console.log('Diary FAB clicked - animation should be working');
               navigateWithAnimation('/diary/new');

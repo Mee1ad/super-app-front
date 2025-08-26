@@ -38,12 +38,14 @@ class SSEManager {
     const encoder = new TextEncoder();
     const data = `data: ${message}\n\n`;
     
-    this.clients.forEach((controller, index) => {
+    let i = 0;
+    this.clients.forEach((controller) => {
       try {
         controller.enqueue(encoder.encode(data));
-        console.log(`Message sent to client ${index + 1}`);
+        i += 1;
+        console.log(`Message sent to client ${i}`);
       } catch (error) {
-        console.error(`Failed to send message to client ${index + 1}:`, error);
+        console.error(`Failed to send message to client ${i}:`, error);
         // Client disconnected, remove it
         this.removeClient(controller);
       }
@@ -61,12 +63,14 @@ class SSEManager {
     const encoder = new TextEncoder();
     const data = `data: ${message}\n\n`;
     
-    userClients.forEach((controller, index) => {
+    let i = 0;
+    userClients.forEach((controller) => {
       try {
         controller.enqueue(encoder.encode(data));
-        console.log(`Message sent to user ${userId} client ${index + 1}`);
+        i += 1;
+        console.log(`Message sent to user ${userId} client ${i}`);
       } catch (error) {
-        console.error(`Failed to send message to user ${userId} client ${index + 1}:`, error);
+        console.error(`Failed to send message to user ${userId} client ${i}:`, error);
         // Client disconnected, remove it
         this.removeClient(controller);
       }
