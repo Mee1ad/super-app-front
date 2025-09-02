@@ -106,8 +106,8 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
             await tx.del(`idea/${id}`);
           },
         },
-        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push?ns=ideas`,
-        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull?ns=ideas`,
+        pushURL: `${process.env.NEXT_PUBLIC_API_URL}/replicache/push?ns=ideas`,
+        pullURL: `${process.env.NEXT_PUBLIC_API_URL}/replicache/pull?ns=ideas`,
         auth: authToken ? `Bearer ${authToken}` : '',
         // Prevent auto-sync on initialization
         pullInterval: null,
@@ -176,7 +176,7 @@ export function ReplicacheIdeasProvider({ children }: { children: ReactNode }) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL;
       
       try {
         await fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 

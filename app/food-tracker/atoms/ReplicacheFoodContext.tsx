@@ -92,8 +92,8 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
             await tx.del(`food/${id}`);
           },
         },
-        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push?ns=food`,
-        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull?ns=food`,
+        pushURL: `${process.env.NEXT_PUBLIC_API_URL}/replicache/push?ns=food`,
+        pullURL: `${process.env.NEXT_PUBLIC_API_URL}/replicache/pull?ns=food`,
         auth: authToken ? `Bearer ${authToken}` : '',
         // Completely disable auto-sync
         pullInterval: null,
@@ -164,7 +164,7 @@ export function ReplicacheFoodProvider({ children }: { children: ReactNode }) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
     
-    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 
       method: 'POST',
       headers
