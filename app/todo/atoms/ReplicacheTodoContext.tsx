@@ -193,8 +193,8 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
             }
           },
         },
-        pushURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/push?ns=todo`,
-        pullURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}/replicache/pull?ns=todo`,
+        pushURL: `${process.env.NEXT_PUBLIC_API_URL}/replicache/push?ns=todo`,
+        pullURL: `${process.env.NEXT_PUBLIC_API_URL}/replicache/pull?ns=todo`,
         auth: authToken ? `Bearer ${authToken}` : '',
         // Keep manual control of pulls but allow immediate first pull
         pullInterval: null,
@@ -278,7 +278,7 @@ export function ReplicacheTodoProvider({ children }: { children: ReactNode }) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL;
       
       try {
         await fetch(`${backendUrl}/replicache/poke-user?userId=${userId}`, { 

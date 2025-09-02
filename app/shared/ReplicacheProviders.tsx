@@ -39,7 +39,7 @@ export function SharedSSEManagerProvider({ children }: { children: ReactNode }) 
       }
     }
 
-    const backendUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!backendUrl) {
       console.error('[SharedSSE] No backend URL configured');
       isConnectingRef.current = false;
